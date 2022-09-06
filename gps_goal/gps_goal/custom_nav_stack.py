@@ -17,19 +17,28 @@
 
 
 from logging.handlers import BaseRotatingHandler
+from threading import local
 import time
 import math
 
 from geometry_msgs.msg import Pose, PoseStamped, Twist
 from geometry_msgs.msg import PoseWithCovarianceStamped
-from sensor_msgs.msg import NavSatFix, Imu
+from sensor_msgs.msg import NavSatFix, Imu, PointCloud2
 from sensor_msgs.msg import MagneticField
 from lifecycle_msgs.srv import GetState
 from nav2_msgs.action import NavigateThroughPoses, NavigateToPose
 import sys
 import rclpy
 import utm
+import numpy as np
+import pandas as pd
+import random
+import open3d as o3d
+import ros2_numpy as rnp
 from transformations import euler_from_quaternion
+from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 
 from rclpy.action import ActionClient
 from rclpy.node import Node
@@ -47,12 +56,31 @@ class CustomNavigator(Node):
     def __init__(self):
         super().__init__(node_name='custom_navigator')
         
+        # self.fig = plt.figure()
+        # self.ax = plt.axes(projection='3d')
+
+
+        self.fig = plt.figure()
+        self.fig2 = plt.figure(2)
+
+
+        # fig, self.axs = plt.subplots(2, 2,)
+        
+        # self.axs[0, 0].set_title('Axis [0, 0]')
+        # self.axs[0, 1].set_title('Axis [0, 1]')
+        # self.axs[1, 0].set_title('Axis [1, 0]')
+        # self.axs[1, 1].set_title('Axis [1, 1]')
+
+        
         self.gps_callback_done = 0
         self.gps_subscription = self.create_subscription(NavSatFix,'gps/data',self.gps_callback,10)
         self.gps_subscription  # prevent unused variable warning
 
         self.imu_subscription = self.create_subscription(Imu,'imu/data',self.imu_callback,10)
         self.imu_subscription  # prevent unused variable warning
+
+        self.pc_subscription = self.create_subscription(PointCloud2,'velodyne_points',self.pc_callback,10)
+        self.pc_subscription  # prevent unused variable warning
 
         
         path = Path(__file__).parent / "./destination_lat_long.txt"
@@ -174,6 +202,204 @@ class CustomNavigator(Node):
         # print("Bearing in radian: ", bearing)
         # print("Bearing in degree: ", math.degrees(bearing)) #If -45° , means need to point robot to 45° left/ west of True North
 
+    def pc_callback(self, msg):
+        # msg.__class = PointCloud2
+        #offset_sorted = {f.offset: f for f in msg.fields}
+        #msg.fields = [f for(_, f) in sorted(offset_sorted.items())]
+        data = rnp.point_cloud2.pointcloud2_to_xyz_array(msg,remove_nans=True) #Reading xyz values from PointCloud2 message
+        data = np.append(data, np.arange(data.shape[0]).reshape(-1, 1), axis=1) #Appending index to the 4th column
+        
+        self.ax = self.fig.add_subplot(221, projection='3d')
+        self.ax.set_xlabel('X axis')
+        self.ax.set_ylabel('Y axis')
+        self.ax.set_zlabel('Z axis')
+        self.ax.set_title('Original Point Cloud, size: %.i' % data.shape[0])
+        self.ax.set_xlim(-5,5)
+        self.ax.set_ylim(-5,5)
+        self.ax.set_zlim(-1.5,1.2)
+        self.ax.scatter(data[:,0], data[:,1], data[:,2]) #Plotting original cloud
+
+        self.ax2 = self.fig2.add_subplot(221, projection='3d')
+        self.ax2.set_xlabel('X axis')
+        self.ax2.set_ylabel('Y axis')
+        self.ax2.set_zlabel('Z axis')
+        self.ax2.set_title('Original Point Cloud, size: %.i' % data.shape[0])
+        self.ax2.set_xlim(-5,5)
+        self.ax2.set_ylim(-5,5)
+        self.ax2.set_zlim(-1.5,1.2)
+        self.ax2.scatter(data[:,0], data[:,1], data[:,2]) #Plotting original cloud
+
+
+
+        
+        #Filtering points based on height
+        distance_array = np.zeros(shape=(data.shape[0],1))
+        for i in range(data.shape[0]): 
+            distance = math.sqrt(data[i,0]**2 + data[i,1]**2 + data[i,2]**2)
+            #print(distance)
+            distance_array[i,0] = distance
+        print(np.amin(distance_array))
+        print("Minimum distance index is: " + str(np.argmin(distance_array)))
+        mean = np.mean(data[:,2])
+        sd = np.std(data[:,2])
+        data_ground = data[(abs(data[:,2]) > 0.8) & (abs(data[:,2]) < 1.2)] #Lidar is ~ 1 m above from ground. Points with z lying between 0.8 and 1.2 m are considered ground
+        # data_ground = data[(data[:,2] < mean + 1.5*sd) & (data[:,2] > mean - 1.5*sd)] #Filtering ground points based on height assumption
+        # data_wo_ground = data[(data[:,2] > mean + 1.5*sd) | (data[:,2] < mean - 1.5*sd)]
+        data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
+        self.ax = self.fig.add_subplot(222, projection='3d')
+        self.ax.set_xlabel('X axis')
+        self.ax.set_ylabel('Y axis')
+        self.ax.set_zlabel('Z axis')
+        self.ax.set_title('Ground Points filtered by height, size: %.i' % data_ground.shape[0])
+        self.ax.set_xlim(-5,5)
+        self.ax.set_ylim(-5,5)
+        self.ax.set_zlim(-1.5,1.2)
+        self.ax.scatter(data_ground[:,0], data_ground[:,1], data_ground[:,2]) #Plotting ground points filtered based on height
+
+        self.ax2 = self.fig2.add_subplot(222, projection='3d')
+        self.ax2.set_xlabel('X axis')
+        self.ax2.set_ylabel('Y axis')
+        self.ax2.set_zlabel('Z axis')
+        self.ax2.set_title('Non-ground points filtered by height, size: %.i' % data_wo_ground.shape[0])
+        self.ax2.set_xlim(-5,5)
+        self.ax2.set_ylim(-5,5)
+        self.ax2.set_zlim(-1.5,1.2)
+        self.ax2.scatter(data_wo_ground[:,0], data_wo_ground[:,1], data_wo_ground[:,2]) #Plotting non-ground points filtered based on height
+        
+        #PCA implementation
+        max_z, min_z = np.max(data_ground[:, 2]), np.min(data_ground[:, 2])
+        data_ground[:, 2] = (data_ground[:, 2] - min_z)/(max_z - min_z)
+        covariance = np.cov(data_ground[:, :3].T)
+        eigen_values, eigen_vectors =  np.linalg.eig(np.matrix(covariance))
+        normal_vector = eigen_vectors[np.argmin(eigen_values)]
+        projection = normal_vector.dot(data_ground[:, :3].T)
+        ground_mask = np.abs(projection) < 0.4
+        data_ground = np.asarray([data_ground[index[1]] for index, a in np.ndenumerate(ground_mask) if a == True])
+        data_ground[:, 2] = data_ground[:, 2] * (max_z - min_z) + min_z
+        data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
+        print("PCA output: ",data.shape, data_ground.shape, data_wo_ground.shape)
+        # print(data_ground[:,3])
+        
+        self.ax = self.fig.add_subplot(223, projection='3d')
+        self.ax.set_xlabel('X axis')
+        self.ax.set_ylabel('Y axis')
+        self.ax.set_zlabel('Z axis')
+        self.ax.set_title('PCA ground points, size: %.i' % data_ground.shape[0])
+        self.ax.set_xlim(-5,5)
+        self.ax.set_ylim(-5,5)
+        self.ax.set_zlim(-1.5,1.2)
+        self.ax.scatter(data_ground[:,0], data_ground[:,1], data_ground[:,2]) #Plotting ground points filtered through PCA
+
+        self.ax2 = self.fig2.add_subplot(223, projection='3d')
+        self.ax2.set_xlabel('X axis')
+        self.ax2.set_ylabel('Y axis')
+        self.ax2.set_zlabel('Z axis')
+        self.ax2.set_title('PCA non-ground points, size: %.i' % data_wo_ground.shape[0])
+        self.ax2.set_xlim(-5,5)
+        self.ax2.set_ylim(-5,5)
+        self.ax2.set_zlim(-1.5,1.2)
+        self.ax2.scatter(data_wo_ground[:,0], data_wo_ground[:,1], data_wo_ground[:,2]) #Plotting non-ground points filtered through PCA
+        
+        #RANSAC implementation
+        random.seed()
+        inliers_index_array = [] #Contains inlier global index for all the iterations
+        max_iterations = 6
+        threshold = 0.4 #Distance threshold in metre
+        score_array = [] #Contains score for all the iterations
+
+
+        for j in range(max_iterations):
+            local_random_index = []
+            global_random_index = np.random.choice(data_ground[:,3].astype(int), size=3, replace=False) #Picking 3 points at random without replacement/ repeatition
+            # print("Global indexes are: ", global_random_index)
+            for i in global_random_index:
+                # print(i)
+                # print(np.where(data_ground[:,3].astype(int) == i)[0][0])
+                local_random_index.append(np.where(data_ground[:,3].astype(int) == i)[0][0])
+
+            # print("Local indexes are: ",local_random_index)
+            print("Random points global index as per original xyz data: ",global_random_index)
+            print("Random points local index in data_ground array: ", local_random_index)
+            # print("Global: ", data[global_random_index,:],  " \nLocal: ", data_ground[local_random_index, :])
+            # print(data_ground[local_random_index, :3])
+
+            [x1, y1, z1], [x2, y2, z2], [x3, y3, z3] = data_ground[local_random_index, :3]
+
+            # Plane Equation --> ax + by + cz + d = 0
+            # Value of Constants for inlier plane
+            a = (y2 - y1)*(z3 - z1) - (z2 - z1)*(y3 - y1)
+            b = (z2 - z1)*(x3 - x1) - (x2 - x1)*(z3 - z1)
+            c = (x2 - x1)*(y3 - y1) - (y2 - y1)*(x3 - x1)
+            d = -(a*x1 + b*y1 + c*z1)
+
+            inliers_index_array = np.append(inliers_index_array, global_random_index)
+            score = 3 #Including the 3 random points as well for score calculation
+
+            #Find distance of all other points from the plane
+            for i in range(data_ground.shape[0]): #Check distance of all other points from the plane. Does not include the last number. range starts from 0
+                if i not in local_random_index:
+                    x4, y4, z4 = data_ground[i, :3]
+                    distance = ((a*x4) + (b*y4) + (c*z4) + d) / math.sqrt(a*a + b*b + c*c) 
+                    # print(x4, y4, z4)
+
+                    if distance < threshold: #It means the point is a ground point/ inlier
+                        # print("Inlier global index: ", np.where(data[:,3].astype(int) == i)[0][0])
+                        inliers_index_array = np.append(inliers_index_array, np.where(data[:,3].astype(int) == data_ground[i,3])[0][0])  #Need to store global index of x4, y4, z4
+                        score+= 1
+            score_array.append(score)
+        print("Inliers arrays all iteration, size: ", inliers_index_array.shape)
+        #Choosing iteration with maximum score
+
+        max_score = np.amax(score_array)
+        max_score_index = np.argmax(score_array)
+        print("Scores for iterations are: ", score_array)
+        print("Maximum score is: ", max_score, "| Corresponding index is: ", max_score_index)
+
+        if max_score_index == 0:
+            start_index = 0
+        else:
+            print("Sum till max score index: ",sum(score_array[:max_score_index]))
+            start_index = sum(score_array[:max_score_index]) - 1
+        end_index = start_index + score_array[max_score_index]
+        print("Start Index: ", start_index, "End Index: ", end_index)
+        print("Inlier points global index: ", inliers_index_array[start_index : end_index])
+        data_ground = data[inliers_index_array[start_index : end_index].astype(int)]
+        data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
+        print("RANSAC output: ",data.shape, data_ground.shape, data_wo_ground.shape)
+        # self.ax = self.fig.add_subplot(222, projection='3d')
+        # self.ax.scatter(data[:,0], data[:,1], data[:,2])
+
+        self.ax = self.fig.add_subplot(224, projection='3d')
+        self.ax.set_xlabel('X axis')
+        self.ax.set_ylabel('Y axis')
+        self.ax.set_zlabel('Z axis')
+        self.ax.set_title('RANSAC ground points, size: %.i' % data_ground.shape[0])
+        self.ax.scatter(data_ground[:,0], data_ground[:,1], data_ground[:,2]) #Plotting ground points filtered through RANSAC
+        self.ax.set_xlim(-5,5)
+        self.ax.set_ylim(-5,5)
+        self.ax.set_zlim(-1.5,1.2)
+
+        self.ax2 = self.fig2.add_subplot(224, projection='3d')
+        self.ax2.set_xlabel('X axis')
+        self.ax2.set_ylabel('Y axis')
+        self.ax2.set_zlabel('Z axis')
+        self.ax2.set_title('RANSAC non-ground points, size: %.i' % data_wo_ground.shape[0])
+        self.ax2.set_xlim(-5,5)
+        self.ax2.set_ylim(-5,5)
+        self.ax2.set_zlim(-1.5,1.2)
+        self.ax2.scatter(data_wo_ground[:,0], data_wo_ground[:,1], data_wo_ground[:,2]) #Plotting non-ground points filtered through RANSAC
+
+
+
+        plt.show()
+        
+        #print(distance_array.shape)
+        #print(data[1,0])
+        print("Listening END. Size is: " + str(data.shape))
+
+        # rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))        # print("Entered IMU callback")
+        
+
     def calc_goal(self, origin_lat, origin_long, goal_lat, goal_long):
         # Calculate distance and azimuth between GPS points
         geod = Geodesic.WGS84  # define the WGS84 ellipsoid
@@ -196,6 +422,7 @@ class CustomNavigator(Node):
             #Need to make changes here to detect obstacle
             self.move_cmd.linear.x = 0.4
         else:
+            pass
             
 
 

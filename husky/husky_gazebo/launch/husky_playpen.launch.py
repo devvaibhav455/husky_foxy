@@ -10,9 +10,9 @@ def generate_launch_description():
     world_file = PathJoinSubstitution(
         [FindPackageShare("husky_gazebo"),
         "worlds",
-        # "clearpath_playpen.world"],
+        "clearpath_playpen.world"],
 	    # "empty_cones.world"],
-        "empty_world.world"],
+        # "empty_world.world"],
         # "my_world.sdf"],
         # "penguin_world.world"],
     )
