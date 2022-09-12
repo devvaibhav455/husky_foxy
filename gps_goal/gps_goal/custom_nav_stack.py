@@ -25,6 +25,7 @@ from geometry_msgs.msg import Pose, PoseStamped, Twist
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from sensor_msgs.msg import NavSatFix, Imu, PointCloud2
 from sensor_msgs.msg import MagneticField
+from nav_msgs.msg import Odometry
 from lifecycle_msgs.srv import GetState
 from nav2_msgs.action import NavigateThroughPoses, NavigateToPose
 import sys
@@ -79,8 +80,11 @@ class CustomNavigator(Node):
         self.imu_subscription = self.create_subscription(Imu,'imu/data',self.imu_callback,10)
         self.imu_subscription  # prevent unused variable warning
 
-        self.pc_subscription = self.create_subscription(PointCloud2,'velodyne_points',self.pc_callback,10)
-        self.pc_subscription  # prevent unused variable warning
+        self.odom_subscription = self.create_subscription(Odometry,'odom',self.odom_callback,10)
+        self.odom_subscription  # prevent unused variable warning
+
+        # self.pc_subscription = self.create_subscription(PointCloud2,'velodyne_points',self.pc_callback,10)
+        # self.pc_subscription  # prevent unused variable warning
 
         
         path = Path(__file__).parent / "./destination_lat_long.txt"
@@ -107,6 +111,10 @@ class CustomNavigator(Node):
         for i in range(len(self.lat_array)):
             # Check for degrees, minutes, seconds format and convert to decimal
             self.dest_lat, self.dest_long = self.DMS_to_decimal_format(self.lat_array[i], self.long_array[i])
+        
+        global goal_number
+        goal_number = 0
+        self.dest_lat, self.dest_long = self.DMS_to_decimal_format(self.lat_array[goal_number], self.long_array[goal_number])
 
         # self.current_lat = math.radians(argv[0])
         # self.current_long = math.radians(argv[1])
@@ -129,7 +137,9 @@ class CustomNavigator(Node):
         # self.target = 90
         # self.target2 = -90 
         self.kp = 0.8
-        self.mag_declination = math.radians(-14.87) #14.87° W degrees is for Neumayer III Station, Antarctica (https://latitude.to/articles-by-country/aq/antarctica/27247/neumayer-station-iii)
+        # self.mag_declination = math.radians(-14.87) #14.87° W degrees is for Neumayer III Station, Antarctica (https://latitude.to/articles-by-country/aq/antarctica/27247/neumayer-station-iii)
+        self.mag_declination = math.radians(-4.23) # 4.23° W at 0 lat/ long
+        self.imu_heading_offset = math.radians(4.235193576741463 - 90) #At robot's initial spawn position, IMU provides ~ 4.23° heading  which is towards West. Need to account for thus offset. In practice, it shouldn't matter as heading will be calculated from magnetometer readings which are wrt real directions.
         
         
         # time.sleep(5)
@@ -186,7 +196,8 @@ class CustomNavigator(Node):
         orientation_q = msg.orientation
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         (self.roll, self.pitch, self.yaw) = euler_from_quaternion (orientation_list) #Result in radians. -180 < Roll < 180
-        self.mag_north_heading = -self.roll #ASSUMPTION 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
+        self.mag_north_heading = -self.roll + self.imu_heading_offset #ASSUMPTION 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
+        # print("IMU heading: ", math.degrees(self.mag_north_heading))
         # print("Finished IMU callback")
 
     def gps_callback(self, msg):
@@ -201,6 +212,13 @@ class CustomNavigator(Node):
         rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))        # print("Entered IMU callback")
         # print("Bearing in radian: ", bearing)
         # print("Bearing in degree: ", math.degrees(bearing)) #If -45° , means need to point robot to 45° left/ west of True North
+
+    def odom_callback(self, msg):
+        # self.get_logger().info('I heard: "%s"' % msg.data)
+        # print("Entered ODOM callback")
+        self.current_odom_x = msg.pose.pose.position.x
+        # print("Odom x: ", self.current_odom_x)
+        
 
     def pc_callback(self, msg):
         # msg.__class = PointCloud2
@@ -233,13 +251,6 @@ class CustomNavigator(Node):
 
         
         #Filtering points based on height
-        distance_array = np.zeros(shape=(data.shape[0],1))
-        for i in range(data.shape[0]): 
-            distance = math.sqrt(data[i,0]**2 + data[i,1]**2 + data[i,2]**2)
-            #print(distance)
-            distance_array[i,0] = distance
-        print(np.amin(distance_array))
-        print("Minimum distance index is: " + str(np.argmin(distance_array)))
         mean = np.mean(data[:,2])
         sd = np.std(data[:,2])
         data_ground = data[(abs(data[:,2]) > 0.8) & (abs(data[:,2]) < 1.2)] #Lidar is ~ 1 m above from ground. Points with z lying between 0.8 and 1.2 m are considered ground
@@ -271,9 +282,11 @@ class CustomNavigator(Node):
         data_ground[:, 2] = (data_ground[:, 2] - min_z)/(max_z - min_z)
         covariance = np.cov(data_ground[:, :3].T)
         eigen_values, eigen_vectors =  np.linalg.eig(np.matrix(covariance))
-        normal_vector = eigen_vectors[np.argmin(eigen_values)]
+        # normal_vector = eigen_vectors[np.argmin(eigen_values)] #For plane consisting obstacles
+        normal_vector = eigen_vectors[np.argmax(eigen_values)] #For pure ground plane
         projection = normal_vector.dot(data_ground[:, :3].T)
-        ground_mask = np.abs(projection) < 0.4
+        # ground_mask = np.abs(projection) < 0.4 #For plane consisting obstacles
+        ground_mask = np.abs(projection) > 0.4 #For pure ground plane
         data_ground = np.asarray([data_ground[index[1]] for index, a in np.ndenumerate(ground_mask) if a == True])
         data_ground[:, 2] = data_ground[:, 2] * (max_z - min_z) + min_z
         data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
@@ -390,9 +403,15 @@ class CustomNavigator(Node):
         self.ax2.scatter(data_wo_ground[:,0], data_wo_ground[:,1], data_wo_ground[:,2]) #Plotting non-ground points filtered through RANSAC
 
 
-
-        plt.show()
+        distance_array = np.zeros(shape=(data_wo_ground.shape[0],1))
+        for i in range(data_wo_ground.shape[0]): 
+            distance = math.sqrt(data_wo_ground[i,0]**2 + data_wo_ground[i,1]**2 + data_wo_ground[i,2]**2)
+            #print(distance)
+            distance_array[i,0] = distance
+        # print(np.amin(distance_array))
+        print("Minimum distance from VLP-16 is:", np.amin(distance_array), ", index is: ", np.argmin(distance_array), "and XYZ point is: ", data_wo_ground[np.argmin(distance_array)])
         
+        # plt.show()
         #print(distance_array.shape)
         #print(data[1,0])
         print("Listening END. Size is: " + str(data.shape))
@@ -407,63 +426,75 @@ class CustomNavigator(Node):
         hypotenuse = distance = g['s12'] # access distance
         self.get_logger().info("The distance from the origin to the goal is {:.3f} m.".format(distance))
         azimuth = g['azi1']
-        self.get_logger().info("The azimuth from the origin to the goal is {:.3f} degrees.".format(azimuth))
+        # self.get_logger().info("The azimuth from the origin to the goal is {:.3f} degrees.".format(azimuth))
 
         # Convert polar (distance and azimuth) to x,y translation in meters (needed for ROS) by finding side lenghs of a right-angle triangle
         # Convert azimuth to radians
         azimuth = math.radians(azimuth)
         x = adjacent = math.cos(azimuth) * hypotenuse
         y = opposite = math.sin(azimuth) * hypotenuse
-        self.get_logger().info("The translation from the origin to the goal is (x,y) {:.3f}, {:.3f} m.".format(x, y))
+        # self.get_logger().info("The translation from the origin to the goal is (x,y) {:.3f}, {:.3f} m.".format(x, y))
         return distance
     
     def move_forward(self, distance_to_move='until_obstacle'): # If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters
         if distance_to_move == 'until_obstacle':
             #Need to make changes here to detect obstacle
-            self.move_cmd.linear.x = 0.4
-        else:
-            pass
             
-
+            self.move_cmd.linear.x = 0.4
+        elif(distance_to_move > 1):
+            print("Need to move: ", distance_to_move)
+            self.move_cmd.linear.x = 0.4
+            self.velocity_publisher_.publish(self.move_cmd)
+        elif(distance_to_move < 1):
+            print("Destination reached :)")
+            self.move_cmd.linear.x = 0.0
+            self.move_cmd.angular.z = 0.0
+            self.velocity_publisher_.publish(self.move_cmd)
+            global goal_number
+            goal_number+=1
+            if goal_number < len(self.lat_array):
+                self.dest_lat, self.dest_long = self.DMS_to_decimal_format(self.lat_array[goal_number], self.long_array[goal_number])
 
     def timer_callback(self):
-        print("Entered timer callback")
+        # print("Entered timer callback")
         
         if self.gps_callback_done == 1:
             #First try to align robot to desired heading and then move in that direction
             global bearing
-            rclpy.logging.get_logger('timer_callback').info('Entered IMU/ timer_callback') 
+            # rclpy.logging.get_logger('timer_callback').info('Entered IMU/ timer_callback') 
 
 
             self.true_heading = self.mag_north_heading + self.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+            print("Current heading: ", math.degrees(self.true_heading))
             if self.true_heading < math.radians(-180):
                 self.true_heading = math.radians(180 - (abs(math.degrees(self.true_heading)) - 180))
             elif self.true_heading > math.radians(180):
                 self.true_heading = -(math.radians(180) - (self.true_heading - math.radians(180)))
-
+            print("Current heading after 180 adjustment: ", math.degrees(self.true_heading))
 
             if bearing < 0:
                 if (self.true_heading < bearing and self.true_heading > math.radians(-180)) or (self.true_heading > (math.radians(180) - abs(bearing)) and self.true_heading < math.radians(180)):
-                    self.direction = 'cw'
+                    self.direction = 'cw' #Original
                     if self.true_heading < 0:
                         self.to_rotate = abs(bearing - self.true_heading)
                     else:
                         self.to_rotate = math.radians(180 - math.degrees(self.true_heading) + 180 - math.degrees(abs(bearing)))
                 elif ((self.true_heading < 0 and self.true_heading > bearing) or (self.true_heading > 0 and self.true_heading < math.radians(180 - math.degrees(abs(bearing))))):
-                    self.direction = 'ccw'
+                    self.direction = 'ccw' #Original
                     if self.true_heading < 0:
                         self.to_rotate = abs(bearing - self.true_heading)
                     else:
                         self.to_rotate = self.true_heading + abs(bearing)
             elif bearing > 0:
                 if ((self.true_heading < 0 and self.true_heading > -math.radians(180 - math.degrees(bearing))) or (self.true_heading > 0 and self.true_heading < bearing)):
-                    self.direction = 'cw'
+                    self.direction = 'cw' #Original
                     if self.true_heading < 0:
                         self.to_rotate = abs(self.true_heading) + bearing
                     else:
                         self.to_rotate = abs(bearing - self.true_heading)
                 elif ((self.true_heading > bearing and self.true_heading < math.radians(180)) or (self.true_heading < -math.radians(180 - math.degrees(bearing)) and self.true_heading > math.radians(-180))):
-                    self.direction = 'ccw'
+                    self.direction = 'ccw' #Original
+                    
                     if self.true_heading < 0:
                         self.to_rotate = math.radians(180 - abs(math.degrees(self.true_heading)) + 180 - math.degrees(bearing))
                     else:
@@ -480,12 +511,13 @@ class CustomNavigator(Node):
 
             if abs(self.to_rotate) > 0.06:
                 self.rotate(self.to_rotate, self.direction)
+                # pass
             elif self.to_rotate < 0.06:
                 print("Robot already aligned towards goal")
-                self.destroy_timer(self.timer)
                 print("Finished timer callback")
                 self.distance_to_move = self.calc_goal(self.current_lat, self.current_long, self.dest_lat, self.dest_long)
-                self.move_forward
+                self.move_forward(self.distance_to_move)
+                # self.destroy_timer(self.timer)
 
             
 
@@ -496,7 +528,7 @@ class CustomNavigator(Node):
         print("Entered rotate function")
         global bearing
         if(direction == 'ccw'):
-                multiplier = 1  #Positive velocity means anti-clockwise (CCW) rotation
+                multiplier = 1  #Positive velocity means anti-clockwise (CCW) rotation (If we rotate in actual CCW direction, robot moves away from the bearing.. its a workaround)
                 print("CCW")
         else:
                 multiplier = -1  #Negative velocity means clockwise (CW) rotation
@@ -508,8 +540,8 @@ class CustomNavigator(Node):
         rotation_complete = 0
         print("Bearing (in degree): ", math.degrees(bearing))
         print("True heading (in degree): ", math.degrees(self.true_heading))
-        print("DEGREE: Need_to_rorate={} current:{}", math.degrees(target_angle_rad), math.degrees(self.true_heading))
-        print("RADIAN: Need_to_rorate={} current:{}", target_angle_rad, self.true_heading)
+        print("DEGREE: Need_to_rotate={} current heading:{}", math.degrees(target_angle_rad), math.degrees(self.true_heading))
+        # print("RADIAN: Need_to_rotate={} current:{}", target_angle_rad, self.true_heading)
         
         # if abs(target_angle_rad - self.roll) < 0.06:
             # rotation_complete = 1
@@ -522,6 +554,7 @@ class CustomNavigator(Node):
         # else:
         print("Reached 2")
         # print("target={} current:{}", target_angle_rad,self.roll)
+        self.move_cmd.linear.x = 0.0
         self.move_cmd.angular.z = multiplier * (self.kp * (abs(bearing - self.true_heading) + 0.3))
         # self.move_cmd.angular.z = multiplier * 0.5
         print(self.move_cmd.angular.z)
