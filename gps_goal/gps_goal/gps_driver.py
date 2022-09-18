@@ -20,7 +20,7 @@ class GPS_Publisher(Node):
 
         #Sensor parameter configuration
         SENSOR_NAME = "gps"
-        serial_port = '/dev/ttyACM0'
+        serial_port = '/dev/gps_port'
         serial_baud = 4800
         port = serial.Serial(serial_port, serial_baud, timeout=3.)
 

@@ -40,6 +40,7 @@ from transformations import euler_from_quaternion
 from mpl_toolkits import mplot3d
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+import pyransac3d as pyrsc
 
 from rclpy.action import ActionClient
 from rclpy.node import Node
@@ -83,8 +84,8 @@ class CustomNavigator(Node):
         self.odom_subscription = self.create_subscription(Odometry,'odom',self.odom_callback,10)
         self.odom_subscription  # prevent unused variable warning
 
-        # self.pc_subscription = self.create_subscription(PointCloud2,'velodyne_points',self.pc_callback,10)
-        # self.pc_subscription  # prevent unused variable warning
+        self.pc_subscription = self.create_subscription(PointCloud2,'velodyne_points',self.pc_callback,10)
+        self.pc_subscription  # prevent unused variable warning
 
         
         path = Path(__file__).parent / "./destination_lat_long.txt"
@@ -286,7 +287,7 @@ class CustomNavigator(Node):
         normal_vector = eigen_vectors[np.argmax(eigen_values)] #For pure ground plane
         projection = normal_vector.dot(data_ground[:, :3].T)
         # ground_mask = np.abs(projection) < 0.4 #For plane consisting obstacles
-        ground_mask = np.abs(projection) > 0.4 #For pure ground plane
+        ground_mask = np.abs(projection) > 0.010 #For pure ground plane
         data_ground = np.asarray([data_ground[index[1]] for index, a in np.ndenumerate(ground_mask) if a == True])
         data_ground[:, 2] = data_ground[:, 2] * (max_z - min_z) + min_z
         data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
@@ -314,73 +315,88 @@ class CustomNavigator(Node):
         self.ax2.scatter(data_wo_ground[:,0], data_wo_ground[:,1], data_wo_ground[:,2]) #Plotting non-ground points filtered through PCA
         
         #RANSAC implementation
-        random.seed()
-        inliers_index_array = [] #Contains inlier global index for all the iterations
-        max_iterations = 6
-        threshold = 0.4 #Distance threshold in metre
-        score_array = [] #Contains score for all the iterations
+        # random.seed()
+        # inliers_index_array = [] #Contains inlier global index for all the iterations
+        # max_iterations = 6
+        # threshold = 0.4 #Distance threshold in metre
+        # score_array = [] #Contains score for all the iterations
 
 
-        for j in range(max_iterations):
-            local_random_index = []
-            global_random_index = np.random.choice(data_ground[:,3].astype(int), size=3, replace=False) #Picking 3 points at random without replacement/ repeatition
-            # print("Global indexes are: ", global_random_index)
-            for i in global_random_index:
-                # print(i)
-                # print(np.where(data_ground[:,3].astype(int) == i)[0][0])
-                local_random_index.append(np.where(data_ground[:,3].astype(int) == i)[0][0])
+        # for j in range(max_iterations):
+        #     local_random_index = []
+        #     global_random_index = np.random.choice(data_ground[:,3].astype(int), size=3, replace=False) #Picking 3 points at random without replacement/ repeatition
+        #     # print("Global indexes are: ", global_random_index)
+        #     for i in global_random_index:
+        #         # print(i)
+        #         # print(np.where(data_ground[:,3].astype(int) == i)[0][0])
+        #         local_random_index.append(np.where(data_ground[:,3].astype(int) == i)[0][0])
 
-            # print("Local indexes are: ",local_random_index)
-            print("Random points global index as per original xyz data: ",global_random_index)
-            print("Random points local index in data_ground array: ", local_random_index)
-            # print("Global: ", data[global_random_index,:],  " \nLocal: ", data_ground[local_random_index, :])
-            # print(data_ground[local_random_index, :3])
+        #     # print("Local indexes are: ",local_random_index)
+        #     print("Random points global index as per original xyz data: ",global_random_index)
+        #     print("Random points local index in data_ground array: ", local_random_index)
+        #     # print("Global: ", data[global_random_index,:],  " \nLocal: ", data_ground[local_random_index, :])
+        #     # print(data_ground[local_random_index, :3])
 
-            [x1, y1, z1], [x2, y2, z2], [x3, y3, z3] = data_ground[local_random_index, :3]
+        #     [x1, y1, z1], [x2, y2, z2], [x3, y3, z3] = data_ground[local_random_index, :3]
 
-            # Plane Equation --> ax + by + cz + d = 0
-            # Value of Constants for inlier plane
-            a = (y2 - y1)*(z3 - z1) - (z2 - z1)*(y3 - y1)
-            b = (z2 - z1)*(x3 - x1) - (x2 - x1)*(z3 - z1)
-            c = (x2 - x1)*(y3 - y1) - (y2 - y1)*(x3 - x1)
-            d = -(a*x1 + b*y1 + c*z1)
+        #     # Plane Equation --> ax + by + cz + d = 0
+        #     # Value of Constants for inlier plane
+        #     a = (y2 - y1)*(z3 - z1) - (z2 - z1)*(y3 - y1)
+        #     b = (z2 - z1)*(x3 - x1) - (x2 - x1)*(z3 - z1)
+        #     c = (x2 - x1)*(y3 - y1) - (y2 - y1)*(x3 - x1)
+        #     d = -(a*x1 + b*y1 + c*z1)
 
-            inliers_index_array = np.append(inliers_index_array, global_random_index)
-            score = 3 #Including the 3 random points as well for score calculation
+        #     inliers_index_array = np.append(inliers_index_array, global_random_index)
+        #     score = 3 #Including the 3 random points as well for score calculation
 
-            #Find distance of all other points from the plane
-            for i in range(data_ground.shape[0]): #Check distance of all other points from the plane. Does not include the last number. range starts from 0
-                if i not in local_random_index:
-                    x4, y4, z4 = data_ground[i, :3]
-                    distance = ((a*x4) + (b*y4) + (c*z4) + d) / math.sqrt(a*a + b*b + c*c) 
-                    # print(x4, y4, z4)
+        #     #Find distance of all other points from the plane
+        #     for i in range(data_ground.shape[0]): #Check distance of all other points from the plane. Does not include the last number. range starts from 0
+        #         if i not in local_random_index:
+        #             x4, y4, z4 = data_ground[i, :3]
+        #             distance = ((a*x4) + (b*y4) + (c*z4) + d) / math.sqrt(a*a + b*b + c*c) 
+        #             # print(x4, y4, z4)
 
-                    if distance < threshold: #It means the point is a ground point/ inlier
-                        # print("Inlier global index: ", np.where(data[:,3].astype(int) == i)[0][0])
-                        inliers_index_array = np.append(inliers_index_array, np.where(data[:,3].astype(int) == data_ground[i,3])[0][0])  #Need to store global index of x4, y4, z4
-                        score+= 1
-            score_array.append(score)
-        print("Inliers arrays all iteration, size: ", inliers_index_array.shape)
-        #Choosing iteration with maximum score
+        #             if distance < threshold: #It means the point is a ground point/ inlier
+        #                 # print("Inlier global index: ", np.where(data[:,3].astype(int) == i)[0][0])
+        #                 inliers_index_array = np.append(inliers_index_array, np.where(data[:,3].astype(int) == data_ground[i,3])[0][0])  #Need to store global index of x4, y4, z4
+        #                 score+= 1
+        #     score_array.append(score)
+        # print("Inliers arrays all iteration, size: ", inliers_index_array.shape)
+        # #Choosing iteration with maximum score
 
-        max_score = np.amax(score_array)
-        max_score_index = np.argmax(score_array)
-        print("Scores for iterations are: ", score_array)
-        print("Maximum score is: ", max_score, "| Corresponding index is: ", max_score_index)
+        # max_score = np.amax(score_array)
+        # max_score_index = np.argmax(score_array)
+        # print("Scores for iterations are: ", score_array)
+        # print("Maximum score is: ", max_score, "| Corresponding index is: ", max_score_index)
 
-        if max_score_index == 0:
-            start_index = 0
-        else:
-            print("Sum till max score index: ",sum(score_array[:max_score_index]))
-            start_index = sum(score_array[:max_score_index]) - 1
-        end_index = start_index + score_array[max_score_index]
-        print("Start Index: ", start_index, "End Index: ", end_index)
-        print("Inlier points global index: ", inliers_index_array[start_index : end_index])
-        data_ground = data[inliers_index_array[start_index : end_index].astype(int)]
-        data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
-        print("RANSAC output: ",data.shape, data_ground.shape, data_wo_ground.shape)
+        # if max_score_index == 0:
+        #     start_index = 0
+        # else:
+        #     print("Sum till max score index: ",sum(score_array[:max_score_index]))
+        #     start_index = sum(score_array[:max_score_index]) - 1
+        # end_index = start_index + score_array[max_score_index]
+        # print("Start Index: ", start_index, "End Index: ", end_index)
+        # print("Inlier points global index: ", inliers_index_array[start_index : end_index])
+
+        
+        # data_ground = data[inliers_index_array[start_index : end_index].astype(int)]
+        # data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
+        # print("RANSAC output: ",data.shape, data_ground.shape, data_wo_ground.shape)
         # self.ax = self.fig.add_subplot(222, projection='3d')
         # self.ax.scatter(data[:,0], data[:,1], data[:,2])
+
+        #Example 1 - Planar RANSAC¶ : Reference: https://leomariga.github.io/pyRANSAC-3D/api-documentation/plane/
+        points = np.array([data_ground[:,0],data_ground[:,1],data_ground[:,2]]).T
+        print("Points shape: ", points.shape)
+        plane1 = pyrsc.Plane()
+        best_eq, inliers_local_index_array = plane1.fit(points, thresh=0.02) #best_inliers contains the local index of inliers present inside data_ground array
+        inliers_global_index_array = data_ground[inliers_local_index_array,3]
+        
+                
+        print("Points shape: ", points.shape, "Best eq: ", best_eq, "Best inliers shape: ", inliers_global_index_array.shape, "Inliers index array shape: ", inliers_global_index_array.shape)
+        data_ground = data[inliers_global_index_array.astype(int)]
+        data_wo_ground = np.delete(data, data_ground[:,3].astype(int), axis=0)[:,:3]
+        print("RANSAC output: ",data.shape, data_ground.shape, data_wo_ground.shape)
 
         self.ax = self.fig.add_subplot(224, projection='3d')
         self.ax.set_xlabel('X axis')
@@ -411,7 +427,7 @@ class CustomNavigator(Node):
         # print(np.amin(distance_array))
         print("Minimum distance from VLP-16 is:", np.amin(distance_array), ", index is: ", np.argmin(distance_array), "and XYZ point is: ", data_wo_ground[np.argmin(distance_array)])
         
-        # plt.show()
+        plt.show()
         #print(distance_array.shape)
         #print(data[1,0])
         print("Listening END. Size is: " + str(data.shape))
@@ -510,8 +526,8 @@ class CustomNavigator(Node):
             # print(math.degrees(self.roll)) #Roll is providing the current angular rotation surprisingly
 
             if abs(self.to_rotate) > 0.06:
-                self.rotate(self.to_rotate, self.direction)
-                # pass
+                # self.rotate(self.to_rotate, self.direction)
+                pass
             elif self.to_rotate < 0.06:
                 print("Robot already aligned towards goal")
                 print("Finished timer callback")

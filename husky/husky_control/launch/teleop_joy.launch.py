@@ -8,8 +8,12 @@ def generate_launch_description():
     joy_type = EnvironmentVariable('CPR_JOY_TYPE', default_value='logitech')
 
 
+    # filepath_config_joy = PathJoinSubstitution(
+    #     [FindPackageShare('husky_control'), 'config', ('teleop_' + joy_type.perform(lc) + '.yaml')]
+    # )
+
     filepath_config_joy = PathJoinSubstitution(
-        [FindPackageShare('husky_control'), 'config', ('teleop_' + joy_type.perform(lc) + '.yaml')]
+        [FindPackageShare('husky_control'), 'config', ('teleop_' + 'flysky' + '.yaml')]
     )
 
     node_joy = Node(
