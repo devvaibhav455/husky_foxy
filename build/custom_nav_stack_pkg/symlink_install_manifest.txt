@@ -1,0 +1,17 @@
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/lib/custom_nav_stack_pkg/cpp_executable
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/lib/custom_nav_stack_pkg/custom_nav_stack.py
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/ament_index/resource_index/package_run_dependencies/custom_nav_stack_pkg
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/ament_index/resource_index/parent_prefix_path/custom_nav_stack_pkg
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/environment/ament_prefix_path.sh
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/environment/ament_prefix_path.dsv
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/environment/path.sh
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/environment/path.dsv
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/local_setup.bash
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/local_setup.sh
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/local_setup.zsh
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/local_setup.dsv
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/package.dsv
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/ament_index/resource_index/packages/custom_nav_stack_pkg
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/cmake/custom_nav_stack_pkgConfig.cmake
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/cmake/custom_nav_stack_pkgConfig-version.cmake
+/home/dev/husky_ws/src/install/custom_nav_stack_pkg/share/custom_nav_stack_pkg/package.xml

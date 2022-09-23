@@ -57,10 +57,7 @@ joy_teleop/teleop_twist_joy_node:
       yaw: 1.2
     enable_button: 4
     enable_turbo_button: 5
-    remap:
-    -
-        from: "/joy/renamed"
-        to: "/joy_teleop/joy"
+    require_enable_button: False
 joy_teleop/joy_node:
   ros__parameters:
     deadzone: 0.1

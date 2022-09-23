@@ -20,7 +20,8 @@ from logging.handlers import BaseRotatingHandler
 from threading import local
 import time
 import math
-import pcl
+import subprocess
+
 
 from geometry_msgs.msg import Pose, PoseStamped, Twist
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -51,6 +52,8 @@ from rclpy.duration import Duration
 from geographiclib.geodesic import Geodesic
 
 from pathlib import Path
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
 
 
 #ASSUMPTIONS: 1) IMU 0 orientation is TRUE NORTH | 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
@@ -89,7 +92,10 @@ class CustomNavigator(Node):
         self.pc_subscription  # prevent unused variable warning
 
         
-        path = Path(__file__).parent / "./destination_lat_long.txt"
+        path = str(Path(__file__).parent / "./destination_lat_long.txt")
+        path = path.replace("install", "src")
+        path = path.replace("lib/custom_nav_stack_pkg", "scripts")
+
         f = open(path, "r")
         Lines = f.readlines()
         self.lat_array =[]
@@ -227,7 +233,7 @@ class CustomNavigator(Node):
         #offset_sorted = {f.offset: f for f in msg.fields}
         #msg.fields = [f for(_, f) in sorted(offset_sorted.items())]
         data = rnp.point_cloud2.pointcloud2_to_xyz_array(msg,remove_nans=True) #Reading xyz values from PointCloud2 message
-        pc_pcl = pcl.PointCloud(np.array(pc_np, dtype=np.float32))
+        #pc_pcl = pcl.PointCloud(np.array(pc_np, dtype=np.float32))
         data = np.append(data, np.arange(data.shape[0]).reshape(-1, 1), axis=1) #Appending index to the 4th column
         
         self.ax = self.fig.add_subplot(221, projection='3d')
@@ -420,14 +426,14 @@ class CustomNavigator(Node):
         self.ax2.set_zlim(-1.5,1.2)
         self.ax2.scatter(data_wo_ground[:,0], data_wo_ground[:,1], data_wo_ground[:,2]) #Plotting non-ground points filtered through RANSAC
 
-
-        distance_array = np.zeros(shape=(data_wo_ground.shape[0],1))
-        for i in range(data_wo_ground.shape[0]): 
-            distance = math.sqrt(data_wo_ground[i,0]**2 + data_wo_ground[i,1]**2 + data_wo_ground[i,2]**2)
-            #print(distance)
-            distance_array[i,0] = distance
-        # print(np.amin(distance_array))
-        print("Minimum distance from VLP-16 is:", np.amin(distance_array), ", index is: ", np.argmin(distance_array), "and XYZ point is: ", data_wo_ground[np.argmin(distance_array)])
+        if data_wo_ground.shape[0] != 0: #Means there is no non-ground points/ obstacle
+            distance_array = np.zeros(shape=(data_wo_ground.shape[0],1))
+            for i in range(data_wo_ground.shape[0]): 
+                distance = math.sqrt(data_wo_ground[i,0]**2 + data_wo_ground[i,1]**2 + data_wo_ground[i,2]**2)
+                #print(distance)
+                distance_array[i,0] = distance
+            # print(np.amin(distance_array))
+            print("Minimum distance from VLP-16 is:", np.amin(distance_array), ", index is: ", np.argmin(distance_array), "and XYZ point is: ", data_wo_ground[np.argmin(distance_array)])
         
         plt.show()
         #print(distance_array.shape)
