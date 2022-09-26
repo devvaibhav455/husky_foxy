@@ -16,6 +16,7 @@
   <depend>actionlib_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>libpcl-dev</depend>
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -26,5 +27,6 @@
     <exec_depend>actionlib_msgs</exec_depend>
     <exec_depend>geometry_msgs</exec_depend>
     <exec_depend>sensor_msgs</exec_depend>
+    <exec_depend>libpcl-dev</exec_depend>
   </export>
 </package>

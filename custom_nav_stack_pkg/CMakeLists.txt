@@ -28,7 +28,27 @@ find_package(lifecycle_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "lifecycle_msgs")
+# set(Boost_LIBRARY_DIRS /usr/lib/x86_64-linux-gnu/)
+# set(Boost_LIBRARY_DIR /usr/lib/x86_64-linux-gnu/)
+# set(BOOST_LIBRARY_DIRS /usr/lib/x86_64-linux-gnu/)
+# set(BOOST_LIBRARY_DIR /usr/lib/x86_64-linux-gnu/)
+# set(Boost_INCLUDE_DIR /usr/include/)
+# set(BOOST_INCLUDE_DIR /usr/include/)
+# set(Boost_INCLUDE_DIRS /usr/include/)
+# set(BOOST_INCLUDE_DIRS /usr/include/)
+# find_package(Boost 1.55.0 ${QUIET_} COMPONENTS system filesystem date_time iostreams)
+# find_package(Boost 1.55.0 REQUIRED COMPONENTS system filesystem date_time iostreams) #Surprisingly this can find Boost but one present in PCL can't
+
+
+# message( CMAKE_MODULE_PATH in mycmake:  ${CMAKE_MODULE_PATH} )
+# message( Boost_FOUND in my cmakelist:  ${Boost_FOUND} )
+find_package(PCL REQUIRED)
+
+
+
+
+set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "lifecycle_msgs" "PCL" )#"libpcl-dev"
+
 
 
 # uncomment the following section in order to fill in
@@ -36,7 +56,11 @@ set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "
 # find_package(<dependency> REQUIRED)
 
 # Include Cpp "include" directory
-include_directories(include)
+include_directories(include ${colcon_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+# /usr/include/pcl-1.10 /usr/include/eigen3 
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 
 # Create Cpp executable
 add_executable(cpp_executable src/cpp_node.cpp)
@@ -48,6 +72,8 @@ install(TARGETS
   cpp_executable
   DESTINATION lib/${PROJECT_NAME}
 )
+
+target_link_libraries (cpp_executable ${PCL_LIBRARIES})
 
 # Install Python executables
 install(PROGRAMS
@@ -67,3 +93,4 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
