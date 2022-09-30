@@ -1,6 +1,6 @@
+//#pragma once
 #include <memory>
 #include <iostream>
-
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
@@ -12,6 +12,8 @@
 // #include <boost/foreach.hpp>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/crop_box.h>
+
+// Include files required for RANSAC
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
@@ -19,6 +21,7 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/segmentation/extract_clusters.h>
+#include <pcl/filters/extract_indices.h>
 
 
 
@@ -126,20 +129,29 @@ class MinimalSubscriber : public rclcpp::Node
       std::cerr << "PointCloud after cropbox filtering: " << cloud_filtered_ptr->width * cloud_filtered_ptr->height 
        << " data points (" << pcl::getFieldsList (*cloud_filtered_ptr) << ")." << std::endl;
 
-      // STEP 3: Segmentation Using RANSAC Algorithm; Reference: https://pointclouds.org/documentation/classpcl_1_1_s_a_c_segmentation.html#a7e9ad0f4cd31e45c2ff03da17d0c9bce, https://pcl.readthedocs.io/projects/tutorials/en/latest/planar_segmentation.html, https://github.com/RAS2015-GROUP5/ras_computer_vision/blob/master/milestone_1_object_detection/src/object_detection.cpp
-      pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-      pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+      // STEP 3(a): Segmentation Using RANSAC Algorithm; Reference: https://pointclouds.org/documentation/classpcl_1_1_s_a_c_segmentation.html#a7e9ad0f4cd31e45c2ff03da17d0c9bce, https://pcl.readthedocs.io/projects/tutorials/en/latest/planar_segmentation.html, https://github.com/RAS2015-GROUP5/ras_computer_vision/blob/master/milestone_1_object_detection/src/object_detection.cpp
+      pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
+      pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
       // Create the segmentation object
-      pcl::SACSegmentation<pcl::PCLPointCloud2> seg;
+      // pcl::SACSegmentation<pcl::PCLPointCloud2> seg;
+      pcl::SACSegmentation<pcl::PointXYZ> seg;
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_ptr(new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::fromPCLPointCloud2(*cloud_filtered_ptr, *cloud_xyz_ptr);  //https://stackoverflow.com/questions/69716482/convert-from-pclpointcloudpclpointxyz-to-pclpclpointcloud2-ros-melodic  (we can using <PointT> or PointXYZ in all function it seems)
+      // cloud_xyz_ptr->header =cloud_filtered_ptr->header;
+      // cloud_xyz_ptr->width =cloud_filtered_ptr->width;
+      // cloud_xyz_ptr->height =cloud_filtered_ptr->height;
+      // cloud_xyz_ptr->is_dense =cloud_filtered_ptr->is_dense;
+      // cloud_xyz_ptr->points =cloud_filtered_ptr->data;
+
       // Optional
       seg.setOptimizeCoefficients (true);
       // Mandatory
       seg.setModelType (pcl::SACMODEL_PLANE);
       seg.setMethodType (pcl::SAC_RANSAC);
-      seg.setDistanceThreshold (0.01);
       seg.setMaxIterations (50);
+      seg.setDistanceThreshold (0.01);
       
-      seg.setInputCloud (cloud_filtered_ptr);
+      seg.setInputCloud (cloud_xyz_ptr);
       seg.segment (*inliers, *coefficients);
 
       if (inliers->indices.size () == 0)
@@ -155,12 +167,50 @@ class MinimalSubscriber : public rclcpp::Node
 
       std::cerr << "Model inliers: " << inliers->indices.size () << std::endl;
 
+      
+      // STEP 3(b): Extracting ground/ non-ground points // https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md
+        // If we want ground points, use extract.setNegative (false);
+        // If we want non-ground, obstacle points, use extract.setNegative (true);
+      
+      // Create the filtering object
+      pcl::ExtractIndices<pcl::PointXYZ> extract;
+
+      extract.setInputCloud (cloud_xyz_ptr);
+      extract.setIndices (inliers);
+      extract.setNegative (true);
+      extract.filter (*cloud_xyz_ptr);
+
+      std::cerr << "PointCloud after RANSAC plane extraction, ground points: " << cloud_xyz_ptr->width * cloud_xyz_ptr->height 
+       << " data points (" << pcl::getFieldsList (*cloud_xyz_ptr) << ")." << std::endl;
+
+      // Step 4: Clustering using K-D treel; Reference: https://link.springer.com/chapter/10.1007/978-981-16-6460-1_57, https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md
+
+      // Create the KdTree object for the search method of the extraction
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+      tree->setInputCloud (cloud_xyz_ptr);
+    
+      // create the extraction object for the clusters
+      std::vector<pcl::PointIndices> cluster_indices;
+      pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+      // specify euclidean cluster parameters
+      ec.setClusterTolerance (0.02); // 2cm
+      ec.setMinClusterSize (100);
+      ec.setMaxClusterSize (25000);
+      ec.setSearchMethod (tree);
+      ec.setInputCloud (cloud_xyz_ptr);
+      // exctract the indices pertaining to each cluster and store in a vector of pcl::PointIndices
+      ec.extract (cluster_indices);
+
+
 
       //Publish data back to ROS2 for visualization
-      sensor_msgs::msg::PointCloud2 ros_processed_pcl2_ptr; //Declaring a pointer using new was working but gave deprecated warning
-      pcl_conversions::fromPCL(*cloud_filtered_ptr, ros_processed_pcl2_ptr);
-      RCLCPP_INFO(this->get_logger(), "Process ROS2 PCL2, width is: '%d'", ros_processed_pcl2_ptr.width); //
-      publisher_->publish(ros_processed_pcl2_ptr);
+      sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
+      // pcl_conversions::fromPCL(*cloud_filtered_ptr, ros_processed_pcl2_ptr);
+      //pcl_conversions::fromPCL(*cloud_xyz_ptr, ros_processed_pcl2)
+      pcl::toROSMsg(*cloud_xyz_ptr, ros_processed_pcl2);
+
+      RCLCPP_INFO(this->get_logger(), "Process ROS2 PCL2, width is: '%d'", ros_processed_pcl2.width); //
+      publisher_->publish(ros_processed_pcl2);
       std::cout << "Reached callback end in Private" << std::endl;
       // std::cin.ignore();
     }
