@@ -23,16 +23,47 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/extract_indices.h>
 
+#include <pcl/io/pcd_io.h>
+#include <pcl/common/common.h> //Used for getMinMax3D
+#include <fstream>
+#include <sstream>
+#include <string>
+
 
 
 // using std::placeholders::_1;
 
 // clear && colcon build --packages-select custom_nav_stack_pkg --symlink-install && source install/local_setup.bash && ros2 run custom_nav_stack_pkg cpp_executable
 // sudo chown -R dev /opt/ros/foxy/share/ #to remove the squiggle error in vscode where "dev" is the username
+// sudo apt install pcl-tools to install pcl_viewer to visualize the cluster for debugging
 
 class MinimalSubscriber : public rclcpp::Node
 {
+
+  struct Config {
+        int    num;
+        std::string str;
+        double flt;
+        float leaf_size_x;
+        float leaf_size_y;
+        float leaf_size_z;
+        float crop_min_x;
+        float crop_min_y;
+        float crop_min_z;
+        float crop_max_x;
+        float crop_max_y;
+        float crop_max_z;
+        int ransac_max_iterations;
+        float ransac_distance_threshold;
+        float cluster_tolerance;
+        int cluster_min_size;
+        int cluster_max_size;
+      };
+  Config config;
+  
   public:
+    
+    
     MinimalSubscriber()    //Constructor which has the same name as that of class followed by a parentheses. A constructor in C++ is a special method that is automatically called when an object of a class is created. 
     : Node("minimal_subscriber")
     {
@@ -43,13 +74,55 @@ class MinimalSubscriber : public rclcpp::Node
       subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>
       ("velodyne_points", 10, std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
 
-      std::cout << "Reached end og Public" << std::endl;
+      std::cout << "Reached end of Public" << std::endl;
 
+      std::ifstream config_file_path("/home/dev/husky_ws/src/custom_nav_stack_pkg/src/config.txt");
+      std::string line;
+      while (std::getline(config_file_path, line)) {
+          std::istringstream sin(line.substr(line.find("=") + 1));
+          if (line.find("num") != -1)
+              sin >> config.num;
+          else if (line.find("str") != -1)
+              sin >> config.str;
+          else if (line.find("flt") != -1)
+              sin >> config.flt;
+          else if (line.find("leaf_size_x") != -1)
+              sin >> config.leaf_size_x;
+          else if (line.find("leaf_size_y") != -1)
+              sin >> config.leaf_size_y;
+          else if (line.find("leaf_size_z") != -1)
+              sin >> config.leaf_size_z;
+          else if (line.find("crop_min_x") != -1)
+              sin >> config.crop_min_x;
+          else if (line.find("crop_min_y") != -1)
+              sin >> config.crop_min_y;
+          else if (line.find("crop_min_z") != -1)
+              sin >> config.crop_min_z;
+          else if (line.find("ransac_max_iterations") != -1)
+              sin >> config.ransac_max_iterations;
+          else if (line.find("ransac_distance_threshold") != -1)
+              sin >> config.ransac_distance_threshold;
+          else if (line.find("cluster_tolerance") != -1)
+              sin >> config.cluster_tolerance;
+          else if (line.find("cluster_min_size") != -1)
+              sin >> config.cluster_min_size;
+          else if (line.find("cluster_max_size") != -1)
+              sin >> config.cluster_max_size;
+      }
+      std::cout << config.num << '\n';
+      std::cout << config.leaf_size_x << '\n';
+      std::cout << config.crop_min_x << '\n';
+      
+      
+      
     }
 
   private:
+
+    
     void topic_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg_ptr) const
     {
+      std::cout << "Config crop min x is: " << config.crop_min_x << std::endl;
       // std::cout << "Hello";
       // RCLCPP_INFO(this->get_logger(), "I received the message , height is: '%d'", msg_ptr->height); //
       // RCLCPP_INFO(this->get_logger(), "I received the message"); //
@@ -104,7 +177,8 @@ class MinimalSubscriber : public rclcpp::Node
       // set input to cloud
       voxelGrid.setInputCloud(cloud_in_ptr);
       // set the leaf size (x, y, z)
-      voxelGrid.setLeafSize(0.1, 0.1, 0.1);
+      // voxelGrid.setLeafSize(0.1, 0.1, 0.1);
+      voxelGrid.setLeafSize(config.leaf_size_x, config.leaf_size_y, config.leaf_size_x);
       // apply the filter to dereferenced cloudVoxel
       voxelGrid.filter(*cloud_filtered_ptr);   
 
@@ -116,8 +190,10 @@ class MinimalSubscriber : public rclcpp::Node
       // define a cropbox
       pcl::CropBox<pcl::PCLPointCloud2> cropBox;
       cropBox.setInputCloud(cloud_filtered_ptr);
-      Eigen::Vector4f min_pt (-5.0f, -5.0f, -10.0f, 1.0f); //(minX, minY, minZ, 1.0) in meter
-      Eigen::Vector4f max_pt (5.0f, 5.0f, 10.0f, 1.0f); //(maxX, maxY, maxZ, 1.0) in meter
+      Eigen::Vector4f min_pt (-5.0f, -5.0f, -10.0f, 1.0); //(minX, minY, minZ, 1.0) in meter
+      Eigen::Vector4f max_pt (5.0f, 5.0f, 10.0f, 1.0); //(maxX, maxY, maxZ, 1.0) in meter
+      // Eigen::Vector4f min_pt (config.crop_min_x, config.crop_min_y, config.crop_min_z, 1.0f); //(minX, minY, minZ, 1.0) in meter
+      // Eigen::Vector4f max_pt (config.crop_max_x, config.crop_max_y, config.crop_max_z, 1.0f);
       // Cropbox slighlty bigger then bounding box of points
       cropBox.setMin (min_pt);
       cropBox.setMax (max_pt);
@@ -148,8 +224,10 @@ class MinimalSubscriber : public rclcpp::Node
       // Mandatory
       seg.setModelType (pcl::SACMODEL_PLANE);
       seg.setMethodType (pcl::SAC_RANSAC);
-      seg.setMaxIterations (50);
-      seg.setDistanceThreshold (0.01);
+      // seg.setMaxIterations (50);
+      // seg.setDistanceThreshold (0.01);
+      seg.setMaxIterations (config.ransac_max_iterations);
+      seg.setDistanceThreshold (config.ransac_distance_threshold);
       
       seg.setInputCloud (cloud_xyz_ptr);
       seg.segment (*inliers, *coefficients);
@@ -183,7 +261,7 @@ class MinimalSubscriber : public rclcpp::Node
       std::cerr << "PointCloud after RANSAC plane extraction, ground points: " << cloud_xyz_ptr->width * cloud_xyz_ptr->height 
        << " data points (" << pcl::getFieldsList (*cloud_xyz_ptr) << ")." << std::endl;
 
-      // Step 4: Clustering using K-D treel; Reference: https://link.springer.com/chapter/10.1007/978-981-16-6460-1_57, https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md
+      // Step 4: Clustering using K-D treel; Reference: https://link.springer.com/chapter/10.1007/978-981-16-6460-1_57, https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md, https://pcl.readthedocs.io/en/latest/cluster_extraction.html
 
       // Create the KdTree object for the search method of the extraction
       pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -193,24 +271,63 @@ class MinimalSubscriber : public rclcpp::Node
       std::vector<pcl::PointIndices> cluster_indices;
       pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
       // specify euclidean cluster parameters
-      ec.setClusterTolerance (0.02); // 2cm
-      ec.setMinClusterSize (100);
-      ec.setMaxClusterSize (25000);
+      // ec.setClusterTolerance (0.2); // 2cm
+      // ec.setMinClusterSize (50);
+      // ec.setMaxClusterSize (25000);
+      ec.setClusterTolerance (config.cluster_tolerance); // 2cm
+      ec.setMinClusterSize (config.cluster_min_size);
+      ec.setMaxClusterSize (config.cluster_max_size);
       ec.setSearchMethod (tree);
       ec.setInputCloud (cloud_xyz_ptr);
       // exctract the indices pertaining to each cluster and store in a vector of pcl::PointIndices
       ec.extract (cluster_indices);
+      // std::cout << "Cluster indices: " << cluster_indices[0] << std::endl;
+
+      pcl::PCDWriter writer;
+
+      int j = 0;
+      for (const auto& cluster : cluster_indices)
+      {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
+        for (const auto& idx : cluster.indices) {
+          cloud_cluster->push_back((*cloud_xyz_ptr)[idx]);
+        } //*
+        cloud_cluster->width = cloud_cluster->size ();
+        cloud_cluster->height = 1;
+        cloud_cluster->is_dense = true;   
+        cloud_cluster->header = cloud_xyz_ptr->header;  
+        std::cout << "PointCloud representing the Cluster: " << cloud_cluster->size () << " data points." << std::endl;
+        Eigen::Vector4f min_pt_cluster; //(minX, minY, minZ, 1.0) in meter
+        Eigen::Vector4f max_pt_cluster; //(maxX, maxY, maxZ, 1.0) in meter
+        pcl::getMinMax3D(*cloud_cluster,min_pt_cluster, max_pt_cluster); //Ref: https://github.com/PointCloudLibrary/pcl/blob/master/examples/common/example_get_max_min_coordinates.cpp
+        std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
+        std::cout << "Max y: " << max_pt_cluster[1] << std::endl;
+        std::cout << "Max z: " << max_pt_cluster[2] << std::endl;
+        std::cout << "Min x: " << min_pt_cluster[0] << std::endl;
+        std::cout << "Min y: " << min_pt_cluster[1] << std::endl;
+        std::cout << "Min z: " << min_pt_cluster[2] << std::endl;
+        sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
+        pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
+        publisher_->publish(ros_processed_pcl2);
+
+        // std::stringstream ss;
+        // ss << "cloud_cluster_" << j << ".pcd";
+        // writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); //*
+        j++;
+      }
+
+      
 
 
 
       //Publish data back to ROS2 for visualization
-      sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
+      // sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
       // pcl_conversions::fromPCL(*cloud_filtered_ptr, ros_processed_pcl2_ptr);
       //pcl_conversions::fromPCL(*cloud_xyz_ptr, ros_processed_pcl2)
-      pcl::toROSMsg(*cloud_xyz_ptr, ros_processed_pcl2);
+      // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
 
-      RCLCPP_INFO(this->get_logger(), "Process ROS2 PCL2, width is: '%d'", ros_processed_pcl2.width); //
-      publisher_->publish(ros_processed_pcl2);
+      // RCLCPP_INFO(this->get_logger(), "Process ROS2 PCL2, width is: '%d'", ros_processed_pcl2.width); //
+      // publisher_->publish(ros_processed_pcl2);
       std::cout << "Reached callback end in Private" << std::endl;
       // std::cin.ignore();
     }

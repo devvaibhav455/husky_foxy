@@ -50,7 +50,6 @@ find_package(PCL REQUIRED)
 set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "lifecycle_msgs" "PCL" )#"libpcl-dev"
 
 
-
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
