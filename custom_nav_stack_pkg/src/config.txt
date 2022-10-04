@@ -18,3 +18,6 @@ ransac_distance_threshold = 0.01
 cluster_tolerance = 0.2
 cluster_min_size = 50
 cluster_max_size = 25000
+
+fwd_obs_tolerance = 3
+angle_view_degree = 36 

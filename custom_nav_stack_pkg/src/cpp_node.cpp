@@ -25,6 +25,7 @@
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/common.h> //Used for getMinMax3D
+#include <pcl/common/centroid.h> //Used for cluster centroid calculation
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -58,6 +59,8 @@ class MinimalSubscriber : public rclcpp::Node
         float cluster_tolerance;
         int cluster_min_size;
         int cluster_max_size;
+        float fwd_obs_tolerance;
+        float angle_view_degree;
       };
   Config config;
   
@@ -108,6 +111,10 @@ class MinimalSubscriber : public rclcpp::Node
               sin >> config.cluster_min_size;
           else if (line.find("cluster_max_size") != -1)
               sin >> config.cluster_max_size;
+          else if (line.find("fwd_obs_tolerance") != -1)
+              sin >> config.fwd_obs_tolerance;
+          else if (line.find("angle_view_degree") != -1)
+              sin >> config.angle_view_degree;
       }
       std::cout << config.num << '\n';
       std::cout << config.leaf_size_x << '\n';
@@ -122,7 +129,7 @@ class MinimalSubscriber : public rclcpp::Node
     
     void topic_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg_ptr) const
     {
-      std::cout << "Config crop min x is: " << config.crop_min_x << std::endl;
+      
       // std::cout << "Hello";
       // RCLCPP_INFO(this->get_logger(), "I received the message , height is: '%d'", msg_ptr->height); //
       // RCLCPP_INFO(this->get_logger(), "I received the message"); //
@@ -192,7 +199,10 @@ class MinimalSubscriber : public rclcpp::Node
       cropBox.setInputCloud(cloud_filtered_ptr);
       Eigen::Vector4f min_pt (-5.0f, -5.0f, -10.0f, 1.0); //(minX, minY, minZ, 1.0) in meter
       Eigen::Vector4f max_pt (5.0f, 5.0f, 10.0f, 1.0); //(maxX, maxY, maxZ, 1.0) in meter
-      // Eigen::Vector4f min_pt (config.crop_min_x, config.crop_min_y, config.crop_min_z, 1.0f); //(minX, minY, minZ, 1.0) in meter
+      // float my_x = -5.1f;
+      // std::cout << "Config crop min x is: " << config.crop_min_x << std::endl;
+      // std::cout << "My x is: " << my_x << "of type" << typeid(my_x).name() << std::endl;
+      // Eigen::Vector4f min_pt (my_x, -5.0f, -5.0f, 1.0f); //(minX, minY, minZ, 1.0) in meter
       // Eigen::Vector4f max_pt (config.crop_max_x, config.crop_max_y, config.crop_max_z, 1.0f);
       // Cropbox slighlty bigger then bounding box of points
       cropBox.setMin (min_pt);
@@ -235,6 +245,7 @@ class MinimalSubscriber : public rclcpp::Node
       if (inliers->indices.size () == 0)
       {
         PCL_ERROR ("Could not estimate a planar model for the given dataset.");
+        std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
         //Need to skip ransac part here
       }
 
@@ -258,7 +269,7 @@ class MinimalSubscriber : public rclcpp::Node
       extract.setNegative (true);
       extract.filter (*cloud_xyz_ptr);
 
-      std::cerr << "PointCloud after RANSAC plane extraction, ground points: " << cloud_xyz_ptr->width * cloud_xyz_ptr->height 
+      std::cerr << "PointCloud after RANSAC plane extraction, non-ground points: " << cloud_xyz_ptr->width * cloud_xyz_ptr->height 
        << " data points (" << pcl::getFieldsList (*cloud_xyz_ptr) << ")." << std::endl;
 
       // Step 4: Clustering using K-D treel; Reference: https://link.springer.com/chapter/10.1007/978-981-16-6460-1_57, https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md, https://pcl.readthedocs.io/en/latest/cluster_extraction.html
@@ -285,30 +296,59 @@ class MinimalSubscriber : public rclcpp::Node
 
       pcl::PCDWriter writer;
 
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_all (new pcl::PointCloud<pcl::PointXYZ>);
+      std::vector <float> min_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing min points of each cluster x1,y1,z1 ; x2.y2,z2 ...
+      std::vector <float> max_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing max points of each cluster x1,y1,z1 ; x2.y2,z2 ...
+      // NOTE: xmin, ymin, zmin are not paired. They can be different points. They are just min values in x, y, and z respectively.
+      std::vector <float> centroid_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
       int j = 0;
       for (const auto& cluster : cluster_indices)
       {
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
+        std::cout << "Number of clusters: " << cluster_indices.size() << std::endl;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_individual (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::CentroidPoint<pcl::PointXYZ> centroid; //Reference: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
         for (const auto& idx : cluster.indices) {
-          cloud_cluster->push_back((*cloud_xyz_ptr)[idx]);
+        cloud_cluster_all->push_back((*cloud_xyz_ptr)[idx]);
+        cloud_cluster_individual->push_back((*cloud_xyz_ptr)[idx]);
         } //*
-        cloud_cluster->width = cloud_cluster->size ();
-        cloud_cluster->height = 1;
-        cloud_cluster->is_dense = true;   
-        cloud_cluster->header = cloud_xyz_ptr->header;  
-        std::cout << "PointCloud representing the Cluster: " << cloud_cluster->size () << " data points." << std::endl;
+        cloud_cluster_all->width = cloud_cluster_all->size ();
+        cloud_cluster_all->height = 1;
+        cloud_cluster_all->is_dense = true;   
+        cloud_cluster_all->header = cloud_xyz_ptr->header;  
+        std::cout << "PointCloud representing the Cluster# " << j << " is of size: " << cloud_cluster_all->size () << " data points." << std::endl;
+        
         Eigen::Vector4f min_pt_cluster; //(minX, minY, minZ, 1.0) in meter
         Eigen::Vector4f max_pt_cluster; //(maxX, maxY, maxZ, 1.0) in meter
-        pcl::getMinMax3D(*cloud_cluster,min_pt_cluster, max_pt_cluster); //Ref: https://github.com/PointCloudLibrary/pcl/blob/master/examples/common/example_get_max_min_coordinates.cpp
-        std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
-        std::cout << "Max y: " << max_pt_cluster[1] << std::endl;
-        std::cout << "Max z: " << max_pt_cluster[2] << std::endl;
+        pcl::getMinMax3D(*cloud_cluster_individual,min_pt_cluster, max_pt_cluster); //Ref: https://github.com/PointCloudLibrary/pcl/blob/master/examples/common/example_get_max_min_coordinates.cpp
+        min_pt_cluster_all[j].push_back(min_pt_cluster[0]);
+        min_pt_cluster_all[j].push_back(min_pt_cluster[1]);
+        min_pt_cluster_all[j].push_back(min_pt_cluster[2]);
+        max_pt_cluster_all[j].push_back(max_pt_cluster[0]);
+        max_pt_cluster_all[j].push_back(max_pt_cluster[1]);
+        max_pt_cluster_all[j].push_back(max_pt_cluster[2]);
+
+        // Finding centroid of the individual cluster and storing them with centroid co-ords of all clusters
+        pcl::PointXYZ c1;
+        centroid.get(c1); //c1 contains centroid xyz co-ords of the jth cluster
+        centroid_cluster_all[j].push_back(c1.x);
+        centroid_cluster_all[j].push_back(c1.y);
+        centroid_cluster_all[j].push_back(c1.z);
+
+
+        std::cout << "Min point vector: " << min_pt_cluster_all[j][0] << std::endl;
+        // std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
+        // std::cout << "Max y: " << max_pt_cluster[1] << std::endl;
+        // std::cout << "Max z: " << max_pt_cluster[2] << std::endl;
         std::cout << "Min x: " << min_pt_cluster[0] << std::endl;
-        std::cout << "Min y: " << min_pt_cluster[1] << std::endl;
-        std::cout << "Min z: " << min_pt_cluster[2] << std::endl;
-        sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
-        pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
-        publisher_->publish(ros_processed_pcl2);
+        // std::cout << "Min y: " << min_pt_cluster[1] << std::endl;
+        // std::cout << "Min z: " << min_pt_cluster[2] << std::endl;
+
+        if (config.fwd_obs_tolerance >= min_pt_cluster[0] && config.fwd_obs_tolerance <= max_pt_cluster[0] ){
+
+        }
+        // sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
+        // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
+        // publisher_->publish(ros_processed_pcl2);        
 
         // std::stringstream ss;
         // ss << "cloud_cluster_" << j << ".pcd";
@@ -316,6 +356,9 @@ class MinimalSubscriber : public rclcpp::Node
         j++;
       }
 
+      sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
+      pcl::toROSMsg(*cloud_cluster_all, ros_processed_pcl2);
+      publisher_->publish(ros_processed_pcl2);
       
 
 
