@@ -29,6 +29,9 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <math.h>
+
+// Add condition for no error when no obstacle is present in simulation/ not detected
 
 
 
@@ -63,9 +66,52 @@ class MinimalSubscriber : public rclcpp::Node
         float angle_view_degree;
       };
   Config config;
+  float angle_view_radian;
   
   public:
     
+    int detect_obstacle(float xmin, float ymin, float xmax, float ymax) const
+    {
+      std::cout << "Angle view radian, xmin, ymin, xmax, ymax, rctheta, rstheta " << angle_view_radian << ", " << xmin << ", " << ymin << ", "  << xmax << ", "  << ymax << ", "  << config.fwd_obs_tolerance*cos(angle_view_radian) << ", "  << config.fwd_obs_tolerance*sin(angle_view_radian) << ", "  <<   std::endl;
+      if (xmin <= 0 && xmax <= 0){
+        std::cout << 1 << std::endl; return 0;} // Case 0: If all x values are -ve, then the bounding box/ rectangle/ cluster/ obstacle is behind the robot and its a don't care condition.
+      else if (ymin >= config.fwd_obs_tolerance*sin(angle_view_radian)){std::cout << 2 << std::endl; return 0;} // Case 1: Rectangle lies to the left of robot
+      else if (ymax <= -config.fwd_obs_tolerance*sin(angle_view_radian)){std::cout << 3 << std::endl; return 0;} // Case 2: Rectangle lies to the right of robot. Case 3 = 1 and 4 = 2
+      // Rectangle is not at the back, left, right of robot. It can be partial overlapping or no overlapping. Checking for further possibilities.
+      else if (ymin >= 0 && ymin <= config.fwd_obs_tolerance*sin(angle_view_radian)){
+        std::cout << 4 << std::endl;
+        if (xmin >= config.fwd_obs_tolerance){std::cout << 5 << std::endl; return 0;} // Case 5: xmin >= r
+        else if (xmin >= config.fwd_obs_tolerance*cos(angle_view_radian)){ // xmin < r naturally because of last if
+          std::cout << 6 << std::endl;
+          if (sqrt(xmin*xmin + ymin*ymin) >= config.fwd_obs_tolerance){std::cout << 7 << std::endl; return 0;}  // Case 7
+          else {std::cout << 8 << std::endl; return 1;}
+        }
+        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 9 << std::endl; return 1;} // Case 9: xmin < r and xmin < x_L naturally because of last else if. xmax > x_L
+        else if ((ymin - (tan(angle_view_radian))*xmax)*(-(tan(angle_view_radian))*config.fwd_obs_tolerance) > 0){std::cout << 10 << std::endl; return 1;}// Need to check if TR (xmax, ymax) and (r,0) are on same side of y = (y_L/x_L)x line. If same side, obstacle detected, otherwise not.
+        else {std::cout << 11 << std::endl; return 0;} // TR is on opposite side of (r,0), hence inside of common area and obstacle is detected.
+      }
+      else if (ymax <= 0 && ymax >= -config.fwd_obs_tolerance*sin(angle_view_radian)){ // Case 6
+        std::cout << 12 << std::endl;
+        if (xmin >= config.fwd_obs_tolerance){std::cout << 13 << std::endl; return 0;} // Case 6: xmin >= r
+        else if (xmin >= config.fwd_obs_tolerance*cos(angle_view_radian)){ // xmin < r naturally because of last if. If xmin >= x_R or r*cos(theta), check distance of BL from (0,0)
+          std::cout << 14 << std::endl;
+          if(sqrt(xmin*xmin + ymax*ymax) >= config.fwd_obs_tolerance){std::cout << 15 << std::endl; return 0;} //If BL distance >=r obstacle not detected
+          else {std::cout << 16 << std::endl; return 1;} // If BL distance < r, obstacle detected
+        }
+        else if (xmin < config.fwd_obs_tolerance*cos(angle_view_radian)){// xmin < x_R
+          std::cout << 17 << std::endl;
+          if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 18 << std::endl; return 1;} // xmax > x_R and xmin< x_R; right side of rectangle crosses the sector, hence obstacle detected
+          else if ((ymax + tan(angle_view_radian)*xmax)*(tan(angle_view_radian)*config.fwd_obs_tolerance) > 0){std::cout << 19 << std::endl; return 1;} // xmax < x_R naturally; TL and (r,0) are on the same side of FOV right line, hence obstacle is detected otherwise not
+          else {std::cout << 20 << std::endl; return 0;}
+        }
+      }
+      else if (ymax >= 0 && ymin <= 0){
+        std::cout << 21 << std::endl;
+        if (xmin >= config.fwd_obs_tolerance){std::cout << 22 << std::endl; return 0;}
+        else {std::cout << 23 << std::endl; return 1;}
+      } 
+    }
+      
     
     MinimalSubscriber()    //Constructor which has the same name as that of class followed by a parentheses. A constructor in C++ is a special method that is automatically called when an object of a class is created. 
     : Node("minimal_subscriber")
@@ -116,8 +162,9 @@ class MinimalSubscriber : public rclcpp::Node
           else if (line.find("angle_view_degree") != -1)
               sin >> config.angle_view_degree;
       }
-      std::cout << config.num << '\n';
-      std::cout << config.leaf_size_x << '\n';
+      angle_view_radian = config.angle_view_degree * (M_PI / 360); //Dividing it by 360 instead of 180 to get theta/2 instead of theta
+      std::cout << config.fwd_obs_tolerance << '\n';
+      std::cout << config.angle_view_degree << '\n';
       std::cout << config.crop_min_x << '\n';
       
       
@@ -301,12 +348,14 @@ class MinimalSubscriber : public rclcpp::Node
       std::vector <float> max_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing max points of each cluster x1,y1,z1 ; x2.y2,z2 ...
       // NOTE: xmin, ymin, zmin are not paired. They can be different points. They are just min values in x, y, and z respectively.
       std::vector <float> centroid_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
+      std::vector <float> centroid_direction_array[cluster_indices.size()]; // Array of angles in radian containing the angle at which centroid of a cluster is present wrt robot
+      Eigen::Vector4d centroid;
       int j = 0;
       for (const auto& cluster : cluster_indices)
       {
         std::cout << "Number of clusters: " << cluster_indices.size() << std::endl;
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_individual (new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::CentroidPoint<pcl::PointXYZ> centroid; //Reference: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
+        // pcl::CentroidPoint<pcl::PointXYZ> centroid; //Reference: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
         for (const auto& idx : cluster.indices) {
         cloud_cluster_all->push_back((*cloud_xyz_ptr)[idx]);
         cloud_cluster_individual->push_back((*cloud_xyz_ptr)[idx]);
@@ -327,25 +376,30 @@ class MinimalSubscriber : public rclcpp::Node
         max_pt_cluster_all[j].push_back(max_pt_cluster[1]);
         max_pt_cluster_all[j].push_back(max_pt_cluster[2]);
 
-        // Finding centroid of the individual cluster and storing them with centroid co-ords of all clusters
-        pcl::PointXYZ c1;
-        centroid.get(c1); //c1 contains centroid xyz co-ords of the jth cluster
-        centroid_cluster_all[j].push_back(c1.x);
-        centroid_cluster_all[j].push_back(c1.y);
-        centroid_cluster_all[j].push_back(c1.z);
+        // Finding centroid of the individual cluster and storing them with centroid co-ords of all clusters; Ref: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
+        pcl::compute3DCentroid (*cloud_cluster_individual, centroid);
+        // pcl::PointXYZ c1;
+        // centroid.add(cloud_cluster_individual); //c1 contains centroid xyz co-ords of the jth cluster
+        // centroid_cluster_all[j].push_back(c1.x);
+        // centroid_cluster_all[j].push_back(c1.y);
+        // centroid_cluster_all[j].push_back(c1.z);
 
+        // centroid_direction_array[j].push_back(atan2(centroid_cluster_all[j][1], centroid_cluster_all[j][0]));
+        centroid_direction_array[j].push_back(atan2(centroid[1], centroid[0]));
+        std::cout << "Centroid co-ords cluster " << j << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+        // See if current cluster is present in the FOV of the robot
+        int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1] );
+        std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at angle: " << centroid_direction_array[j][0]*180/M_PI << std::endl;
 
-        std::cout << "Min point vector: " << min_pt_cluster_all[j][0] << std::endl;
+        // std::cout << "Min point vector: " << min_pt_cluster_all[j][0] << std::endl;
         // std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
         // std::cout << "Max y: " << max_pt_cluster[1] << std::endl;
         // std::cout << "Max z: " << max_pt_cluster[2] << std::endl;
-        std::cout << "Min x: " << min_pt_cluster[0] << std::endl;
+        // std::cout << "Min x: " << min_pt_cluster[0] << std::endl;
         // std::cout << "Min y: " << min_pt_cluster[1] << std::endl;
         // std::cout << "Min z: " << min_pt_cluster[2] << std::endl;
 
-        if (config.fwd_obs_tolerance >= min_pt_cluster[0] && config.fwd_obs_tolerance <= max_pt_cluster[0] ){
 
-        }
         // sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
         // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
         // publisher_->publish(ros_processed_pcl2);        
