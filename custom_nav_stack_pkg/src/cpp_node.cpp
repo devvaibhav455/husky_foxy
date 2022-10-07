@@ -30,8 +30,23 @@
 #include <sstream>
 #include <string>
 #include <math.h>
+#include <vector>
 
-// Add condition for no error when no obstacle is present in simulation/ not detected
+// Include files for socket
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdio.h>
+
+#define SERVER_PORT htons(65432)
+char socket_buffer[1000];
+int serverSock;
+int clientSock;
+
 
 
 
@@ -70,7 +85,7 @@ class MinimalSubscriber : public rclcpp::Node
   
   public:
     
-    int detect_obstacle(float xmin, float ymin, float xmax, float ymax) const
+    int detect_obstacle(float xmin, float ymin, float xmax, float ymax, float *angle_individual_radian_ptr) const
     {
       std::cout << "Angle view radian, xmin, ymin, xmax, ymax, rctheta, rstheta " << angle_view_radian << ", " << xmin << ", " << ymin << ", "  << xmax << ", "  << ymax << ", "  << config.fwd_obs_tolerance*cos(angle_view_radian) << ", "  << config.fwd_obs_tolerance*sin(angle_view_radian) << ", "  <<   std::endl;
       
@@ -86,10 +101,10 @@ class MinimalSubscriber : public rclcpp::Node
         else if (xmin >= config.fwd_obs_tolerance*cos(angle_view_radian)){ // xmin < r naturally because of last if
           std::cout << 6 << std::endl;
           if (sqrt(xmin*xmin + ymin*ymin) >= config.fwd_obs_tolerance){std::cout << 7 << std::endl; return 0;}  // Case 7 : check distance of BR, if >= r, outside POV
-          else {std::cout << 8 << std::endl; return 1;} // Case 7 : check distance of BR, if < r, inside POV and obstacle is detected
+          else {std::cout << 8 << std::endl; *angle_individual_radian_ptr = atan2(ymin, xmin); return 1;} // Case 7 : check distance of BR, if < r, inside POV and obstacle is detected
         }
-        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 9 << std::endl; return 1;} // Case 11: xmax > x_L; xmin < r and xmin < x_L naturally because of last else if. Right side of rectangle crosses the sector, hence obstacle detected
-        else if ((ymin - (tan(angle_view_radian))*xmax)*(-(tan(angle_view_radian))*config.fwd_obs_tolerance) > 0){std::cout << 10 << std::endl; return 1;}// Case 9: Need to check if TR (xmax, ymax) and (r,0) are on same side of y = (y_L/x_L)x line. If same side, obstacle detected, otherwise not.
+        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 9 << std::endl; *angle_individual_radian_ptr = atan2(ymin, xmin); return 1;} // Case 11: xmax > x_L; xmin < r and xmin < x_L naturally because of last else if. Right side of rectangle crosses the sector, hence obstacle detected
+        else if ((ymin - (tan(angle_view_radian))*xmax)*(-(tan(angle_view_radian))*config.fwd_obs_tolerance) > 0){std::cout << 10 << std::endl; *angle_individual_radian_ptr = atan2(ymin, xmax); return 1;}// Case 9: Need to check if TR (xmax, ymax) and (r,0) are on same side of y = (y_L/x_L)x line. If same side, obstacle detected, otherwise not.
         else {std::cout << 11 << std::endl; return 0;} // TR is on opposite side of (r,0), hence inside of common area and obstacle is detected.
       }
       else if (ymax <= 0 && ymax >= -config.fwd_obs_tolerance*sin(angle_view_radian)){ // Case 6
@@ -98,67 +113,66 @@ class MinimalSubscriber : public rclcpp::Node
         else if (xmin >= config.fwd_obs_tolerance*cos(angle_view_radian)){ // xmin < r naturally because of last if. If xmin >= x_R or r*cos(theta), check distance of BL from (0,0)
           std::cout << 14 << std::endl;
           if(sqrt(xmin*xmin + ymax*ymax) >= config.fwd_obs_tolerance){std::cout << 15 << std::endl; return 0;} // Case 8: If BL distance >=r obstacle not detected
-          else {std::cout << 16 << std::endl; return 1;} // Case 8: If BL distance < r, obstacle detected
+          else {std::cout << 16 << std::endl; *angle_individual_radian_ptr = atan2(ymax, xmin); return 1;} // Case 8: If BL distance < r, obstacle detected
         }
-        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 18 << std::endl; return 1;} // Case 12: xmax > x_R and xmin< x_R naturally; Left side of rectangle crosses the sector, hence obstacle detected
-        else if ((ymax + tan(angle_view_radian)*xmax)*(tan(angle_view_radian)*config.fwd_obs_tolerance) > 0){std::cout << 19 << std::endl; return 1;} // Case 10: xmax < x_R naturally; TL and (r,0) are on the same side of FOV right line, hence obstacle is detected otherwise not
+        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 18 << std::endl; *angle_individual_radian_ptr = atan2(ymin, xmin); return 1;} // Case 12: xmax > x_R and xmin< x_R naturally; Left side of rectangle crosses the sector, hence obstacle detected
+        else if ((ymax + tan(angle_view_radian)*xmax)*(tan(angle_view_radian)*config.fwd_obs_tolerance) > 0){
+          std::cout << 19 << std::endl; *angle_individual_radian_ptr = atan2(ymax, xmax); return 1;} // Case 10: xmax < x_R naturally; TL and (r,0) are on the same side of FOV right line, hence obstacle is detected otherwise not
         else {std::cout << 20 << std::endl; return 0;}
       }
       else if (ymax >= 0 && ymin <= 0){
         std::cout << 21 << std::endl;
         if (xmin >= config.fwd_obs_tolerance){std::cout << 22 << std::endl; return 0;}
-        else {std::cout << 23 << std::endl; return 1;} // Case 10: Rectangle bottom side crosses the sector
-      } 
+        else {
+          std::cout << 23 << std::endl;
+          if (abs(ymax) >= abs(ymin)){*angle_individual_radian_ptr = atan2(ymin, xmin);}else{*angle_individual_radian_ptr = atan2(ymax, xmin);}
+          return 1;} // Case 13: Rectangle bottom side crosses the sector
+      }
+      // No if-else condition matched (though it should not happen), so return 0 to avoid the warning while compiling: "/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp: In member function ‘int MinimalSubscriber::detect_obstacle(float, float, float, float) const’:/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp:126:5: warning: control reaches end of non-void function [-Wreturn-type]  126 |     }" 
+      return 0;
     }
-      
-    
+
     MinimalSubscriber()    //Constructor which has the same name as that of class followed by a parentheses. A constructor in C++ is a special method that is automatically called when an object of a class is created. 
     : Node("minimal_subscriber")
     {
       std::cout << "Reached start of Public" << std::endl;
       
-      publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("filtered_cloud", 10);
       
-      subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>
-      ("velodyne_points", 10, std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
-
-      std::cout << "Reached end of Public" << std::endl;
-
       std::ifstream config_file_path("/home/dev/husky_ws/src/custom_nav_stack_pkg/src/config.txt");
       std::string line;
       while (std::getline(config_file_path, line)) {
           std::istringstream sin(line.substr(line.find("=") + 1));
-          if (line.find("num") != -1)
+          if (line.find("num") == 0)
               sin >> config.num;
-          else if (line.find("str") != -1)
+          else if (line.find("str") == 0)
               sin >> config.str;
-          else if (line.find("flt") != -1)
+          else if (line.find("flt") == 0)
               sin >> config.flt;
-          else if (line.find("leaf_size_x") != -1)
+          else if (line.find("leaf_size_x") == 0)
               sin >> config.leaf_size_x;
-          else if (line.find("leaf_size_y") != -1)
+          else if (line.find("leaf_size_y") == 0)
               sin >> config.leaf_size_y;
-          else if (line.find("leaf_size_z") != -1)
+          else if (line.find("leaf_size_z") == 0)
               sin >> config.leaf_size_z;
-          else if (line.find("crop_min_x") != -1)
+          else if (line.find("crop_min_x") == 0)
               sin >> config.crop_min_x;
-          else if (line.find("crop_min_y") != -1)
+          else if (line.find("crop_min_y") == 0)
               sin >> config.crop_min_y;
-          else if (line.find("crop_min_z") != -1)
+          else if (line.find("crop_min_z") == 0)
               sin >> config.crop_min_z;
-          else if (line.find("ransac_max_iterations") != -1)
+          else if (line.find("ransac_max_iterations") == 0)
               sin >> config.ransac_max_iterations;
-          else if (line.find("ransac_distance_threshold") != -1)
+          else if (line.find("ransac_distance_threshold") == 0)
               sin >> config.ransac_distance_threshold;
-          else if (line.find("cluster_tolerance") != -1)
+          else if (line.find("cluster_tolerance") == 0)
               sin >> config.cluster_tolerance;
-          else if (line.find("cluster_min_size") != -1)
+          else if (line.find("cluster_min_size") == 0)
               sin >> config.cluster_min_size;
-          else if (line.find("cluster_max_size") != -1)
+          else if (line.find("cluster_max_size") == 0)
               sin >> config.cluster_max_size;
-          else if (line.find("fwd_obs_tolerance") != -1)
+          else if (line.find("fwd_obs_tolerance") == 0)
               sin >> config.fwd_obs_tolerance;
-          else if (line.find("angle_view_degree") != -1)
+          else if (line.find("angle_view_degree") == 0)
               sin >> config.angle_view_degree;
       }
       angle_view_radian = config.angle_view_degree * (M_PI / 360); //Dividing it by 360 instead of 180 to get theta/2 instead of theta
@@ -166,8 +180,12 @@ class MinimalSubscriber : public rclcpp::Node
       std::cout << config.angle_view_degree << '\n';
       std::cout << config.crop_min_x << '\n';
       
+      publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("filtered_cloud", 10);
       
-      
+      subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>
+      ("velodyne_points", 10, std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
+
+      std::cout << "Reached end of Public" << std::endl;      
     }
 
   private:
@@ -344,11 +362,12 @@ class MinimalSubscriber : public rclcpp::Node
         pcl::PCDWriter writer;
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_all (new pcl::PointCloud<pcl::PointXYZ>); //Point cloud containig all the clusters. Was implemented to visualise all the clusters simultaneously in RVIZ2 instead of sequentially.
-        std::vector <float> min_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing min points of each cluster x1,y1,z1 ; x2.y2,z2 ...
-        std::vector <float> max_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing max points of each cluster x1,y1,z1 ; x2.y2,z2 ...
+        std::vector <std::vector <float>> min_pt_cluster_all(cluster_indices.size()); //Array of vector of size of no. of clusters containing min points of each cluster x1,y1,z1 ; x2.y2,z2 ...
+        std::vector <std::vector <float>> max_pt_cluster_all(cluster_indices.size()); //Array of vector of size of no. of clusters containing max points of each cluster x1,y1,z1 ; x2.y2,z2 ...
         // NOTE: xmin, ymin, zmin are not paired. They can be different points. They are just min values in x, y, and z respectively.
-        std::vector <float> centroid_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
-        std::vector <float> centroid_direction_array[cluster_indices.size()]; // Array of angles in radian containing the angle at which centroid of a cluster is present wrt robot
+        std::vector <std::vector <float>> centroid_cluster_all(cluster_indices.size()); //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
+        std::vector <std::vector <float>> centroid_direction_array(cluster_indices.size()); // Array of angles in radian containing the angle at which centroid of a cluster is present wrt robot
+        std::vector <std::vector <float>> angle_corner_radian_all(cluster_indices.size()); // Array of angles of AABB wrt lidar which will help in finding by how much angle to rotate the robot
 
         int j = 0;
         for (const auto& cluster : cluster_indices)
@@ -390,10 +409,33 @@ class MinimalSubscriber : public rclcpp::Node
           centroid_cluster_all[j].push_back(centroid[0]);
           centroid_cluster_all[j].push_back(centroid[1]);
           centroid_cluster_all[j].push_back(centroid[2]);
-          std::cout << "Centroid co-ords cluster " << j << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
-          // See if current cluster is present in the FOV of the robot
-          int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1] );
-          std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at angle: " << centroid_direction_array[j][0]*180/M_PI << std::endl;
+          std::cout << j << "th cluster's centroid co-ords: " << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+          // See if current cluster is present in the FOV of the robot and find angle of corner of AABB which is in FOV
+          
+          float angle_individual_radian;
+          int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1], &angle_individual_radian);
+          if(is_obstacle_detected_in_fov == 1) {
+            angle_corner_radian_all[j].push_back(angle_individual_radian);
+            std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI << " and corner angle: " << angle_corner_radian_all[j][0]*180/M_PI  <<std::endl;
+            bzero(socket_buffer, 1000);
+            strcpy(socket_buffer, "test");
+            int n = write(clientSock, socket_buffer, strlen(socket_buffer));
+            std::cout << "Write Confirmation code  " << n << std::endl;
+          }
+
+
+
+
+
+
+          
+          
+          // int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1]);
+
+          std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI <<std::endl;
+          
+
+
 
           // std::cout << "Min point vector: " << min_pt_cluster_all[j][0] << std::endl;
           // std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
@@ -414,9 +456,9 @@ class MinimalSubscriber : public rclcpp::Node
           j++;
         }
 
-      sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
-      pcl::toROSMsg(*cloud_cluster_all, ros_processed_pcl2);
-      publisher_->publish(ros_processed_pcl2);
+        sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
+        pcl::toROSMsg(*cloud_cluster_all, ros_processed_pcl2);
+        publisher_->publish(ros_processed_pcl2);
       }
       else {
         // Obstacle not detected. Need to indicate this to Python script
@@ -446,6 +488,35 @@ class MinimalSubscriber : public rclcpp::Node
 
 int main(int argc, char * argv[])
 {
+  
+  //Socket implementation ref: https://realpython.com/python-sockets/#echo-client, https://stackoverflow.com/questions/20732980/how-to-use-socket-with-a-python-client-and-a-c-server
+  int serverSock=socket(AF_INET, SOCK_STREAM, 0);
+  sockaddr_in serverAddr;
+  serverAddr.sin_family = AF_INET;
+  serverAddr.sin_port = SERVER_PORT;
+  // serverAddr.sin_addr.s_addr = INADDR_ANY;
+  serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+  /* bind (this socket, local address, address length)
+     bind server socket (serverSock) to server address (serverAddr).  
+     Necessary so that server can use a specific port */ 
+  bind(serverSock, (struct sockaddr*)&serverAddr, sizeof(struct sockaddr));
+  // wait for a client
+  /* listen (this socket, request queue length) */
+  listen(serverSock,1);
+  sockaddr_in clientAddr;
+  socklen_t sin_size=sizeof(struct sockaddr_in);
+  clientSock=accept(serverSock,(struct sockaddr*)&clientAddr, &sin_size);
+  
+  
+  // receive a message from a client
+  // read(clientSock, socket_buffer, 1000); // no contains the no. of bytes received; Ref: https://www.ibm.com/docs/en/zos/2.1.0?topic=functions-read-read-from-file-socket
+  // std::cout << "Server received:  " << socket_buffer << std::endl;
+  
+  // strcpy(socket_buffer, "test");
+  // write(clientSock, socket_buffer, strlen(socket_buffer));
+      
+
+  
   std::cout << "Inside main function now" << std::endl;
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<MinimalSubscriber>());
