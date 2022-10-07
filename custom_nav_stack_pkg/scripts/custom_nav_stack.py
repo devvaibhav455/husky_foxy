@@ -88,8 +88,8 @@ class CustomNavigator(Node):
         self.odom_subscription = self.create_subscription(Odometry,'odom',self.odom_callback,10)
         self.odom_subscription  # prevent unused variable warning
 
-        self.pc_subscription = self.create_subscription(PointCloud2,'velodyne_points',self.pc_callback,10)
-        self.pc_subscription  # prevent unused variable warning
+        # self.pc_subscription = self.create_subscription(PointCloud2,'velodyne_points',self.pc_callback,10)
+        # self.pc_subscription  # prevent unused variable warning
 
         
         path = str(Path(__file__).parent / "./destination_lat_long.txt")
@@ -112,7 +112,7 @@ class CustomNavigator(Node):
         print(self.lat_array, self.long_array)
 
         self.velocity_publisher_ = self.create_publisher(Twist, 'husky_velocity_controller/cmd_vel_unstamped', 10)
-        timer_period = 1/10  # seconds
+        timer_period = 1/100  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         print("Entered in class")
 
@@ -435,7 +435,7 @@ class CustomNavigator(Node):
             # print(np.amin(distance_array))
             print("Minimum distance from VLP-16 is:", np.amin(distance_array), ", index is: ", np.argmin(distance_array), "and XYZ point is: ", data_wo_ground[np.argmin(distance_array)])
         
-        plt.show()
+        # plt.show()
         #print(distance_array.shape)
         #print(data[1,0])
         print("Listening END. Size is: " + str(data.shape))
@@ -464,6 +464,7 @@ class CustomNavigator(Node):
         if distance_to_move == 'until_obstacle':
             #Need to make changes here to detect obstacle
             
+            
             self.move_cmd.linear.x = 0.4
         elif(distance_to_move > 1):
             print("Need to move: ", distance_to_move)
@@ -490,12 +491,14 @@ class CustomNavigator(Node):
 
             self.true_heading = self.mag_north_heading + self.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
             print("Current heading: ", math.degrees(self.true_heading))
+            # Calculation to get true heading within -180 to +180 degrees range
             if self.true_heading < math.radians(-180):
                 self.true_heading = math.radians(180 - (abs(math.degrees(self.true_heading)) - 180))
             elif self.true_heading > math.radians(180):
                 self.true_heading = -(math.radians(180) - (self.true_heading - math.radians(180)))
             print("Current heading after 180 adjustment: ", math.degrees(self.true_heading))
 
+            # Calculations to find the angle to rotate the robot in order to align with the required heading (true heading)
             if bearing < 0:
                 if (self.true_heading < bearing and self.true_heading > math.radians(-180)) or (self.true_heading > (math.radians(180) - abs(bearing)) and self.true_heading < math.radians(180)):
                     self.direction = 'cw' #Original
@@ -534,8 +537,8 @@ class CustomNavigator(Node):
             # print(math.degrees(self.roll)) #Roll is providing the current angular rotation surprisingly
 
             if abs(self.to_rotate) > 0.06:
-                # self.rotate(self.to_rotate, self.direction)
-                pass
+                self.rotate(self.to_rotate, self.direction)
+                # pass
             elif self.to_rotate < 0.06:
                 print("Robot already aligned towards goal")
                 print("Finished timer callback")
@@ -578,10 +581,10 @@ class CustomNavigator(Node):
         # else:
         print("Reached 2")
         # print("target={} current:{}", target_angle_rad,self.roll)
-        self.move_cmd.linear.x = 0.0
         self.move_cmd.angular.z = multiplier * (self.kp * (abs(bearing - self.true_heading) + 0.3))
+        self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 2)
         # self.move_cmd.angular.z = multiplier * 0.5
-        print(self.move_cmd.angular.z)
+        # print(self.move_cmd.angular.z)
         self.velocity_publisher_.publish(self.move_cmd)
         time.sleep(1)
         print("Finished single execution of rotate function")

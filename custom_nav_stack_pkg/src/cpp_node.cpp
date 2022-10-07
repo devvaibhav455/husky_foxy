@@ -73,6 +73,8 @@ class MinimalSubscriber : public rclcpp::Node
     int detect_obstacle(float xmin, float ymin, float xmax, float ymax) const
     {
       std::cout << "Angle view radian, xmin, ymin, xmax, ymax, rctheta, rstheta " << angle_view_radian << ", " << xmin << ", " << ymin << ", "  << xmax << ", "  << ymax << ", "  << config.fwd_obs_tolerance*cos(angle_view_radian) << ", "  << config.fwd_obs_tolerance*sin(angle_view_radian) << ", "  <<   std::endl;
+      
+      // Conditions to detect cluster/ obstacle AABB (Axis-Aligned Bounding Box) rectangle defined by xmin, ymin, xmax, ymax within a circle's sector defined by config.fwd_obs_tolerance and angle_view_degree
       if (xmin <= 0 && xmax <= 0){
         std::cout << 1 << std::endl; return 0;} // Case 0: If all x values are -ve, then the bounding box/ rectangle/ cluster/ obstacle is behind the robot and its a don't care condition.
       else if (ymin >= config.fwd_obs_tolerance*sin(angle_view_radian)){std::cout << 2 << std::endl; return 0;} // Case 1: Rectangle lies to the left of robot
@@ -83,11 +85,11 @@ class MinimalSubscriber : public rclcpp::Node
         if (xmin >= config.fwd_obs_tolerance){std::cout << 5 << std::endl; return 0;} // Case 5: xmin >= r
         else if (xmin >= config.fwd_obs_tolerance*cos(angle_view_radian)){ // xmin < r naturally because of last if
           std::cout << 6 << std::endl;
-          if (sqrt(xmin*xmin + ymin*ymin) >= config.fwd_obs_tolerance){std::cout << 7 << std::endl; return 0;}  // Case 7
-          else {std::cout << 8 << std::endl; return 1;}
+          if (sqrt(xmin*xmin + ymin*ymin) >= config.fwd_obs_tolerance){std::cout << 7 << std::endl; return 0;}  // Case 7 : check distance of BR, if >= r, outside POV
+          else {std::cout << 8 << std::endl; return 1;} // Case 7 : check distance of BR, if < r, inside POV and obstacle is detected
         }
-        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 9 << std::endl; return 1;} // Case 9: xmin < r and xmin < x_L naturally because of last else if. xmax > x_L
-        else if ((ymin - (tan(angle_view_radian))*xmax)*(-(tan(angle_view_radian))*config.fwd_obs_tolerance) > 0){std::cout << 10 << std::endl; return 1;}// Need to check if TR (xmax, ymax) and (r,0) are on same side of y = (y_L/x_L)x line. If same side, obstacle detected, otherwise not.
+        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 9 << std::endl; return 1;} // Case 11: xmax > x_L; xmin < r and xmin < x_L naturally because of last else if. Right side of rectangle crosses the sector, hence obstacle detected
+        else if ((ymin - (tan(angle_view_radian))*xmax)*(-(tan(angle_view_radian))*config.fwd_obs_tolerance) > 0){std::cout << 10 << std::endl; return 1;}// Case 9: Need to check if TR (xmax, ymax) and (r,0) are on same side of y = (y_L/x_L)x line. If same side, obstacle detected, otherwise not.
         else {std::cout << 11 << std::endl; return 0;} // TR is on opposite side of (r,0), hence inside of common area and obstacle is detected.
       }
       else if (ymax <= 0 && ymax >= -config.fwd_obs_tolerance*sin(angle_view_radian)){ // Case 6
@@ -95,20 +97,17 @@ class MinimalSubscriber : public rclcpp::Node
         if (xmin >= config.fwd_obs_tolerance){std::cout << 13 << std::endl; return 0;} // Case 6: xmin >= r
         else if (xmin >= config.fwd_obs_tolerance*cos(angle_view_radian)){ // xmin < r naturally because of last if. If xmin >= x_R or r*cos(theta), check distance of BL from (0,0)
           std::cout << 14 << std::endl;
-          if(sqrt(xmin*xmin + ymax*ymax) >= config.fwd_obs_tolerance){std::cout << 15 << std::endl; return 0;} //If BL distance >=r obstacle not detected
-          else {std::cout << 16 << std::endl; return 1;} // If BL distance < r, obstacle detected
+          if(sqrt(xmin*xmin + ymax*ymax) >= config.fwd_obs_tolerance){std::cout << 15 << std::endl; return 0;} // Case 8: If BL distance >=r obstacle not detected
+          else {std::cout << 16 << std::endl; return 1;} // Case 8: If BL distance < r, obstacle detected
         }
-        else if (xmin < config.fwd_obs_tolerance*cos(angle_view_radian)){// xmin < x_R
-          std::cout << 17 << std::endl;
-          if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 18 << std::endl; return 1;} // xmax > x_R and xmin< x_R; right side of rectangle crosses the sector, hence obstacle detected
-          else if ((ymax + tan(angle_view_radian)*xmax)*(tan(angle_view_radian)*config.fwd_obs_tolerance) > 0){std::cout << 19 << std::endl; return 1;} // xmax < x_R naturally; TL and (r,0) are on the same side of FOV right line, hence obstacle is detected otherwise not
-          else {std::cout << 20 << std::endl; return 0;}
-        }
+        else if (xmax > config.fwd_obs_tolerance*cos(angle_view_radian)){std::cout << 18 << std::endl; return 1;} // Case 12: xmax > x_R and xmin< x_R naturally; Left side of rectangle crosses the sector, hence obstacle detected
+        else if ((ymax + tan(angle_view_radian)*xmax)*(tan(angle_view_radian)*config.fwd_obs_tolerance) > 0){std::cout << 19 << std::endl; return 1;} // Case 10: xmax < x_R naturally; TL and (r,0) are on the same side of FOV right line, hence obstacle is detected otherwise not
+        else {std::cout << 20 << std::endl; return 0;}
       }
       else if (ymax >= 0 && ymin <= 0){
         std::cout << 21 << std::endl;
         if (xmin >= config.fwd_obs_tolerance){std::cout << 22 << std::endl; return 0;}
-        else {std::cout << 23 << std::endl; return 1;}
+        else {std::cout << 23 << std::endl; return 1;} // Case 10: Rectangle bottom side crosses the sector
       } 
     }
       
@@ -319,100 +318,112 @@ class MinimalSubscriber : public rclcpp::Node
       std::cerr << "PointCloud after RANSAC plane extraction, non-ground points: " << cloud_xyz_ptr->width * cloud_xyz_ptr->height 
        << " data points (" << pcl::getFieldsList (*cloud_xyz_ptr) << ")." << std::endl;
 
-      // Step 4: Clustering using K-D treel; Reference: https://link.springer.com/chapter/10.1007/978-981-16-6460-1_57, https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md, https://pcl.readthedocs.io/en/latest/cluster_extraction.html
+      if (cloud_xyz_ptr->width * cloud_xyz_ptr->height != 0){ //Don't do clustering if non-ground points are not detected.
+        // Step 4: Clustering using K-D treel; Reference: https://link.springer.com/chapter/10.1007/978-981-16-6460-1_57, https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md, https://pcl.readthedocs.io/en/latest/cluster_extraction.html
 
-      // Create the KdTree object for the search method of the extraction
-      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-      tree->setInputCloud (cloud_xyz_ptr);
-    
-      // create the extraction object for the clusters
-      std::vector<pcl::PointIndices> cluster_indices;
-      pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-      // specify euclidean cluster parameters
-      // ec.setClusterTolerance (0.2); // 2cm
-      // ec.setMinClusterSize (50);
-      // ec.setMaxClusterSize (25000);
-      ec.setClusterTolerance (config.cluster_tolerance); // 2cm
-      ec.setMinClusterSize (config.cluster_min_size);
-      ec.setMaxClusterSize (config.cluster_max_size);
-      ec.setSearchMethod (tree);
-      ec.setInputCloud (cloud_xyz_ptr);
-      // exctract the indices pertaining to each cluster and store in a vector of pcl::PointIndices
-      ec.extract (cluster_indices);
-      // std::cout << "Cluster indices: " << cluster_indices[0] << std::endl;
+        // Create the KdTree object for the search method of the extraction
+        pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+        tree->setInputCloud (cloud_xyz_ptr);
 
-      pcl::PCDWriter writer;
+        // create the extraction object for the clusters
+        std::vector<pcl::PointIndices> cluster_indices;
+        pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+        // specify euclidean cluster parameters
+        // ec.setClusterTolerance (0.2); // 2cm
+        // ec.setMinClusterSize (50);
+        // ec.setMaxClusterSize (25000);
+        ec.setClusterTolerance (config.cluster_tolerance); // 2cm
+        ec.setMinClusterSize (config.cluster_min_size);
+        ec.setMaxClusterSize (config.cluster_max_size);
+        ec.setSearchMethod (tree);
+        ec.setInputCloud (cloud_xyz_ptr);
+        // exctract the indices pertaining to each cluster and store in a vector of pcl::PointIndices
+        ec.extract (cluster_indices);
+        // std::cout << "Cluster indices: " << cluster_indices[0] << std::endl;
 
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_all (new pcl::PointCloud<pcl::PointXYZ>);
-      std::vector <float> min_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing min points of each cluster x1,y1,z1 ; x2.y2,z2 ...
-      std::vector <float> max_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing max points of each cluster x1,y1,z1 ; x2.y2,z2 ...
-      // NOTE: xmin, ymin, zmin are not paired. They can be different points. They are just min values in x, y, and z respectively.
-      std::vector <float> centroid_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
-      std::vector <float> centroid_direction_array[cluster_indices.size()]; // Array of angles in radian containing the angle at which centroid of a cluster is present wrt robot
-      Eigen::Vector4d centroid;
-      int j = 0;
-      for (const auto& cluster : cluster_indices)
-      {
-        std::cout << "Number of clusters: " << cluster_indices.size() << std::endl;
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_individual (new pcl::PointCloud<pcl::PointXYZ>);
-        // pcl::CentroidPoint<pcl::PointXYZ> centroid; //Reference: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
-        for (const auto& idx : cluster.indices) {
-        cloud_cluster_all->push_back((*cloud_xyz_ptr)[idx]);
-        cloud_cluster_individual->push_back((*cloud_xyz_ptr)[idx]);
-        } //*
-        cloud_cluster_all->width = cloud_cluster_all->size ();
-        cloud_cluster_all->height = 1;
-        cloud_cluster_all->is_dense = true;   
-        cloud_cluster_all->header = cloud_xyz_ptr->header;  
-        std::cout << "PointCloud representing the Cluster# " << j << " is of size: " << cloud_cluster_all->size () << " data points." << std::endl;
-        
-        Eigen::Vector4f min_pt_cluster; //(minX, minY, minZ, 1.0) in meter
-        Eigen::Vector4f max_pt_cluster; //(maxX, maxY, maxZ, 1.0) in meter
-        pcl::getMinMax3D(*cloud_cluster_individual,min_pt_cluster, max_pt_cluster); //Ref: https://github.com/PointCloudLibrary/pcl/blob/master/examples/common/example_get_max_min_coordinates.cpp
-        min_pt_cluster_all[j].push_back(min_pt_cluster[0]);
-        min_pt_cluster_all[j].push_back(min_pt_cluster[1]);
-        min_pt_cluster_all[j].push_back(min_pt_cluster[2]);
-        max_pt_cluster_all[j].push_back(max_pt_cluster[0]);
-        max_pt_cluster_all[j].push_back(max_pt_cluster[1]);
-        max_pt_cluster_all[j].push_back(max_pt_cluster[2]);
+        pcl::PCDWriter writer;
 
-        // Finding centroid of the individual cluster and storing them with centroid co-ords of all clusters; Ref: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
-        pcl::compute3DCentroid (*cloud_cluster_individual, centroid);
-        // pcl::PointXYZ c1;
-        // centroid.add(cloud_cluster_individual); //c1 contains centroid xyz co-ords of the jth cluster
-        // centroid_cluster_all[j].push_back(c1.x);
-        // centroid_cluster_all[j].push_back(c1.y);
-        // centroid_cluster_all[j].push_back(c1.z);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_all (new pcl::PointCloud<pcl::PointXYZ>); //Point cloud containig all the clusters. Was implemented to visualise all the clusters simultaneously in RVIZ2 instead of sequentially.
+        std::vector <float> min_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing min points of each cluster x1,y1,z1 ; x2.y2,z2 ...
+        std::vector <float> max_pt_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing max points of each cluster x1,y1,z1 ; x2.y2,z2 ...
+        // NOTE: xmin, ymin, zmin are not paired. They can be different points. They are just min values in x, y, and z respectively.
+        std::vector <float> centroid_cluster_all[cluster_indices.size()]; //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
+        std::vector <float> centroid_direction_array[cluster_indices.size()]; // Array of angles in radian containing the angle at which centroid of a cluster is present wrt robot
 
-        // centroid_direction_array[j].push_back(atan2(centroid_cluster_all[j][1], centroid_cluster_all[j][0]));
-        centroid_direction_array[j].push_back(atan2(centroid[1], centroid[0]));
-        std::cout << "Centroid co-ords cluster " << j << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
-        // See if current cluster is present in the FOV of the robot
-        int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1] );
-        std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at angle: " << centroid_direction_array[j][0]*180/M_PI << std::endl;
+        int j = 0;
+        for (const auto& cluster : cluster_indices)
+        {
+          std::cout << "Number of clusters: " << cluster_indices.size() << std::endl;
+          pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_individual (new pcl::PointCloud<pcl::PointXYZ>);
+          // pcl::CentroidPoint<pcl::PointXYZ> centroid; //Reference: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
+          for (const auto& idx : cluster.indices) {
+          cloud_cluster_all->push_back((*cloud_xyz_ptr)[idx]);
+          cloud_cluster_individual->push_back((*cloud_xyz_ptr)[idx]);
+          } //*
+          cloud_cluster_all->width = cloud_cluster_all->size ();
+          cloud_cluster_all->height = 1;
+          cloud_cluster_all->is_dense = true;   
+          cloud_cluster_all->header = cloud_xyz_ptr->header;  
+          std::cout << "PointCloud representing the Cluster# " << j << " is of size: " << cloud_cluster_all->size () << " data points." << std::endl;
 
-        // std::cout << "Min point vector: " << min_pt_cluster_all[j][0] << std::endl;
-        // std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
-        // std::cout << "Max y: " << max_pt_cluster[1] << std::endl;
-        // std::cout << "Max z: " << max_pt_cluster[2] << std::endl;
-        // std::cout << "Min x: " << min_pt_cluster[0] << std::endl;
-        // std::cout << "Min y: " << min_pt_cluster[1] << std::endl;
-        // std::cout << "Min z: " << min_pt_cluster[2] << std::endl;
+          Eigen::Vector4f min_pt_cluster; //(minX, minY, minZ, 1.0) in meter
+          Eigen::Vector4f max_pt_cluster; //(maxX, maxY, maxZ, 1.0) in meter
+          pcl::getMinMax3D(*cloud_cluster_individual,min_pt_cluster, max_pt_cluster); //Ref: https://github.com/PointCloudLibrary/pcl/blob/master/examples/common/example_get_max_min_coordinates.cpp
+          min_pt_cluster_all[j].push_back(min_pt_cluster[0]);
+          min_pt_cluster_all[j].push_back(min_pt_cluster[1]);
+          min_pt_cluster_all[j].push_back(min_pt_cluster[2]);
+          max_pt_cluster_all[j].push_back(max_pt_cluster[0]);
+          max_pt_cluster_all[j].push_back(max_pt_cluster[1]);
+          max_pt_cluster_all[j].push_back(max_pt_cluster[2]);
+
+          // Finding centroid of the individual cluster and storing them with centroid co-ords of all clusters; Ref: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
+          Eigen::Vector4d centroid;
+          pcl::compute3DCentroid (*cloud_cluster_individual, centroid);
+          // pcl::PointXYZ c1;
+          // centroid.add(cloud_cluster_individual); //c1 contains centroid xyz co-ords of the jth cluster
+          // centroid_cluster_all[j].push_back(c1.x);
+          // centroid_cluster_all[j].push_back(c1.y);
+          // centroid_cluster_all[j].push_back(c1.z);
+
+          // centroid_direction_array[j].push_back(atan2(centroid_cluster_all[j][1], centroid_cluster_all[j][0]));
+          centroid_direction_array[j].push_back(atan2(centroid[1], centroid[0]));
+          centroid_cluster_all[j].push_back(centroid[0]);
+          centroid_cluster_all[j].push_back(centroid[1]);
+          centroid_cluster_all[j].push_back(centroid[2]);
+          std::cout << "Centroid co-ords cluster " << j << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+          // See if current cluster is present in the FOV of the robot
+          int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1] );
+          std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at angle: " << centroid_direction_array[j][0]*180/M_PI << std::endl;
+
+          // std::cout << "Min point vector: " << min_pt_cluster_all[j][0] << std::endl;
+          // std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
+          // std::cout << "Max y: " << max_pt_cluster[1] << std::endl;
+          // std::cout << "Max z: " << max_pt_cluster[2] << std::endl;
+          // std::cout << "Min x: " << min_pt_cluster[0] << std::endl;
+          // std::cout << "Min y: " << min_pt_cluster[1] << std::endl;
+          // std::cout << "Min z: " << min_pt_cluster[2] << std::endl;
 
 
-        // sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
-        // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
-        // publisher_->publish(ros_processed_pcl2);        
+          // sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
+          // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
+          // publisher_->publish(ros_processed_pcl2);        
 
-        // std::stringstream ss;
-        // ss << "cloud_cluster_" << j << ".pcd";
-        // writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); //*
-        j++;
-      }
+          // std::stringstream ss;
+          // ss << "cloud_cluster_" << j << ".pcd";
+          // writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); //*
+          j++;
+        }
 
       sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
       pcl::toROSMsg(*cloud_cluster_all, ros_processed_pcl2);
       publisher_->publish(ros_processed_pcl2);
+      }
+      else {
+        // Obstacle not detected. Need to indicate this to Python script
+        
+      }
+
+      
       
 
 
