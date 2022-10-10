@@ -46,9 +46,13 @@
 char socket_buffer[1000];
 int serverSock;
 int clientSock;
+socklen_t sin_size=sizeof(struct sockaddr_in);
+sockaddr_in clientAddr;
 
 
 
+
+// Need to stop the robot if the obstacle is too close
 
 // using std::placeholders::_1;
 
@@ -183,7 +187,7 @@ class MinimalSubscriber : public rclcpp::Node
       publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("filtered_cloud", 10);
       
       subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>
-      ("velodyne_points", 10, std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
+      ("velodyne_points", 1, std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
 
       std::cout << "Reached end of Public" << std::endl;      
     }
@@ -193,7 +197,7 @@ class MinimalSubscriber : public rclcpp::Node
     
     void topic_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg_ptr) const
     {
-      
+      sleep(1);
       // std::cout << "Hello";
       // RCLCPP_INFO(this->get_logger(), "I received the message , height is: '%d'", msg_ptr->height); //
       // RCLCPP_INFO(this->get_logger(), "I received the message"); //
@@ -417,10 +421,24 @@ class MinimalSubscriber : public rclcpp::Node
           if(is_obstacle_detected_in_fov == 1) {
             angle_corner_radian_all[j].push_back(angle_individual_radian);
             std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI << " and corner angle: " << angle_corner_radian_all[j][0]*180/M_PI  <<std::endl;
-            bzero(socket_buffer, 1000);
-            strcpy(socket_buffer, "test");
-            int n = write(clientSock, socket_buffer, strlen(socket_buffer));
-            std::cout << "Write Confirmation code  " << n << std::endl;
+            
+            
+            // bzero(socket_buffer, 1000);
+            // strcpy(socket_buffer, "test");
+            // int n = write(clientSock, socket_buffer, strlen(socket_buffer));
+            // std::cout << "Write Confirmation code  " << n << std::endl;
+
+
+            
+            
+            send(clientSock, &angle_individual_radian, sizeof(angle_individual_radian), 0);
+
+            
+            
+            // shutdown(clientSock);
+            
+
+
           }
 
 
@@ -494,7 +512,6 @@ int main(int argc, char * argv[])
   sockaddr_in serverAddr;
   serverAddr.sin_family = AF_INET;
   serverAddr.sin_port = SERVER_PORT;
-  // serverAddr.sin_addr.s_addr = INADDR_ANY;
   serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
   /* bind (this socket, local address, address length)
      bind server socket (serverSock) to server address (serverAddr).  
@@ -502,10 +519,13 @@ int main(int argc, char * argv[])
   bind(serverSock, (struct sockaddr*)&serverAddr, sizeof(struct sockaddr));
   // wait for a client
   /* listen (this socket, request queue length) */
+  std::cout << "Waiting to listen on server socket" << std::endl;
   listen(serverSock,1);
-  sockaddr_in clientAddr;
-  socklen_t sin_size=sizeof(struct sockaddr_in);
+  std::cout << "Listen complete" << std::endl;
   clientSock=accept(serverSock,(struct sockaddr*)&clientAddr, &sin_size);
+  std::cout << "Socket connected" << std::endl;
+  
+  
   
   
   // receive a message from a client

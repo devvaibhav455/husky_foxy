@@ -55,6 +55,14 @@ from pathlib import Path
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
+import socket
+import struct
+import errno
+import sys
+
+HOST = "127.0.0.1"  # The server's hostname or IP address
+PORT = 65432  # The port used by the server
+
 
 #ASSUMPTIONS: 1) IMU 0 orientation is TRUE NORTH | 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
 
@@ -65,6 +73,10 @@ class CustomNavigator(Node):
         # self.fig = plt.figure()
         # self.ax = plt.axes(projection='3d')
 
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((HOST, PORT))
+        self.s.setblocking(False)
+        print("Socket connected")
 
         self.fig = plt.figure()
         self.fig2 = plt.figure(2)
@@ -220,6 +232,9 @@ class CustomNavigator(Node):
         rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))        # print("Entered IMU callback")
         # print("Bearing in radian: ", bearing)
         # print("Bearing in degree: ", math.degrees(bearing)) #If -45° , means need to point robot to 45° left/ west of True North
+
+         
+        
 
     def odom_callback(self, msg):
         # self.get_logger().info('I heard: "%s"' % msg.data)
@@ -460,16 +475,35 @@ class CustomNavigator(Node):
         # self.get_logger().info("The translation from the origin to the goal is (x,y) {:.3f}, {:.3f} m.".format(x, y))
         return distance
     
-    def move_forward(self, distance_to_move='until_obstacle'): # If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters
-        if distance_to_move == 'until_obstacle':
-            #Need to make changes here to detect obstacle
-            
-            
-            self.move_cmd.linear.x = 0.4
-        elif(distance_to_move > 1):
+    def move_forward(self, distance_to_move): # If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters
+        if distance_to_move > 1:
             print("Need to move: ", distance_to_move)
-            self.move_cmd.linear.x = 0.4
-            self.velocity_publisher_.publish(self.move_cmd)
+            #Need to make changes here to detect obstacle
+            try: #Means obstacle is detected and need to avoid it
+                # print("Waiting to receive data from server") #If this line is printed, execution is blocked
+                # obs_corner_angle_rad = self.s.recv(4)
+                # print(f"Received {obs_corner_angle_rad!r}")
+                obs_corner_angle_rad = struct.unpack('f', self.s.recv(4))[0]
+                print("######################### Decoded data is: ", obs_corner_angle_rad*180/math.pi)
+                # Implement control logic here if obstacle is detected
+                if obs_corner_angle_rad <= 0:
+                    self.direction = 'CW'
+                    self.to_rotate = math.radians(20)
+                else:
+                    self.direction = 'CCW'
+                    self.to_rotate = math.radians(20)
+                self.rotate(self.to_rotate, self.direction)
+            except socket.error as e:
+                err = e.args[0]
+                if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                    # print("No data available")
+                    # Implement control logic here if obstacle is not detected
+                    self.move_cmd.linear.x = 0.4
+                    self.velocity_publisher_.publish(self.move_cmd)
+                else:
+                    # a "real" error occurred
+                    print("Real error occured: ", e)
+                    sys.exit(1)           
         elif(distance_to_move < 1):
             print("Destination reached :)")
             self.move_cmd.linear.x = 0.0
@@ -536,9 +570,32 @@ class CustomNavigator(Node):
             # print(self.roll, self.pitch, self.yaw)
             # print(math.degrees(self.roll)) #Roll is providing the current angular rotation surprisingly
 
+            # Reference: https://stackoverflow.com/questions/16745409/what-does-pythons-socket-recv-return-for-non-blocking-sockets-if-no-data-is-r
             if abs(self.to_rotate) > 0.06:
-                self.rotate(self.to_rotate, self.direction)
-                # pass
+                try:
+                    # print("Waiting to receive data from server") #If this line is printed, execution is blocked
+                    # obs_corner_angle_rad = self.s.recv(4)
+                    # print(f"Received {obs_corner_angle_rad!r}")
+                    obs_corner_angle_rad = struct.unpack('f', self.s.recv(4))[0]*180/math.pi
+                    print("######################### Decoded data is: ", obs_corner_angle_rad)
+                    # Implement control logic here if obstacle is detected
+                    if obs_corner_angle_rad <= 0:
+                        self.direction = 'CW'
+                        self.to_rotate = math.radians(20)
+                    else:
+                        self.direction = 'CCW'
+                        self.to_rotate = math.radians(20)
+                    self.rotate(self.to_rotate, self.direction)
+                except socket.error as e:
+                    err = e.args[0]
+                    if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                        # print("No data available")
+                        # Implement control logic here if obstacle is not detected
+                        self.rotate(self.to_rotate, self.direction) #No obstacle is detected, so, just rotate + translate to align with the heading
+                    else:
+                        # a "real" error occurred
+                        print("Real error occured: ", e)
+                        sys.exit(1)
             elif self.to_rotate < 0.06:
                 print("Robot already aligned towards goal")
                 print("Finished timer callback")
@@ -567,8 +624,8 @@ class CustomNavigator(Node):
         rotation_complete = 0
         print("Bearing (in degree): ", math.degrees(bearing))
         print("True heading (in degree): ", math.degrees(self.true_heading))
-        print("DEGREE: Need_to_rotate={} current heading:{}", math.degrees(target_angle_rad), math.degrees(self.true_heading))
-        # print("RADIAN: Need_to_rotate={} current:{}", target_angle_rad, self.true_heading)
+        # print("DEGREE: Need_to_rotate={} current heading:{}", math.degrees(target_angle_rad), math.degrees(self.true_heading))
+        print("RADIAN: Need_to_rotate by: ", math.degrees(target_angle_rad), "in ", direction)
         
         # if abs(target_angle_rad - self.roll) < 0.06:
             # rotation_complete = 1
@@ -581,7 +638,8 @@ class CustomNavigator(Node):
         # else:
         print("Reached 2")
         # print("target={} current:{}", target_angle_rad,self.roll)
-        self.move_cmd.angular.z = multiplier * (self.kp * (abs(bearing - self.true_heading) + 0.3))
+        # self.move_cmd.angular.z = multiplier * (self.kp * (abs(bearing - self.true_heading) + 0.3))
+        self.move_cmd.angular.z = multiplier * (self.kp * (abs(target_angle_rad) + 0.3))
         self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 2)
         # self.move_cmd.angular.z = multiplier * 0.5
         # print(self.move_cmd.angular.z)
