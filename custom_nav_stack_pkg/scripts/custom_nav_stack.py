@@ -483,8 +483,10 @@ class CustomNavigator(Node):
                 # print("Waiting to receive data from server") #If this line is printed, execution is blocked
                 # obs_corner_angle_rad = self.s.recv(4)
                 # print(f"Received {obs_corner_angle_rad!r}")
-                obs_corner_angle_rad = struct.unpack('f', self.s.recv(4))[0]
-                print("######################### Decoded data is: ", obs_corner_angle_rad*180/math.pi)
+                while(1==1): #Loop used to reject old values from socket buffer and use the latest value
+                    #to do: if no obstacle is detected, c++ will send 456.78, in while loop, read latest and then do actions correspondingly, if error, no data in buffer, need to send continue command, will go back to try again
+                    obs_corner_angle_rad = struct.unpack('f', self.s.recv(4))[0]
+                    print("######################### Decoded data is: ", obs_corner_angle_rad*180/math.pi)
                 # Implement control logic here if obstacle is detected
                 if obs_corner_angle_rad <= 0:
                     self.direction = 'CW'
@@ -498,6 +500,7 @@ class CustomNavigator(Node):
                 if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                     # print("No data available")
                     # Implement control logic here if obstacle is not detected
+                    #If no obstacle is detected, send some fixed float over buffer, eg 450.45
                     self.move_cmd.linear.x = 0.4
                     self.velocity_publisher_.publish(self.move_cmd)
                 else:

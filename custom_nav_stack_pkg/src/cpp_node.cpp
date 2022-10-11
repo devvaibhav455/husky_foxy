@@ -164,6 +164,12 @@ class MinimalSubscriber : public rclcpp::Node
               sin >> config.crop_min_y;
           else if (line.find("crop_min_z") == 0)
               sin >> config.crop_min_z;
+          else if (line.find("crop_max_x") == 0)
+              sin >> config.crop_max_x;
+          else if (line.find("crop_max_y") == 0)
+              sin >> config.crop_max_y;
+          else if (line.find("crop_max_z") == 0)
+              sin >> config.crop_max_z;
           else if (line.find("ransac_max_iterations") == 0)
               sin >> config.ransac_max_iterations;
           else if (line.find("ransac_distance_threshold") == 0)
@@ -183,11 +189,12 @@ class MinimalSubscriber : public rclcpp::Node
       std::cout << config.fwd_obs_tolerance << '\n';
       std::cout << config.angle_view_degree << '\n';
       std::cout << config.crop_min_x << '\n';
+      std::cout << config.crop_max_x << '\n';
       
       publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("filtered_cloud", 10);
       
       subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>
-      ("velodyne_points", 1, std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
+      ("velodyne_points", rclcpp::SensorDataQoS(), std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
 
       std::cout << "Reached end of Public" << std::endl;      
     }
@@ -197,8 +204,8 @@ class MinimalSubscriber : public rclcpp::Node
     
     void topic_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg_ptr) const
     {
+      std::cout << "Hello" << std::endl;
       sleep(1);
-      // std::cout << "Hello";
       // RCLCPP_INFO(this->get_logger(), "I received the message , height is: '%d'", msg_ptr->height); //
       // RCLCPP_INFO(this->get_logger(), "I received the message"); //
 
@@ -253,7 +260,7 @@ class MinimalSubscriber : public rclcpp::Node
       voxelGrid.setInputCloud(cloud_in_ptr);
       // set the leaf size (x, y, z)
       // voxelGrid.setLeafSize(0.1, 0.1, 0.1);
-      voxelGrid.setLeafSize(config.leaf_size_x, config.leaf_size_y, config.leaf_size_x);
+      voxelGrid.setLeafSize(config.leaf_size_x, config.leaf_size_y, config.leaf_size_z);
       // apply the filter to dereferenced cloudVoxel
       voxelGrid.filter(*cloud_filtered_ptr);   
 
@@ -265,13 +272,13 @@ class MinimalSubscriber : public rclcpp::Node
       // define a cropbox
       pcl::CropBox<pcl::PCLPointCloud2> cropBox;
       cropBox.setInputCloud(cloud_filtered_ptr);
-      Eigen::Vector4f min_pt (-5.0f, -5.0f, -10.0f, 1.0); //(minX, minY, minZ, 1.0) in meter
-      Eigen::Vector4f max_pt (5.0f, 5.0f, 10.0f, 1.0); //(maxX, maxY, maxZ, 1.0) in meter
+      // Eigen::Vector4f min_pt (-5.0f, -5.0f, -10.0f, 1.0); //(minX, minY, minZ, 1.0) in meter
+      // Eigen::Vector4f max_pt (5.0f, 5.0f, 10.0f, 1.0); //(maxX, maxY, maxZ, 1.0) in meter
       // float my_x = -5.1f;
       // std::cout << "Config crop min x is: " << config.crop_min_x << std::endl;
       // std::cout << "My x is: " << my_x << "of type" << typeid(my_x).name() << std::endl;
-      // Eigen::Vector4f min_pt (my_x, -5.0f, -5.0f, 1.0f); //(minX, minY, minZ, 1.0) in meter
-      // Eigen::Vector4f max_pt (config.crop_max_x, config.crop_max_y, config.crop_max_z, 1.0f);
+      Eigen::Vector4f min_pt (config.crop_min_x, config.crop_min_y, config.crop_min_z, 1.0f); //(minX, minY, minZ, 1.0) in meter
+      Eigen::Vector4f max_pt (config.crop_max_x, config.crop_max_y, config.crop_max_z, 1.0f);
       // Cropbox slighlty bigger then bounding box of points
       cropBox.setMin (min_pt);
       cropBox.setMax (max_pt);
@@ -539,8 +546,10 @@ int main(int argc, char * argv[])
   
   std::cout << "Inside main function now" << std::endl;
   rclcpp::init(argc, argv);
+  std::cout << "RCLCPP init complete" << std::endl;
   rclcpp::spin(std::make_shared<MinimalSubscriber>());
-  
+  std::cout << "RCLCPP spin line executed" << std::endl;
   rclcpp::shutdown();
+  std::cout << "RCLCPP shutdown completed" << std::endl;
   return 0;
 }

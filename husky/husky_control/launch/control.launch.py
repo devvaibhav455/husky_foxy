@@ -61,7 +61,7 @@ def generate_launch_description():
     ld.add_action(node_ekf_local)
 
     pkg_husky_viz = FindPackageShare(package='husky_viz').find('husky_viz')
-    default_rviz_config_path = os.path.join(pkg_husky_viz, 'rviz/custom_config.rviz')
+    default_rviz_config_path = os.path.join(pkg_husky_viz, 'rviz/custom_config_pcl.rviz')
 
     rviz_node = Node(
         package='rviz2',

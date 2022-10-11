@@ -44,6 +44,22 @@ find_package(rosidl_default_generators REQUIRED)
 # message( Boost_FOUND in my cmakelist:  ${Boost_FOUND} )
 find_package(PCL REQUIRED)
 
+# https://pointclouds.org/documentation/tutorials/using_pcl_pcl_config.html
+# When PCL is found, several related variables are set:
+
+#     PCL_FOUND: set to 1 if PCL is found, otherwise unset
+
+#     PCL_INCLUDE_DIRS: set to the paths to PCL installed headers and the dependency headers
+
+#     PCL_LIBRARIES: set to the file names of the built and installed PCL libraries
+
+#     PCL_LIBRARY_DIRS: set to the paths to where PCL libraries and 3rd party dependencies reside
+
+#     PCL_VERSION: the version of the found PCL
+
+#     PCL_COMPONENTS: lists all available components
+
+#     PCL_DEFINITIONS: lists the needed preprocessor definitions and compiler flags
 
 
 
