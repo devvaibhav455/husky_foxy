@@ -25,6 +25,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED) #To include markers visualization in rviz
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
@@ -63,7 +64,7 @@ find_package(PCL REQUIRED)
 
 
 
-set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "lifecycle_msgs" "PCL" )#"libpcl-dev"
+set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "lifecycle_msgs" "visualization_msgs" "PCL" )#"libpcl-dev"
 
 
 # uncomment the following section in order to fill in

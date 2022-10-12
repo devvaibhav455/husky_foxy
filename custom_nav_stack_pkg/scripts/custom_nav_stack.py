@@ -66,6 +66,7 @@ PORT = 65432  # The port used by the server
 
 #ASSUMPTIONS: 1) IMU 0 orientation is TRUE NORTH | 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
 
+
 class CustomNavigator(Node):
     def __init__(self):
         super().__init__(node_name='custom_navigator')
@@ -77,6 +78,7 @@ class CustomNavigator(Node):
         self.s.connect((HOST, PORT))
         self.s.setblocking(False)
         print("Socket connected")
+        time.sleep(3)
 
         self.fig = plt.figure()
         self.fig2 = plt.figure(2)
@@ -478,35 +480,9 @@ class CustomNavigator(Node):
     def move_forward(self, distance_to_move): # If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters
         if distance_to_move > 1:
             print("Need to move: ", distance_to_move)
-            #Need to make changes here to detect obstacle
-            try: #Means obstacle is detected and need to avoid it
-                # print("Waiting to receive data from server") #If this line is printed, execution is blocked
-                # obs_corner_angle_rad = self.s.recv(4)
-                # print(f"Received {obs_corner_angle_rad!r}")
-                while(1==1): #Loop used to reject old values from socket buffer and use the latest value
-                    #to do: if no obstacle is detected, c++ will send 456.78, in while loop, read latest and then do actions correspondingly, if error, no data in buffer, need to send continue command, will go back to try again
-                    obs_corner_angle_rad = struct.unpack('f', self.s.recv(4))[0]
-                    print("######################### Decoded data is: ", obs_corner_angle_rad*180/math.pi)
-                # Implement control logic here if obstacle is detected
-                if obs_corner_angle_rad <= 0:
-                    self.direction = 'CW'
-                    self.to_rotate = math.radians(20)
-                else:
-                    self.direction = 'CCW'
-                    self.to_rotate = math.radians(20)
-                self.rotate(self.to_rotate, self.direction)
-            except socket.error as e:
-                err = e.args[0]
-                if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-                    # print("No data available")
-                    # Implement control logic here if obstacle is not detected
-                    #If no obstacle is detected, send some fixed float over buffer, eg 450.45
-                    self.move_cmd.linear.x = 0.4
-                    self.velocity_publisher_.publish(self.move_cmd)
-                else:
-                    # a "real" error occurred
-                    print("Real error occured: ", e)
-                    sys.exit(1)           
+            self.move_cmd.linear.x = 0.2
+            self.move_cmd.angular.z = 0.0
+            self.velocity_publisher_.publish(self.move_cmd)
         elif(distance_to_move < 1):
             print("Destination reached :)")
             self.move_cmd.linear.x = 0.0
@@ -574,32 +550,38 @@ class CustomNavigator(Node):
             # print(math.degrees(self.roll)) #Roll is providing the current angular rotation surprisingly
 
             # Reference: https://stackoverflow.com/questions/16745409/what-does-pythons-socket-recv-return-for-non-blocking-sockets-if-no-data-is-r
+            
+            global obs_corner_angle_rad
+            try: 
+                while(1==1): 
+                    obs_corner_angle_rad = struct.unpack('f', self.s.recv(4))[0]
+                    print("Received data over socket")
+                    # obs_corner_angle_rad = data
+                    print("################################### OLD CORNER DETECTED AT ANGLE DEGREE: ", obs_corner_angle_rad*180/math.pi, "###########################")
+            except socket.error as e:
+                err = e.args[0]
+                if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                    print("No data available")
+                    print("################################### LATEST CORNER DETECTED AT ANGLE DEGREE: ", obs_corner_angle_rad*180/math.pi, "###########################")
+                    if obs_corner_angle_rad != 456.7799987792969:
+                        if obs_corner_angle_rad >= 0: #means obstacle on left, turn towards right or CW
+                            self.direction = 'cw'
+                            self.to_rotate = math.radians(20)
+                        else:
+                            self.direction = 'ccw'
+                            self.to_rotate = math.radians(20)
+                else:
+                    # a "real" error occurred
+                    print("Real error occured: ", e)
+                    sys.exit(1)  
+
+
+
+            
+            
             if abs(self.to_rotate) > 0.06:
-                try:
-                    # print("Waiting to receive data from server") #If this line is printed, execution is blocked
-                    # obs_corner_angle_rad = self.s.recv(4)
-                    # print(f"Received {obs_corner_angle_rad!r}")
-                    obs_corner_angle_rad = struct.unpack('f', self.s.recv(4))[0]*180/math.pi
-                    print("######################### Decoded data is: ", obs_corner_angle_rad)
-                    # Implement control logic here if obstacle is detected
-                    if obs_corner_angle_rad <= 0:
-                        self.direction = 'CW'
-                        self.to_rotate = math.radians(20)
-                    else:
-                        self.direction = 'CCW'
-                        self.to_rotate = math.radians(20)
-                    self.rotate(self.to_rotate, self.direction)
-                except socket.error as e:
-                    err = e.args[0]
-                    if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-                        # print("No data available")
-                        # Implement control logic here if obstacle is not detected
-                        self.rotate(self.to_rotate, self.direction) #No obstacle is detected, so, just rotate + translate to align with the heading
-                    else:
-                        # a "real" error occurred
-                        print("Real error occured: ", e)
-                        sys.exit(1)
-            elif self.to_rotate < 0.06:
+                self.rotate(self.to_rotate, self.direction)
+            elif self.to_rotate < 0.06: #means no obstacle in FOV and heading is also the desired one
                 print("Robot already aligned towards goal")
                 print("Finished timer callback")
                 self.distance_to_move = self.calc_goal(self.current_lat, self.current_long, self.dest_lat, self.dest_long)
@@ -614,7 +596,7 @@ class CustomNavigator(Node):
     def rotate(self,target_angle_rad,direction):
         print("Entered rotate function")
         global bearing
-        if(direction == 'ccw'):
+        if(direction == 'CCW' or direction == 'ccw'):
                 multiplier = 1  #Positive velocity means anti-clockwise (CCW) rotation (If we rotate in actual CCW direction, robot moves away from the bearing.. its a workaround)
                 print("CCW")
         else:
@@ -643,7 +625,8 @@ class CustomNavigator(Node):
         # print("target={} current:{}", target_angle_rad,self.roll)
         # self.move_cmd.angular.z = multiplier * (self.kp * (abs(bearing - self.true_heading) + 0.3))
         self.move_cmd.angular.z = multiplier * (self.kp * (abs(target_angle_rad) + 0.3))
-        self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 2)
+        # self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 4)
+        self.move_cmd.linear.x = 0.1
         # self.move_cmd.angular.z = multiplier * 0.5
         # print(self.move_cmd.angular.z)
         self.velocity_publisher_.publish(self.move_cmd)
@@ -660,6 +643,8 @@ def main(argv=sys.argv[1:]):
     
     custom_navigator = CustomNavigator()
     rclpy.spin(custom_navigator)
+    custom_navigator.s.close()
+    print("Closed socket on client side")
 
     
     

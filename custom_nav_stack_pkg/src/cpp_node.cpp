@@ -42,12 +42,18 @@
 #include <string.h>
 #include <stdio.h>
 
+//To see bounding box in rviz2
+#include <visualization_msgs/msg/marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+
+
 #define SERVER_PORT htons(65432)
 char socket_buffer[1000];
 int serverSock;
 int clientSock;
 socklen_t sin_size=sizeof(struct sockaddr_in);
 sockaddr_in clientAddr;
+visualization_msgs::msg::Marker fov_marker_pts; //Ptr usage is deprecated warning: ‘visualization_msgs::msg::Marker_<std::allocator<void> >::Ptr’ is deprecated [-Wdeprecated-declarations]   96 |   visualization_msgs::msg::Marker::Ptr fov_marker_pts;
 
 
 
@@ -59,6 +65,8 @@ sockaddr_in clientAddr;
 // clear && colcon build --packages-select custom_nav_stack_pkg --symlink-install && source install/local_setup.bash && ros2 run custom_nav_stack_pkg cpp_executable
 // sudo chown -R dev /opt/ros/foxy/share/ #to remove the squiggle error in vscode where "dev" is the username
 // sudo apt install pcl-tools to install pcl_viewer to visualize the cluster for debugging
+
+// LIMITATION: 1) If object is too close to the LiDAR, it won't come in the pointcloud or might come partial only
 
 class MinimalSubscriber : public rclcpp::Node
 {
@@ -86,6 +94,7 @@ class MinimalSubscriber : public rclcpp::Node
       };
   Config config;
   float angle_view_radian;
+  
   
   public:
     
@@ -191,9 +200,50 @@ class MinimalSubscriber : public rclcpp::Node
       std::cout << config.crop_min_x << '\n';
       std::cout << config.crop_max_x << '\n';
       
-      publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("filtered_cloud", 10);
       
-      subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>
+      fov_marker_pts.ns = "fov_lidar";
+      fov_marker_pts.id = 0;
+      fov_marker_pts.type = visualization_msgs::msg::Marker::POINTS;
+      fov_marker_pts.action = visualization_msgs::msg::Marker::ADD;
+      fov_marker_pts.pose.orientation.x = 0.0;
+      fov_marker_pts.pose.orientation.y = 0.0;
+      fov_marker_pts.pose.orientation.z = 0.0;
+      fov_marker_pts.pose.orientation.w = 1.0;
+      fov_marker_pts.scale.x = 0.1;
+      fov_marker_pts.scale.y = 0.1;
+      fov_marker_pts.color.r = 1.0f;
+      fov_marker_pts.color.g = 0.647f;
+      fov_marker_pts.color.b = 0.0f;
+      fov_marker_pts.color.a = 0.2;
+
+      // Create the vertices for the points and lines (Ref: http://wiki.ros.org/rviz/Tutorials/Markers%3A%20Points%20and%20Lines)
+      for (uint32_t i = 0; i < 50; ++i){
+        // Generating x and y points for left and right bounding lines
+        float x = (config.fwd_obs_tolerance * i * cos(angle_view_radian))/49;
+        float y_l = (config.fwd_obs_tolerance * i * sin(angle_view_radian))/49;
+        float y_r = -(config.fwd_obs_tolerance * i * sin(angle_view_radian))/49;
+        geometry_msgs::msg::Point p;
+        p.x = x;
+        p.y = y_l;
+        fov_marker_pts.points.push_back(p);
+        p.y = y_r;
+        fov_marker_pts.points.push_back(p);
+        //Generating points for circular arc
+        y_l = (i*config.fwd_obs_tolerance*sin(angle_view_radian))/49;
+        x = sqrt(config.fwd_obs_tolerance*config.fwd_obs_tolerance - y_l*y_l);
+        p.x = x;
+        p.y = y_l;
+        fov_marker_pts.points.push_back(p);
+        p.y = -y_l;
+        fov_marker_pts.points.push_back(p);
+      }
+
+      
+      
+      publisher_pcl = this->create_publisher<sensor_msgs::msg::PointCloud2>("filtered_cloud", 10);
+      publisher_marker_array = this->create_publisher<visualization_msgs::msg::MarkerArray>("visualization_marker_array", 10);
+      
+      subscription_vlp16 = this->create_subscription<sensor_msgs::msg::PointCloud2>
       ("velodyne_points", rclcpp::SensorDataQoS(), std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
 
       std::cout << "Reached end of Public" << std::endl;      
@@ -205,7 +255,7 @@ class MinimalSubscriber : public rclcpp::Node
     void topic_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg_ptr) const
     {
       std::cout << "Hello" << std::endl;
-      sleep(1);
+      sleep(0.5);
       // RCLCPP_INFO(this->get_logger(), "I received the message , height is: '%d'", msg_ptr->height); //
       // RCLCPP_INFO(this->get_logger(), "I received the message"); //
 
@@ -379,6 +429,14 @@ class MinimalSubscriber : public rclcpp::Node
         std::vector <std::vector <float>> centroid_cluster_all(cluster_indices.size()); //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
         std::vector <std::vector <float>> centroid_direction_array(cluster_indices.size()); // Array of angles in radian containing the angle at which centroid of a cluster is present wrt robot
         std::vector <std::vector <float>> angle_corner_radian_all(cluster_indices.size()); // Array of angles of AABB wrt lidar which will help in finding by how much angle to rotate the robot
+        visualization_msgs::msg::MarkerArray marker_all;
+        
+        uint32_t shape = visualization_msgs::msg::Marker::CUBE;
+
+        fov_marker_pts.header = msg_ptr->header;
+
+        
+
 
         int j = 0;
         for (const auto& cluster : cluster_indices)
@@ -421,6 +479,49 @@ class MinimalSubscriber : public rclcpp::Node
           centroid_cluster_all[j].push_back(centroid[1]);
           centroid_cluster_all[j].push_back(centroid[2]);
           std::cout << j << "th cluster's centroid co-ords: " << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+          
+          visualization_msgs::msg::Marker marker_individual;
+          // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+          marker_individual.header = msg_ptr->header;
+
+          // Set the namespace and id for this marker.  This serves to create a unique ID
+          // Any marker sent with the same namespace and id will overwrite the old one
+          marker_individual.ns = "cluster";
+          marker_individual.id = j;
+
+          // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
+          marker_individual.type = shape;
+
+          // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
+          marker_individual.action = visualization_msgs::msg::Marker::ADD;
+
+          // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
+          marker_individual.pose.position.x = (min_pt_cluster[0] + max_pt_cluster[0])/2;
+          marker_individual.pose.position.y = (min_pt_cluster[1] + max_pt_cluster[1])/2;
+          marker_individual.pose.position.z = (min_pt_cluster[2] + max_pt_cluster[2])/2;
+          marker_individual.pose.orientation.x = 0.0;
+          marker_individual.pose.orientation.y = 0.0;
+          marker_individual.pose.orientation.z = 0.0;
+          marker_individual.pose.orientation.w = 1.0;
+
+          // Set the scale of the marker -- 1x1x1 here means 1m on a side
+          marker_individual.scale.x = max_pt_cluster[0] - min_pt_cluster[0];
+          marker_individual.scale.y = max_pt_cluster[1] - min_pt_cluster[1];
+          marker_individual.scale.z = max_pt_cluster[2] - min_pt_cluster[2];
+
+          // Set the color -- be sure to set alpha to something non-zero!
+          marker_individual.color.r = 0.0f;
+          marker_individual.color.g = 1.0f;
+          marker_individual.color.b = 0.0f;
+          marker_individual.color.a = 0.5;
+
+          marker_individual.lifetime.sec = 0;
+          marker_individual.lifetime.nanosec = 0;
+
+          marker_all.markers.push_back(marker_individual);
+          
+
+          
           // See if current cluster is present in the FOV of the robot and find angle of corner of AABB which is in FOV
           
           float angle_individual_radian;
@@ -428,36 +529,16 @@ class MinimalSubscriber : public rclcpp::Node
           if(is_obstacle_detected_in_fov == 1) {
             angle_corner_radian_all[j].push_back(angle_individual_radian);
             std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI << " and corner angle: " << angle_corner_radian_all[j][0]*180/M_PI  <<std::endl;
-            
-            
+            send(clientSock, &angle_individual_radian, sizeof(angle_individual_radian), 0);}
             // bzero(socket_buffer, 1000);
             // strcpy(socket_buffer, "test");
             // int n = write(clientSock, socket_buffer, strlen(socket_buffer));
-            // std::cout << "Write Confirmation code  " << n << std::endl;
-
-
-            
-            
-            send(clientSock, &angle_individual_radian, sizeof(angle_individual_radian), 0);
-
-            
-            
+            // std::cout << "Write Confirmation code  " << n << std::endl;            
             // shutdown(clientSock);
-            
-
-
-          }
-
-
-
-
-
-
-          
-          
-          // int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1]);
-
-          std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI <<std::endl;
+          else {
+            float no_obs_angle_rad = 456.78;
+            std::cout << "Cluster # " << j << " obstacle NOT detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI <<std::endl;
+            send(clientSock, &no_obs_angle_rad, sizeof(no_obs_angle_rad), 0);}
           
 
 
@@ -473,7 +554,7 @@ class MinimalSubscriber : public rclcpp::Node
 
           // sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
           // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
-          // publisher_->publish(ros_processed_pcl2);        
+          // publisher_pcl->publish(ros_processed_pcl2);        
 
           // std::stringstream ss;
           // ss << "cloud_cluster_" << j << ".pcd";
@@ -483,12 +564,16 @@ class MinimalSubscriber : public rclcpp::Node
 
         sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
         pcl::toROSMsg(*cloud_cluster_all, ros_processed_pcl2);
-        publisher_->publish(ros_processed_pcl2);
+        publisher_pcl->publish(ros_processed_pcl2);
+        marker_all.markers.push_back(fov_marker_pts);
+        publisher_marker_array->publish(marker_all);
       }
       else {
-        // Obstacle not detected. Need to indicate this to Python script
-        
-      }
+        // Non-ground points not detected. Need to indicate this to Python script
+        float no_obs_angle_rad = 456.78;
+        std::cout << "Non-ground points not detected, sending 456.78" << std::endl;
+        send(clientSock, &no_obs_angle_rad, sizeof(no_obs_angle_rad), 0);}
+      
 
       
       
@@ -502,12 +587,13 @@ class MinimalSubscriber : public rclcpp::Node
       // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
 
       // RCLCPP_INFO(this->get_logger(), "Process ROS2 PCL2, width is: '%d'", ros_processed_pcl2.width); //
-      // publisher_->publish(ros_processed_pcl2);
+      // publisher_pcl->publish(ros_processed_pcl2);
       std::cout << "Reached callback end in Private" << std::endl;
       // std::cin.ignore();
     }
-    rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
+    rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_vlp16;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_pcl;
+    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr publisher_marker_array;
 
 };
 

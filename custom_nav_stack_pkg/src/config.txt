@@ -20,4 +20,4 @@ cluster_min_size = 50
 cluster_max_size = 25000
 
 fwd_obs_tolerance = 5
-angle_view_degree = 60 
+angle_view_degree = 90 
