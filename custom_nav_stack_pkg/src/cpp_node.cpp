@@ -23,7 +23,6 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/extract_indices.h>
 
-#include <pcl/io/pcd_io.h>
 #include <pcl/common/common.h> //Used for getMinMax3D
 #include <pcl/common/centroid.h> //Used for cluster centroid calculation
 #include <fstream>
@@ -53,12 +52,13 @@ int serverSock;
 int clientSock;
 socklen_t sin_size=sizeof(struct sockaddr_in);
 sockaddr_in clientAddr;
-visualization_msgs::msg::Marker fov_marker_pts; //Ptr usage is deprecated warning: ‘visualization_msgs::msg::Marker_<std::allocator<void> >::Ptr’ is deprecated [-Wdeprecated-declarations]   96 |   visualization_msgs::msg::Marker::Ptr fov_marker_pts;
+visualization_msgs::msg::Marker fov_marker_pts; //Didn't use Ptr because Ptr usage is deprecated warning: ‘visualization_msgs::msg::Marker_<std::allocator<void> >::Ptr’ is deprecated [-Wdeprecated-declarations]   96 |   visualization_msgs::msg::Marker::Ptr fov_marker_pts;
+visualization_msgs::msg::MarkerArray marker_all; //Contains cuboid for clusters and FOV sector as well
 
 
 
 
-// Need to stop the robot if the obstacle is too close
+// Need to stop the robot if the obstacle is too close. If obstacle is directly in front of robot, need to handle align with heading and avoidance.
 
 // using std::placeholders::_1;
 
@@ -100,7 +100,7 @@ class MinimalSubscriber : public rclcpp::Node
     
     int detect_obstacle(float xmin, float ymin, float xmax, float ymax, float *angle_individual_radian_ptr) const
     {
-      std::cout << "Angle view radian, xmin, ymin, xmax, ymax, rctheta, rstheta " << angle_view_radian << ", " << xmin << ", " << ymin << ", "  << xmax << ", "  << ymax << ", "  << config.fwd_obs_tolerance*cos(angle_view_radian) << ", "  << config.fwd_obs_tolerance*sin(angle_view_radian) << ", "  <<   std::endl;
+      // std::cout << "Angle view radian, xmin, ymin, xmax, ymax, rctheta, rstheta " << angle_view_radian << ", " << xmin << ", " << ymin << ", "  << xmax << ", "  << ymax << ", "  << config.fwd_obs_tolerance*cos(angle_view_radian) << ", "  << config.fwd_obs_tolerance*sin(angle_view_radian) << ", "  <<   std::endl;
       
       // Conditions to detect cluster/ obstacle AABB (Axis-Aligned Bounding Box) rectangle defined by xmin, ymin, xmax, ymax within a circle's sector defined by config.fwd_obs_tolerance and angle_view_degree
       if (xmin <= 0 && xmax <= 0){
@@ -138,7 +138,7 @@ class MinimalSubscriber : public rclcpp::Node
         if (xmin >= config.fwd_obs_tolerance){std::cout << 22 << std::endl; return 0;}
         else {
           std::cout << 23 << std::endl;
-          if (abs(ymax) >= abs(ymin)){*angle_individual_radian_ptr = atan2(ymin, xmin);}else{*angle_individual_radian_ptr = atan2(ymax, xmin);}
+          if (abs(ymax) <= (0.4)*(abs(ymin)+abs(ymax))){*angle_individual_radian_ptr = atan2(ymin, xmin);}else{*angle_individual_radian_ptr = atan2(ymax, xmin);}
           return 1;} // Case 13: Rectangle bottom side crosses the sector
       }
       // No if-else condition matched (though it should not happen), so return 0 to avoid the warning while compiling: "/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp: In member function ‘int MinimalSubscriber::detect_obstacle(float, float, float, float) const’:/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp:126:5: warning: control reaches end of non-void function [-Wreturn-type]  126 |     }" 
@@ -150,7 +150,7 @@ class MinimalSubscriber : public rclcpp::Node
     {
       std::cout << "Reached start of Public" << std::endl;
       
-      
+      //Read config from file
       std::ifstream config_file_path("/home/dev/husky_ws/src/custom_nav_stack_pkg/src/config.txt");
       std::string line;
       while (std::getline(config_file_path, line)) {
@@ -216,13 +216,13 @@ class MinimalSubscriber : public rclcpp::Node
       fov_marker_pts.color.b = 0.0f;
       fov_marker_pts.color.a = 0.2;
 
+      geometry_msgs::msg::Point p;
       // Create the vertices for the points and lines (Ref: http://wiki.ros.org/rviz/Tutorials/Markers%3A%20Points%20and%20Lines)
       for (uint32_t i = 0; i < 50; ++i){
         // Generating x and y points for left and right bounding lines
         float x = (config.fwd_obs_tolerance * i * cos(angle_view_radian))/49;
         float y_l = (config.fwd_obs_tolerance * i * sin(angle_view_radian))/49;
         float y_r = -(config.fwd_obs_tolerance * i * sin(angle_view_radian))/49;
-        geometry_msgs::msg::Point p;
         p.x = x;
         p.y = y_l;
         fov_marker_pts.points.push_back(p);
@@ -235,6 +235,10 @@ class MinimalSubscriber : public rclcpp::Node
         p.y = y_l;
         fov_marker_pts.points.push_back(p);
         p.y = -y_l;
+        fov_marker_pts.points.push_back(p);
+        // Generating points for the centre line
+        p.y = 0;
+        p.x = i*config.fwd_obs_tolerance/49;
         fov_marker_pts.points.push_back(p);
       }
 
@@ -254,7 +258,7 @@ class MinimalSubscriber : public rclcpp::Node
     
     void topic_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg_ptr) const
     {
-      std::cout << "Hello" << std::endl;
+      std::cout << "##################################### Hello #####################################" << std::endl;
       sleep(0.5);
       // RCLCPP_INFO(this->get_logger(), "I received the message , height is: '%d'", msg_ptr->height); //
       // RCLCPP_INFO(this->get_logger(), "I received the message"); //
@@ -265,6 +269,7 @@ class MinimalSubscriber : public rclcpp::Node
       // RCLCPP_INFO(this->get_logger(), "I received the PCL message , height is: '%d'", cloud.height); //WORKING
       // pcl::PCLPointCloud2::Ptr cloud;      
       // pcl::fromROSMsg (*msg, cloud);
+      fov_marker_pts.header = msg_ptr->header;
       pcl::PCLPointCloud2::Ptr cloud_in_ptr(new pcl::PCLPointCloud2);
       pcl_conversions::toPCL(*msg_ptr, *cloud_in_ptr);
       // pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -322,11 +327,6 @@ class MinimalSubscriber : public rclcpp::Node
       // define a cropbox
       pcl::CropBox<pcl::PCLPointCloud2> cropBox;
       cropBox.setInputCloud(cloud_filtered_ptr);
-      // Eigen::Vector4f min_pt (-5.0f, -5.0f, -10.0f, 1.0); //(minX, minY, minZ, 1.0) in meter
-      // Eigen::Vector4f max_pt (5.0f, 5.0f, 10.0f, 1.0); //(maxX, maxY, maxZ, 1.0) in meter
-      // float my_x = -5.1f;
-      // std::cout << "Config crop min x is: " << config.crop_min_x << std::endl;
-      // std::cout << "My x is: " << my_x << "of type" << typeid(my_x).name() << std::endl;
       Eigen::Vector4f min_pt (config.crop_min_x, config.crop_min_y, config.crop_min_z, 1.0f); //(minX, minY, minZ, 1.0) in meter
       Eigen::Vector4f max_pt (config.crop_max_x, config.crop_max_y, config.crop_max_z, 1.0f);
       // Cropbox slighlty bigger then bounding box of points
@@ -344,45 +344,37 @@ class MinimalSubscriber : public rclcpp::Node
       pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
       pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
       // Create the segmentation object
-      // pcl::SACSegmentation<pcl::PCLPointCloud2> seg;
-      pcl::SACSegmentation<pcl::PointXYZ> seg;
+      pcl::SACSegmentation<pcl::PointXYZ> seg; //Works with <pcl::PointXYZ> and not with <pcl::PCLPointCloud2>
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_ptr(new pcl::PointCloud<pcl::PointXYZ>);
       pcl::fromPCLPointCloud2(*cloud_filtered_ptr, *cloud_xyz_ptr);  //https://stackoverflow.com/questions/69716482/convert-from-pclpointcloudpclpointxyz-to-pclpclpointcloud2-ros-melodic  (we can using <PointT> or PointXYZ in all function it seems)
-      // cloud_xyz_ptr->header =cloud_filtered_ptr->header;
-      // cloud_xyz_ptr->width =cloud_filtered_ptr->width;
-      // cloud_xyz_ptr->height =cloud_filtered_ptr->height;
-      // cloud_xyz_ptr->is_dense =cloud_filtered_ptr->is_dense;
-      // cloud_xyz_ptr->points =cloud_filtered_ptr->data;
 
       // Optional
       seg.setOptimizeCoefficients (true);
       // Mandatory
       seg.setModelType (pcl::SACMODEL_PLANE);
       seg.setMethodType (pcl::SAC_RANSAC);
-      // seg.setMaxIterations (50);
-      // seg.setDistanceThreshold (0.01);
       seg.setMaxIterations (config.ransac_max_iterations);
       seg.setDistanceThreshold (config.ransac_distance_threshold);
-      
       seg.setInputCloud (cloud_xyz_ptr);
       seg.segment (*inliers, *coefficients);
 
-      if (inliers->indices.size () == 0)
+      if (inliers->indices.size () == 0) // If ground plane is not detected, all the points are non-ground points
       {
         PCL_ERROR ("Could not estimate a planar model for the given dataset.");
         std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
-        //Need to skip ransac part here
+        // Still need to do clustering if ground plane is not detected because that means all the points are non-ground points.
+      }else{
+        // std::cerr << "Model coefficients: " << coefficients->values[0] << " " 
+        //                                   << coefficients->values[1] << " "
+        //                                   << coefficients->values[2] << " " 
+        //                                   << coefficients->values[3] << std::endl;
+
+        std::cerr << "Ground plane model inliers: " << inliers->indices.size () << std::endl;
       }
-
-      std::cerr << "Model coefficients: " << coefficients->values[0] << " " 
-                                          << coefficients->values[1] << " "
-                                          << coefficients->values[2] << " " 
-                                          << coefficients->values[3] << std::endl;
-
-      std::cerr << "Model inliers: " << inliers->indices.size () << std::endl;
-
       
-      // STEP 3(b): Extracting ground/ non-ground points // https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md
+      // Need to do clustering no matter what if ground points are detected or not.
+      
+      // STEP 3(b): Extracting non-ground points // https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md
         // If we want ground points, use extract.setNegative (false);
         // If we want non-ground, obstacle points, use extract.setNegative (true);
       
@@ -397,7 +389,7 @@ class MinimalSubscriber : public rclcpp::Node
       std::cerr << "PointCloud after RANSAC plane extraction, non-ground points: " << cloud_xyz_ptr->width * cloud_xyz_ptr->height 
        << " data points (" << pcl::getFieldsList (*cloud_xyz_ptr) << ")." << std::endl;
 
-      if (cloud_xyz_ptr->width * cloud_xyz_ptr->height != 0){ //Don't do clustering if non-ground points are not detected.
+      if (cloud_xyz_ptr->width * cloud_xyz_ptr->height != 0){ //Don't do clustering if non-ground points are not detected. i.e. all points are ground points
         // Step 4: Clustering using K-D treel; Reference: https://link.springer.com/chapter/10.1007/978-981-16-6460-1_57, https://github.com/jupidity/PCL-ROS-cluster-Segmentation/blob/master/README.md, https://pcl.readthedocs.io/en/latest/cluster_extraction.html
 
         // Create the KdTree object for the search method of the extraction
@@ -408,9 +400,6 @@ class MinimalSubscriber : public rclcpp::Node
         std::vector<pcl::PointIndices> cluster_indices;
         pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
         // specify euclidean cluster parameters
-        // ec.setClusterTolerance (0.2); // 2cm
-        // ec.setMinClusterSize (50);
-        // ec.setMaxClusterSize (25000);
         ec.setClusterTolerance (config.cluster_tolerance); // 2cm
         ec.setMinClusterSize (config.cluster_min_size);
         ec.setMaxClusterSize (config.cluster_max_size);
@@ -418,40 +407,32 @@ class MinimalSubscriber : public rclcpp::Node
         ec.setInputCloud (cloud_xyz_ptr);
         // exctract the indices pertaining to each cluster and store in a vector of pcl::PointIndices
         ec.extract (cluster_indices);
-        // std::cout << "Cluster indices: " << cluster_indices[0] << std::endl;
-
-        pcl::PCDWriter writer;
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_all (new pcl::PointCloud<pcl::PointXYZ>); //Point cloud containig all the clusters. Was implemented to visualise all the clusters simultaneously in RVIZ2 instead of sequentially.
+        cloud_cluster_all->width = cloud_cluster_all->size ();
+        cloud_cluster_all->height = 1;
+        cloud_cluster_all->is_dense = true;   
+        cloud_cluster_all->header = cloud_xyz_ptr->header; 
         std::vector <std::vector <float>> min_pt_cluster_all(cluster_indices.size()); //Array of vector of size of no. of clusters containing min points of each cluster x1,y1,z1 ; x2.y2,z2 ...
         std::vector <std::vector <float>> max_pt_cluster_all(cluster_indices.size()); //Array of vector of size of no. of clusters containing max points of each cluster x1,y1,z1 ; x2.y2,z2 ...
         // NOTE: xmin, ymin, zmin are not paired. They can be different points. They are just min values in x, y, and z respectively.
         std::vector <std::vector <float>> centroid_cluster_all(cluster_indices.size()); //Array of vector of size of no. of clusters containing the centroid points co-ordinates x,y,z which are paired.
         std::vector <std::vector <float>> centroid_direction_array(cluster_indices.size()); // Array of angles in radian containing the angle at which centroid of a cluster is present wrt robot
         std::vector <std::vector <float>> angle_corner_radian_all(cluster_indices.size()); // Array of angles of AABB wrt lidar which will help in finding by how much angle to rotate the robot
-        visualization_msgs::msg::MarkerArray marker_all;
         
         uint32_t shape = visualization_msgs::msg::Marker::CUBE;
 
-        fov_marker_pts.header = msg_ptr->header;
-
         
-
-
+        
+        std::cout << "Number of clusters: " << cluster_indices.size() << std::endl;
         int j = 0;
-        for (const auto& cluster : cluster_indices)
-        {
-          std::cout << "Number of clusters: " << cluster_indices.size() << std::endl;
+        for (const auto& cluster : cluster_indices){
           pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_individual (new pcl::PointCloud<pcl::PointXYZ>);
-          // pcl::CentroidPoint<pcl::PointXYZ> centroid; //Reference: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
           for (const auto& idx : cluster.indices) {
-          cloud_cluster_all->push_back((*cloud_xyz_ptr)[idx]);
-          cloud_cluster_individual->push_back((*cloud_xyz_ptr)[idx]);
-          } //*
-          cloud_cluster_all->width = cloud_cluster_all->size ();
-          cloud_cluster_all->height = 1;
-          cloud_cluster_all->is_dense = true;   
-          cloud_cluster_all->header = cloud_xyz_ptr->header;  
+            cloud_cluster_all->push_back((*cloud_xyz_ptr)[idx]);
+            cloud_cluster_individual->push_back((*cloud_xyz_ptr)[idx]);
+          }
+ 
           std::cout << "PointCloud representing the Cluster# " << j << " is of size: " << cloud_cluster_all->size () << " data points." << std::endl;
 
           Eigen::Vector4f min_pt_cluster; //(minX, minY, minZ, 1.0) in meter
@@ -467,18 +448,12 @@ class MinimalSubscriber : public rclcpp::Node
           // Finding centroid of the individual cluster and storing them with centroid co-ords of all clusters; Ref: https://pointclouds.org/documentation/classpcl_1_1_centroid_point.html
           Eigen::Vector4d centroid;
           pcl::compute3DCentroid (*cloud_cluster_individual, centroid);
-          // pcl::PointXYZ c1;
-          // centroid.add(cloud_cluster_individual); //c1 contains centroid xyz co-ords of the jth cluster
-          // centroid_cluster_all[j].push_back(c1.x);
-          // centroid_cluster_all[j].push_back(c1.y);
-          // centroid_cluster_all[j].push_back(c1.z);
 
-          // centroid_direction_array[j].push_back(atan2(centroid_cluster_all[j][1], centroid_cluster_all[j][0]));
           centroid_direction_array[j].push_back(atan2(centroid[1], centroid[0]));
           centroid_cluster_all[j].push_back(centroid[0]);
           centroid_cluster_all[j].push_back(centroid[1]);
           centroid_cluster_all[j].push_back(centroid[2]);
-          std::cout << j << "th cluster's centroid co-ords: " << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+          // std::cout << j << "th cluster's centroid co-ords: " << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
           
           visualization_msgs::msg::Marker marker_individual;
           // Set the frame ID and timestamp.  See the TF tutorials for information on these.
@@ -489,14 +464,14 @@ class MinimalSubscriber : public rclcpp::Node
           marker_individual.ns = "cluster";
           marker_individual.id = j;
 
-          // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
+          // Set the marker type.  Set to CUBE, technically a cuboid.
           marker_individual.type = shape;
 
           // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
           marker_individual.action = visualization_msgs::msg::Marker::ADD;
 
           // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-          marker_individual.pose.position.x = (min_pt_cluster[0] + max_pt_cluster[0])/2;
+          marker_individual.pose.position.x = (min_pt_cluster[0] + max_pt_cluster[0])/2; //Centre point of the cuboid
           marker_individual.pose.position.y = (min_pt_cluster[1] + max_pt_cluster[1])/2;
           marker_individual.pose.position.z = (min_pt_cluster[2] + max_pt_cluster[2])/2;
           marker_individual.pose.orientation.x = 0.0;
@@ -505,7 +480,7 @@ class MinimalSubscriber : public rclcpp::Node
           marker_individual.pose.orientation.w = 1.0;
 
           // Set the scale of the marker -- 1x1x1 here means 1m on a side
-          marker_individual.scale.x = max_pt_cluster[0] - min_pt_cluster[0];
+          marker_individual.scale.x = max_pt_cluster[0] - min_pt_cluster[0]; //Length of cuboid along x-axis
           marker_individual.scale.y = max_pt_cluster[1] - min_pt_cluster[1];
           marker_individual.scale.z = max_pt_cluster[2] - min_pt_cluster[2];
 
@@ -513,66 +488,37 @@ class MinimalSubscriber : public rclcpp::Node
           marker_individual.color.r = 0.0f;
           marker_individual.color.g = 1.0f;
           marker_individual.color.b = 0.0f;
-          marker_individual.color.a = 0.5;
+          marker_individual.color.a = 0.5; //Transparency parameter: 1: full opacity/ zero transparency; 0 : full transparency, zero opacity
 
           marker_individual.lifetime.sec = 0;
           marker_individual.lifetime.nanosec = 0;
-
           marker_all.markers.push_back(marker_individual);
-          
 
-          
           // See if current cluster is present in the FOV of the robot and find angle of corner of AABB which is in FOV
-          
           float angle_individual_radian;
           int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1], &angle_individual_radian);
           if(is_obstacle_detected_in_fov == 1) {
             angle_corner_radian_all[j].push_back(angle_individual_radian);
             std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI << " and corner angle: " << angle_corner_radian_all[j][0]*180/M_PI  <<std::endl;
-            send(clientSock, &angle_individual_radian, sizeof(angle_individual_radian), 0);}
-            // bzero(socket_buffer, 1000);
-            // strcpy(socket_buffer, "test");
-            // int n = write(clientSock, socket_buffer, strlen(socket_buffer));
-            // std::cout << "Write Confirmation code  " << n << std::endl;            
-            // shutdown(clientSock);
-          else {
+            send(clientSock, &angle_individual_radian, sizeof(angle_individual_radian), 0);
+          }else {
             float no_obs_angle_rad = 456.78;
             std::cout << "Cluster # " << j << " obstacle NOT detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI <<std::endl;
-            send(clientSock, &no_obs_angle_rad, sizeof(no_obs_angle_rad), 0);}
-          
-
-
-
-          // std::cout << "Min point vector: " << min_pt_cluster_all[j][0] << std::endl;
-          // std::cout << "Max x: " << max_pt_cluster[0] << std::endl;
-          // std::cout << "Max y: " << max_pt_cluster[1] << std::endl;
-          // std::cout << "Max z: " << max_pt_cluster[2] << std::endl;
-          // std::cout << "Min x: " << min_pt_cluster[0] << std::endl;
-          // std::cout << "Min y: " << min_pt_cluster[1] << std::endl;
-          // std::cout << "Min z: " << min_pt_cluster[2] << std::endl;
-
-
-          // sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
-          // pcl::toROSMsg(*cloud_cluster, ros_processed_pcl2);
-          // publisher_pcl->publish(ros_processed_pcl2);        
-
-          // std::stringstream ss;
-          // ss << "cloud_cluster_" << j << ".pcd";
-          // writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); //*
+            send(clientSock, &no_obs_angle_rad, sizeof(no_obs_angle_rad), 0);
+          }
           j++;
         }
 
         sensor_msgs::msg::PointCloud2 ros_processed_pcl2; //Declaring a pointer using new was working but gave deprecated warning
         pcl::toROSMsg(*cloud_cluster_all, ros_processed_pcl2);
-        publisher_pcl->publish(ros_processed_pcl2);
-        marker_all.markers.push_back(fov_marker_pts);
-        publisher_marker_array->publish(marker_all);
+        publisher_pcl->publish(ros_processed_pcl2);        
       }
       else {
         // Non-ground points not detected. Need to indicate this to Python script
         float no_obs_angle_rad = 456.78;
         std::cout << "Non-ground points not detected, sending 456.78" << std::endl;
-        send(clientSock, &no_obs_angle_rad, sizeof(no_obs_angle_rad), 0);}
+        send(clientSock, &no_obs_angle_rad, sizeof(no_obs_angle_rad), 0);
+      }
       
 
       
@@ -588,6 +534,9 @@ class MinimalSubscriber : public rclcpp::Node
 
       // RCLCPP_INFO(this->get_logger(), "Process ROS2 PCL2, width is: '%d'", ros_processed_pcl2.width); //
       // publisher_pcl->publish(ros_processed_pcl2);
+      marker_all.markers.push_back(fov_marker_pts);
+      publisher_marker_array->publish(marker_all);
+      marker_all.markers.clear();
       std::cout << "Reached callback end in Private" << std::endl;
       // std::cin.ignore();
     }
@@ -619,7 +568,11 @@ int main(int argc, char * argv[])
   std::cout << "Socket connected" << std::endl;
   
   
-  
+  // bzero(socket_buffer, 1000);
+  // strcpy(socket_buffer, "test");
+  // int n = write(clientSock, socket_buffer, strlen(socket_buffer));
+  // std::cout << "Write Confirmation code  " << n << std::endl;            
+  // shutdown(clientSock);
   
   // receive a message from a client
   // read(clientSock, socket_buffer, 1000); // no contains the no. of bytes received; Ref: https://www.ibm.com/docs/en/zos/2.1.0?topic=functions-read-read-from-file-socket

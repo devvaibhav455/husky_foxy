@@ -624,8 +624,9 @@ class CustomNavigator(Node):
         print("Reached 2")
         # print("target={} current:{}", target_angle_rad,self.roll)
         # self.move_cmd.angular.z = multiplier * (self.kp * (abs(bearing - self.true_heading) + 0.3))
-        self.move_cmd.angular.z = multiplier * (self.kp * (abs(target_angle_rad) + 0.3))
+        # self.move_cmd.angular.z = multiplier * (self.kp * (abs(target_angle_rad) + 0.3))
         # self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 4)
+        self.move_cmd.angular.z = 0.2
         self.move_cmd.linear.x = 0.1
         # self.move_cmd.angular.z = multiplier * 0.5
         # print(self.move_cmd.angular.z)
