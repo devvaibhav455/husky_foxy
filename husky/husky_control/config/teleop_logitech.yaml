@@ -58,9 +58,11 @@ joy_teleop/teleop_twist_joy_node:
     enable_button: 4
     enable_turbo_button: 5
     require_enable_button: False
+    use_sim_time: True
 joy_teleop/joy_node:
   ros__parameters:
     deadzone: 0.1
     autorepeat_rate: 20.0
     dev: /dev/input/f710
+    use_sim_time: True
 
