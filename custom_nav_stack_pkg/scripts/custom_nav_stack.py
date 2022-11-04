@@ -161,7 +161,7 @@ class CustomNavigator(Node):
         self.kp = 0.8
         # self.mag_declination = math.radians(-14.87) #14.87° W degrees is for Neumayer III Station, Antarctica (https://latitude.to/articles-by-country/aq/antarctica/27247/neumayer-station-iii)
         self.mag_declination = math.radians(-4.23) # 4.23° W at 0 lat/ long
-        self.imu_heading_offset = math.radians(4.235193576741463 - 90) #At robot's initial spawn position, IMU provides ~ 4.23° heading  which is towards West. Need to account for thus offset. In practice, it shouldn't matter as heading will be calculated from magnetometer readings which are wrt real directions.
+        self.imu_heading_offset = math.radians(4.235193576741463 - 90) #At robot's initial spawn position, IMU provides ~ 4.23° heading  which is towards West. Need to account for this offset. In practice, it shouldn't matter as heading will be calculated from magnetometer readings which are wrt real directions.
         
         
         # time.sleep(5)
