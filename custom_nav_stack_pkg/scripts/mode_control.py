@@ -6,8 +6,8 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String
-from sensor_msgs.msg import Joy, NavSatFix, Imu
-from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Joy, NavSatFix, Imu, MagneticField
+from geometry_msgs.msg import Twist, Vector3
 
 from geographiclib.geodesic import Geodesic
 
@@ -17,11 +17,14 @@ from pathlib import Path
 import math
 from transformations import euler_from_quaternion
 import time
+import numpy as np
+import array as arr
+import statistics
 
 import os
-
-
-
+from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger("my_logger")
 
@@ -29,11 +32,15 @@ class ModeControl(Node):
 
     def __init__(self):
         super().__init__('mode_control')
+        self.fig = plt.figure()
+        
+        self.mag_cal_done = 0
+
         self.analog_axes = [0 , 1, 3, 4]
-        self.button_gps_mode = 4
-        self.button_local_mode = 5
-        self.button_manual_mode = 6 # Back button
-        self.button_auto_mode = 0 #A or green button
+        self.button_gps_mode = [0 , 3]
+        self.button_local_mode = [1 , 2]
+        self.button_manual_mode = [1 , 3] # Back button
+        self.button_auto_mode = [0, 2] #A or green button
 
         path = str(Path(__file__).parent / "./destination_lat_long.txt")
         path = path.replace("install", "src")
@@ -61,22 +68,24 @@ class ModeControl(Node):
         self.pitch = 0.0
         self.yaw = 0.0
         self.kp = 0.8
-        # self.mag_declination = math.radians(-14.87) #14.87° W degrees is for Neumayer III Station, Antarctica (https://latitude.to/articles-by-country/aq/antarctica/27247/neumayer-station-iii)
-        self.mag_declination = math.radians(-4.23) # 4.23° W at 0 lat/ long
+        self.mag_declination = math.radians(-14.87) #14.87° W degrees is for Neumayer III Station, Antarctica (https://latitude.to/articles-by-country/aq/antarctica/27247/neumayer-station-iii)
+        # self.mag_declination = math.radians(-4.23) # 4.23° W at 0 lat/ long. used in simulation
         self.imu_heading_offset = math.radians(4.235193576741463 - 90) #At robot's initial spawn position, IMU provides ~ 4.23° heading  which is towards West. Need to account for this offset. In practice, it shouldn't matter as heading will be calculated from magnetometer readings which are wrt real directions.
 
         self.mode = 'auto'
         self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data')
         self.gps_sub = message_filters.Subscriber(self, NavSatFix, 'gps/data')
         self.joy_sub = message_filters.Subscriber(self, Joy, 'joy_teleop/joy')
+        self.mag_sub = message_filters.Subscriber(self, MagneticField, 'mag')
         
         self.velocity_publisher_ = self.create_publisher(Twist, 'husky_velocity_controller/cmd_vel_unstamped', 10)
         # Twist is a datatype for velocity
         self.move_cmd = Twist()        
         
-        self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub], 10, 0.09)
+        self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.09)
+        # self.ts = message_filters.ApproximateTimeSynchronizer([self.imu_sub, self.mag_sub], 10, 0.9)
         self.ts.registerCallback(self.listener_callback)
-        time.sleep(2)
+        # time.sleep(2)
 
     def DMS_to_decimal_format(self, lat, long): 
         '''Check for degrees, minutes, seconds format and convert to decimal'''
@@ -115,15 +124,21 @@ class ModeControl(Node):
         self.velocity_publisher_.publish(self.move_cmd)
 
     
-    def listener_callback(self, joy_msg, imu_msg, gps_msg):
+    def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
         self.sync_done = 1
         
         #Extracting data from IMU sensor
+        self.imu_msg = imu_msg
         orientation_q = imu_msg.orientation
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         (self.roll, self.pitch, self.yaw) = euler_from_quaternion (orientation_list) #Result in radians. -180 < Roll < 180
         self.mag_north_heading = -self.roll + self.imu_heading_offset #ASSUMPTION 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
 
+        
+        #Extracting magnetometer data
+        self.mag_data = mag_msg.magnetic_field
+
+        
         #Extracting data from GPS sensor
         self.current_lat = gps_msg.latitude
         self.current_long = gps_msg.longitude
@@ -132,20 +147,19 @@ class ModeControl(Node):
         Y = (math.cos(self.current_lat) * math.sin(self.dest_lat)) - (math.sin(self.current_lat) * math.cos(self.dest_lat) * math.cos(self.delta_long))
         global bearing #Bearing is the required direction towards which robot should orient
         bearing = math.atan2(X, Y)
-        # rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))
+        rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))
 
         #Setting mode control based on input from JS
-        if(joy_msg.buttons[self.button_gps_mode] == 1):
+        if(joy_msg.buttons[self.button_gps_mode[0]] == 1 and joy_msg.buttons[self.button_gps_mode[1]] == 1):
             self.mode = 'gps'
-        elif(joy_msg.buttons[self.button_local_mode] == 1):
+        elif(joy_msg.buttons[self.button_local_mode[0]] == 1 and joy_msg.buttons[self.button_local_mode[1]] == 1):
             self.mode = 'local'
-        elif(joy_msg.buttons[self.button_auto_mode] == 1):
+        elif(joy_msg.buttons[self.button_auto_mode[0]] == 1 and joy_msg.buttons[self.button_auto_mode[1]] == 1):
             self.mode = 'auto'
-        elif(joy_msg.buttons[self.button_manual_mode] == 1 or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0):
+        elif((joy_msg.buttons[self.button_manual_mode[0]] == 1 and joy_msg.buttons[self.button_manual_mode[1]] == 1) or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0):
             self.mode = 'manual'
         else:
             self.mode = 'auto'
-        # self.destroy_subscription(self.subscription)
 
     def move_forward(self, distance_to_move): 
         '''If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters'''
@@ -182,10 +196,124 @@ class ModeControl(Node):
         # self.get_logger().info("The translation from the origin to the goal is (x,y) {:.3f}, {:.3f} m.".format(x, y))
         return distance
 
-def main(args=None):
-    
-    
+    def mag_calibration(self, mag_x_arr, mag_y_arr, lin_acc_x_arr, lin_acc_y_arr, lin_acc_z_arr):
+        '''Calculates calibration parameters for magetometer ( tilt correction (bank and elevation angle correction), hard and soft iron correction'''
+        
+        #Plotting original Magnetometer data
+        self.ax = self.fig.add_subplot(221)
+        self.ax.set_xlabel('Mag X (Gauss)')
+        self.ax.set_ylabel('Mag Y (Gauss)')
+        self.ax.set_title('Original Mag data')
+        self.ax.set_xlim(-5,5)
+        self.ax.set_ylim(-5,5)
+        self.ax.scatter(mag_x_arr, mag_y_arr) 
 
+
+        # self.ax2 = self.fig2.add_subplot(221, projection='3d')
+        # self.ax2.set_xlabel('X axis')
+        # self.ax2.set_ylabel('Y axis')
+        # self.ax2.set_zlabel('Z axis')
+        # self.ax2.set_title('Original Point Cloud, size: %.i' % data.shape[0])
+        # self.ax2.set_xlim(-5,5)
+        # self.ax2.set_ylim(-5,5)
+        # self.ax2.set_zlim(-1.5,1.2)
+        # self.ax2.scatter(data[:,0], data[:,1], data[:,2]) #Plotting original cloud
+        
+        
+        # Reference : https://github.com/rlrosa/uquad/blob/master/doc_externa/Calibracion_sensores/MTD-0801_1_0_Calculating_Heading_Elevation_Bank_Angle.pdf, https://kionixfs.kionix.com/en/document/AN005-Tilt-Sensing-with-Kionix-MEMS-Accelerometers.pdf, https://www.fierceelectronics.com/components/compensating-for-tilt-hard-iron-and-soft-iron-effects
+
+
+        # Bank and Elevation angle calculation. It's also important to note that tilt/sensitivity errors vary with location, thus it is not possible to employ a static correction factor such as a lookup table. So, not doing as our test environment in not perfectly plane
+        # bank_angle = math.atan2(statistics.mean(lin_acc_y_arr), math.sqrt(statistics.mean(lin_acc_x_arr)**2 + statistics.mean(lin_acc_z_arr)**2))
+        # elevation_angle = -math.atan2(statistics.mean(lin_acc_x_arr), math.sqrt(statistics.mean(lin_acc_y_arr)**2 + statistics.mean(lin_acc_z_arr)**2))
+        
+        # Rot_x =  ([1 , 0 , 0], [0, math.cos(bank_angle), math.sin(bank_angle)], [0, -math.sin(bank_angle), math.cos(bank_angle)])
+        # Rot_y =  ([math.cos(elevation_angle), 0, -math.sin(elevation_angle)],[0, 1, 0],[math.sin(elevation_angle), 0, math.cos(elevation_angle)])
+        # R = np.dot(Rot_x,Rot_y) #This correction needs to be applied on all the data
+
+        # mag_x_tilt_correction = []
+        # mag_y_tilt_correction = []
+        # mag_z_tilt_correction = []
+        # # mag_xyz_tilt_correction = []
+        # for i in range(len(mag_x_arr)):
+        #     mag_xyz_tilt_correction = np.dot(R, [[mag_x_arr[i]],[mag_y_arr[i]],[mag_y_arr[i]]])
+        #     print(mag_xyz_tilt_correction[0][0])
+        #     mag_x_tilt_correction.append(mag_xyz_tilt_correction[0][0])
+        #     mag_y_tilt_correction.append(mag_xyz_tilt_correction[1][0])
+        #     mag_z_tilt_correction.append(mag_xyz_tilt_correction[2][0])
+        #     print(np.dot(R, [[mag_x_arr[i]],[mag_y_arr[i]],[mag_y_arr[i]]]))
+        #     time.sleep(10)
+        
+
+        # ----------------Hard Iron correction-----------------
+        magx_hard_offset = (max(mag_x_arr) + min(mag_x_arr))/2
+        magy_hard_offset = (max(mag_x_arr) + min(mag_x_arr))/2
+
+        magx_hard_correction = []
+        magy_hard_correction = []
+        for i in range(len(mag_x_arr)):
+            magx_hard_correction.append(mag_x_arr[i] - magx_hard_offset)
+            magy_hard_correction.append(mag_y_arr[i] - magy_hard_offset)
+
+        
+        logger.warning("Hard iron offsets are: x: %f, y: %f",magx_hard_offset, magy_hard_offset)
+        # print("Original Magx: %f", mag_x_arr)
+        # print("Mag x hard corrected: ", magx_hard_correction)
+        
+        # print("Original Magy: ", mag_y_arr)
+        # print("Mag y hard corrected: ", magy_hard_correction)
+
+
+        #Plotting hard iron corrected Magnetometer data
+        self.ax = self.fig.add_subplot(222)
+        self.ax.set_xlabel('Mag X (Gauss)')
+        self.ax.set_ylabel('Mag Y (Gauss)')
+        self.ax.set_title('Mag X vs Mag Y after Hard Iron correction')
+        self.ax.set_xlim(-5,5)
+        self.ax.set_ylim(-5,5)
+        self.ax.scatter(magx_hard_correction, magy_hard_correction)
+
+        #------------Soft iron correction-----------------%
+        r = []
+        for i in range(len(mag_x_arr)):
+            r.append(math.sqrt(magx_hard_correction[i]**2 + magy_hard_correction[i]**2))
+        
+
+        theta = math.asin(magy_hard_correction[r.index(max(r))]/max(r))
+        logger.warning("Soft iron correction: theta is: %f radian or %f degree",theta, math.degrees(theta))
+
+        rot_soft = ([math.cos(theta), math.sin(theta)] , [-math.sin(theta), math.cos(theta)]) 
+
+        mag_x_soft_correction = []
+        mag_y_soft_correction = []
+        for i in range(len(mag_x_arr)):
+            mag_xy_soft_correction = np.dot(rot_soft, [[magx_hard_correction[i]],[magy_hard_correction[i]]])
+            mag_x_soft_correction.append(mag_xy_soft_correction[0][0])
+            mag_y_soft_correction.append(mag_xy_soft_correction[1][0])
+        
+        # print("Before scaling: Mag x soft corrected: ", mag_x_soft_correction)
+        # print("Before scaling: Mag y soft corrected: ", mag_y_soft_correction)
+
+        # ----------Scaling Factor--------------%
+        sigma = (max(mag_x_soft_correction)-min(mag_x_soft_correction))/(max(mag_y_soft_correction)-min(mag_y_soft_correction))
+        logger.warning("Soft iron correction: Scaling factor (sigma) is: %f",sigma)
+
+        mag_x_soft_correction[:] = [x / sigma for x in mag_x_soft_correction]
+        # print(len(mag_x_soft_correction), mag_x_soft_correction)
+        
+        rot_soft_back = ([math.cos(-theta), math.sin(-theta)], [-math.sin(-theta), math.cos(-theta)])
+        for i in range(len(mag_x_arr)):
+            mag_xy_soft_correction = np.dot(rot_soft_back, [[mag_x_soft_correction[i]],[mag_y_soft_correction[i]]])
+            mag_x_soft_correction[i] = mag_xy_soft_correction[0][0]
+            mag_y_soft_correction[i] = mag_xy_soft_correction[1][0]
+        
+        # print("Final Mag x soft corrected: ", mag_x_soft_correction)
+        # print("Final Mag y soft corrected: ", mag_y_soft_correction)
+        self.mag_cal_done = 1
+        return magx_hard_offset, magy_hard_offset, theta, sigma #Use these calibration parameters to modify real-time sensor data
+
+
+def main(args=None):
     
     # logging.basicConfig(
     #     filename='debug.log',
@@ -210,24 +338,103 @@ def main(args=None):
     #On terminal, due to some reason, only warning and above are printed, so setting the level to warning. No need to worry.
     rclpy.init(args=args)
     mode_control = ModeControl()
-    rclpy.spin_once(mode_control)
+    # rclpy.spin_once(mode_control)
     old_mode = mode_control.mode
     logger.warning('Current mode is: %s', mode_control.mode)
+
+    #Perform Magnetometer calibration to calculate initial heading
+    #Step1: Drive robot in a circle for 2-3 times. Record the magnetometer parameters. Calculate the calibration parameters, store them and use for further data from mag sensor
+
+    global i, start_time
+    i = 0
+    mag_x_cal_arr = []
+    mag_y_cal_arr = []
+    mag_z_cal_arr = []
+    lin_acc_x_cal_arr = []
+    lin_acc_y_cal_arr = []
+    lin_acc_z_cal_arr = []
+    
+
+    r_mag_cal = 1
+    speed_mag_cal = 0.4
+    mode_control.sync_done = 0
+    # num_loops = 2
+    # time_one_loop = 2*math.pi*r_mag_cal/speed_mag_cal
+    # print("Time one loop: ", time_one_loop)
+    time_elapsed = 0
+    start_time = time.time()
+    # while time_elapsed <= time_one_loop*num_loops:
+    while mode_control.mode == 'auto':
+        mode_control.sync_done = 0
+        rclpy.spin_once(mode_control)
+        
+        if mode_control.sync_done == 1:
+            mag_x_cal_arr.append(mode_control.mag_data.x)
+            mag_y_cal_arr.append(mode_control.mag_data.y)
+            mag_z_cal_arr.append(mode_control.mag_data.z)
+            lin_acc_x_cal_arr.append(mode_control.imu_msg.linear_acceleration.x)
+            lin_acc_y_cal_arr.append(mode_control.imu_msg.linear_acceleration.y)
+            lin_acc_z_cal_arr.append(mode_control.imu_msg.linear_acceleration.z)
+            mode_control.move_cmd.linear.x = speed_mag_cal
+            mode_control.move_cmd.angular.z = speed_mag_cal/r_mag_cal
+            mode_control.velocity_publisher_.publish(mode_control.move_cmd)
+            # time_elapsed = time.time() - start_time
+            # logger.warning("Time elapsed: %f ", time_elapsed)
+        
+        #Code used just for testing. Need to remove in final implementation
+        # if time_elapsed >= 2:
+        #     mode_control.mode = 'manual'
+
+    logger.warning("Suceessfully recorded magnetometer data. Calculating calibration parameters")
+    magx_hard_offset, magy_hard_offset, theta, sigma = mode_control.mag_calibration(mag_x_cal_arr, mag_y_cal_arr, lin_acc_x_cal_arr, lin_acc_y_cal_arr, lin_acc_z_cal_arr)
+
+    # magx_hard_offset, magy_hard_offset, theta, sigma = 0.194037, 0.19403, -1.496121, 1.231137 #Sample parameters for test
+
+
     while 1==1:
         mode_control.sync_done = 0
         rclpy.spin_once(mode_control)
         if mode_control.sync_done == 1:
+            
+            mode_control.mode = 'gps'
             if(old_mode != mode_control.mode):
                 logger.warning("Changed mode from: %s to %s", old_mode, mode_control.mode)
             if mode_control.mode == 'manual': #Enter into manual override mode. Complete control in hands of the user
                 # Need to run node `node_teleop_twist_joy` which publishes cmd_vel to robot from JS
                 pass
                 # os.system("ros2 launch husky_control teleop_pub_vel.launch.py &") #No need to run this because both joy nodes are running and they override the speed command from script
-                #Need to destroy other nodes here
             elif mode_control.mode == 'gps': #Enter into force GPS waypoing mode, can hit obstacles, does not call local mode when detects obstacle. Used for testing purpose
+                
+                #Using calculated magnetometer calibration parameters to get correct heading from magnetometer.
+                
+                logger.warning("Real time: Original magx: %f, magy: %f",mode_control.mag_data.x, mode_control.mag_data.y )
+                #Hard iron correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x - magx_hard_offset
+                mode_control.mag_data.y = mode_control.mag_data.x - magy_hard_offset
+
+                #Soft iron correction on real-time data
+                rot_soft = ([math.cos(theta), math.sin(theta)] , [-math.sin(theta), math.cos(theta)]) 
+                mode_control.mag_data.x = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+
+                #Scaling factor correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x/sigma
+
+                #Rotating back to compensate for rotation during soft correction
+                rot_soft_back = ([math.cos(-theta), math.sin(-theta)], [-math.sin(-theta), math.cos(-theta)])
+                mode_control.mag_data.x = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+
+                logger.warning("Real time: Corrected magx: %f, magy: %f",mode_control.mag_data.x, mode_control.mag_data.y )
+
+                # ---------   1. Estimate the heading (yaw)------------------ 
+                # Reference: https://digilent.com/blog/how-to-convert-magnetometer-data-into-compass-heading/
+
+                heading_mag = -math.atan2(mode_control.mag_data.y,mode_control.mag_data.x); #Result in -pi to pi
+                mode_control.true_heading = heading_mag + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
                 #First try to align robot to desired heading and then move in that direction
                 global bearing
-                mode_control.true_heading = mode_control.mag_north_heading + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+                # mode_control.true_heading = mode_control.mag_north_heading + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
                 # Calculation to get true heading within -180 to +180 degrees range
                 if mode_control.true_heading < math.radians(-180):
                     mode_control.true_heading = math.radians(180 - (abs(math.degrees(mode_control.true_heading)) - 180))
@@ -270,7 +477,6 @@ def main(args=None):
                     logger.warning("Robot already aligned towards goal no: %d", goal_number)
                     mode_control.distance_to_move = mode_control.calc_goal(mode_control.current_lat, mode_control.current_long, mode_control.dest_lat, mode_control.dest_long)
                     mode_control.move_forward(mode_control.distance_to_move)
-                    # mode_control.destroy_timer(mode_control.timer)
 
 
             elif mode_control.mode == 'local': #Enter into force local navigation mode. Used for testing purpose
