@@ -1,5 +1,10 @@
 #! /usr/bin/env python3
 
+__author__ = "Dev Vaibhav"
+__credits__ = ["Dev Vaibhav"]
+__maintainer__ = "Dev Vaibhav"
+__email__ = "dev.vaibhav@whoi.edu"
+
 import logging
 from statistics import mode
 import rclpy
@@ -82,8 +87,8 @@ class ModeControl(Node):
         # Twist is a datatype for velocity
         self.move_cmd = Twist()        
         
-        self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.09)
-        # self.ts = message_filters.ApproximateTimeSynchronizer([self.imu_sub, self.mag_sub], 10, 0.9)
+        # self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.09)
+        self.ts = message_filters.ApproximateTimeSynchronizer([self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.9)
         self.ts.registerCallback(self.listener_callback)
         # time.sleep(2)
 
@@ -123,8 +128,9 @@ class ModeControl(Node):
         self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 4)
         self.velocity_publisher_.publish(self.move_cmd)
 
-    
-    def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
+
+    def listener_callback(self, imu_msg, gps_msg, mag_msg):
+    # def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
         self.sync_done = 1
         
         #Extracting data from IMU sensor
@@ -150,16 +156,16 @@ class ModeControl(Node):
         rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))
 
         #Setting mode control based on input from JS
-        if(joy_msg.buttons[self.button_gps_mode[0]] == 1 and joy_msg.buttons[self.button_gps_mode[1]] == 1):
-            self.mode = 'gps'
-        elif(joy_msg.buttons[self.button_local_mode[0]] == 1 and joy_msg.buttons[self.button_local_mode[1]] == 1):
-            self.mode = 'local'
-        elif(joy_msg.buttons[self.button_auto_mode[0]] == 1 and joy_msg.buttons[self.button_auto_mode[1]] == 1):
-            self.mode = 'auto'
-        elif((joy_msg.buttons[self.button_manual_mode[0]] == 1 and joy_msg.buttons[self.button_manual_mode[1]] == 1) or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0):
-            self.mode = 'manual'
-        else:
-            self.mode = 'auto'
+        # if(joy_msg.buttons[self.button_gps_mode[0]] == 1 and joy_msg.buttons[self.button_gps_mode[1]] == 1):
+        #     self.mode = 'gps'
+        # elif(joy_msg.buttons[self.button_local_mode[0]] == 1 and joy_msg.buttons[self.button_local_mode[1]] == 1):
+        #     self.mode = 'local'
+        # elif(joy_msg.buttons[self.button_auto_mode[0]] == 1 and joy_msg.buttons[self.button_auto_mode[1]] == 1):
+        #     self.mode = 'auto'
+        # elif((joy_msg.buttons[self.button_manual_mode[0]] == 1 and joy_msg.buttons[self.button_manual_mode[1]] == 1) or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0):
+        #     self.mode = 'manual'
+        # else:
+        #     self.mode = 'auto'
 
     def move_forward(self, distance_to_move): 
         '''If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters'''
@@ -296,6 +302,7 @@ class ModeControl(Node):
 
         # ----------Scaling Factor--------------%
         sigma = (max(mag_x_soft_correction)-min(mag_x_soft_correction))/(max(mag_y_soft_correction)-min(mag_y_soft_correction))
+        logger.warning("Scaling factor calculation: Num is %f, Den is %f",max(mag_x_soft_correction)-min(mag_x_soft_correction), max(mag_y_soft_correction)-min(mag_y_soft_correction) )
         logger.warning("Soft iron correction: Scaling factor (sigma) is: %f",sigma)
 
         mag_x_soft_correction[:] = [x / sigma for x in mag_x_soft_correction]
@@ -378,12 +385,12 @@ def main(args=None):
             mode_control.move_cmd.linear.x = speed_mag_cal
             mode_control.move_cmd.angular.z = speed_mag_cal/r_mag_cal
             mode_control.velocity_publisher_.publish(mode_control.move_cmd)
-            # time_elapsed = time.time() - start_time
-            # logger.warning("Time elapsed: %f ", time_elapsed)
+            time_elapsed = time.time() - start_time
+            logger.warning("Time elapsed: %f ", time_elapsed)
         
-        #Code used just for testing. Need to remove in final implementation
-        # if time_elapsed >= 2:
-        #     mode_control.mode = 'manual'
+        # Code used just for testing. Need to remove in final implementation
+        if time_elapsed >= 2:
+            mode_control.mode = 'manual'
 
     logger.warning("Suceessfully recorded magnetometer data. Calculating calibration parameters")
     magx_hard_offset, magy_hard_offset, theta, sigma = mode_control.mag_calibration(mag_x_cal_arr, mag_y_cal_arr, lin_acc_x_cal_arr, lin_acc_y_cal_arr, lin_acc_z_cal_arr)

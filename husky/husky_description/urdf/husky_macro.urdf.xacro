@@ -136,7 +136,7 @@
     <!-- Can be modified with environment variables in /etc/ros/setup.bash -->
     <link name="${prefix}imu_link"/>
     <joint name="${prefix}imu_joint" type="fixed">
-      <origin xyz="$(optenv CPR_IMU_XYZ 0 0 0)" rpy="$(optenv CPR_IMU_RPY 0 0 0)" />
+      <origin xyz="$(optenv CPR_IMU_XYZ -0.2 -0.2 0)" rpy="$(optenv CPR_IMU_RPY 3.14159 0 1.57079)" />
       <parent link="${prefix}base_link" />
       <child link="${prefix}imu_link" />
     </joint>

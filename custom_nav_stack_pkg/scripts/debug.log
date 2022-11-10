@@ -1,5 +1,20 @@
-2022-11-07 16:45:45 INFO     Line3: 8.568331406746644e-05 -8.459108823264808e-05
-2022-11-07 16:45:45 INFO     Line6: 8.427178989528105e-05 8.67224450490827e-05
-2022-11-07 16:45:45 INFO     Line9: -8.482634326068172e-05 8.620434763335194e-05
-2022-11-07 16:45:45 INFO     Line12: -8.488815024404338e-05 -8.762365968361716e-05
-2022-11-07 16:45:45 WARNING  Current mode is: auto
+2022-11-08 16:49:19 INFO     Line3: 8.568331406746644e-05 -8.459108823264808e-05
+2022-11-08 16:49:19 INFO     Line6: 8.427178989528105e-05 8.67224450490827e-05
+2022-11-08 16:49:19 INFO     Line9: -8.482634326068172e-05 8.620434763335194e-05
+2022-11-08 16:49:19 INFO     Line12: -8.488815024404338e-05 -8.762365968361716e-05
+2022-11-08 16:49:19 WARNING  Current mode is: auto
+2022-11-08 16:49:20 WARNING  Time elapsed: 0.485077 
+2022-11-08 16:49:21 WARNING  Time elapsed: 1.474198 
+2022-11-08 16:49:22 WARNING  Time elapsed: 2.471854 
+2022-11-08 16:49:22 WARNING  Suceessfully recorded magnetometer data. Calculating calibration parameters
+2022-11-08 16:49:22 WARNING  Hard iron offsets are: x: -0.229375, y: -0.229375
+2022-11-08 16:49:22 WARNING  Soft iron correction: theta is: 1.569427 radian or 89.921528 degree
+2022-11-08 16:49:22 WARNING  Scaling factor calculation: Num is 0.000825, Den is 0.000567
+2022-11-08 16:49:22 WARNING  Soft iron correction: Scaling factor (sigma) is: 1.456215
+2022-11-08 16:49:23 WARNING  Changed mode from: manual to gps
+2022-11-08 16:49:23 WARNING  Real time: Original magx: -0.229167, magy: -0.158543
+2022-11-08 16:49:23 WARNING  Real time: Corrected magx: 0.229484, magy: 0.229170
+2022-11-08 16:49:23 WARNING  Info for goal #: 0, Current heading: -59.830747°, Required heading: 114.576187°, Need to rotate by: 174.406934° in Direction: cw
+2022-11-08 16:49:24 WARNING  Real time: Original magx: -0.230540, magy: -0.158201
+2022-11-08 16:49:24 WARNING  Real time: Corrected magx: 0.228110, magy: 0.227797
+2022-11-08 16:49:24 WARNING  Info for goal #: 0, Current heading: -59.830747°, Required heading: 114.576091°, Need to rotate by: 174.406838° in Direction: cw
