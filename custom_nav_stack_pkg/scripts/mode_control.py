@@ -83,12 +83,13 @@ class ModeControl(Node):
         self.joy_sub = message_filters.Subscriber(self, Joy, 'joy_teleop/joy')
         self.mag_sub = message_filters.Subscriber(self, MagneticField, 'mag')
         
-        self.velocity_publisher_ = self.create_publisher(Twist, 'husky_velocity_controller/cmd_vel_unstamped', 10)
+        # self.velocity_publisher_ = self.create_publisher(Twist, 'husky_velocity_controller/cmd_vel_unstamped', 10)
+        self.velocity_publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         # Twist is a datatype for velocity
         self.move_cmd = Twist()        
         
-        # self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.09)
-        self.ts = message_filters.ApproximateTimeSynchronizer([self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.9)
+        self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.09)
+        # self.ts = message_filters.ApproximateTimeSynchronizer([self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.9)
         self.ts.registerCallback(self.listener_callback)
         # time.sleep(2)
 
@@ -129,8 +130,8 @@ class ModeControl(Node):
         self.velocity_publisher_.publish(self.move_cmd)
 
 
-    def listener_callback(self, imu_msg, gps_msg, mag_msg):
-    # def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
+    # def listener_callback(self, imu_msg, gps_msg):
+    def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
         self.sync_done = 1
         
         #Extracting data from IMU sensor
@@ -139,6 +140,7 @@ class ModeControl(Node):
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         (self.roll, self.pitch, self.yaw) = euler_from_quaternion (orientation_list) #Result in radians. -180 < Roll < 180
         self.mag_north_heading = -self.roll + self.imu_heading_offset #ASSUMPTION 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
+        logger.warning("IMU data extraction (values in degree): Roll: %f, Pitch: %f, Yaw: %f", math.degrees(self.roll), math.degrees(self.pitch), math.degrees(self.yaw))
 
         
         #Extracting magnetometer data
@@ -155,24 +157,25 @@ class ModeControl(Node):
         bearing = math.atan2(X, Y)
         rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))
 
-        #Setting mode control based on input from JS
-        # if(joy_msg.buttons[self.button_gps_mode[0]] == 1 and joy_msg.buttons[self.button_gps_mode[1]] == 1):
-        #     self.mode = 'gps'
-        # elif(joy_msg.buttons[self.button_local_mode[0]] == 1 and joy_msg.buttons[self.button_local_mode[1]] == 1):
-        #     self.mode = 'local'
-        # elif(joy_msg.buttons[self.button_auto_mode[0]] == 1 and joy_msg.buttons[self.button_auto_mode[1]] == 1):
-        #     self.mode = 'auto'
-        # elif((joy_msg.buttons[self.button_manual_mode[0]] == 1 and joy_msg.buttons[self.button_manual_mode[1]] == 1) or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0):
-        #     self.mode = 'manual'
-        # else:
-        #     self.mode = 'auto'
+        # Setting mode control based on input from JS
+        if(joy_msg.buttons[self.button_gps_mode[0]] == 1 and joy_msg.buttons[self.button_gps_mode[1]] == 1):
+            self.mode = 'gps'
+        elif(joy_msg.buttons[self.button_local_mode[0]] == 1 and joy_msg.buttons[self.button_local_mode[1]] == 1):
+            self.mode = 'local'
+        elif(joy_msg.buttons[self.button_auto_mode[0]] == 1 and joy_msg.buttons[self.button_auto_mode[1]] == 1):
+            self.mode = 'auto'
+        elif((joy_msg.buttons[self.button_manual_mode[0]] == 1 and joy_msg.buttons[self.button_manual_mode[1]] == 1) or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0):
+            self.mode = 'manual'
+        else:
+            self.mode = 'auto'
 
     def move_forward(self, distance_to_move): 
         '''If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters'''
         if distance_to_move > 1:
-            self.move_cmd.linear.x = 0.2
+            self.move_cmd.linear.x = 0.1
             self.move_cmd.angular.z = 0.0
-            self.velocity_publisher_.publish(self.move_cmd)
+            for i in range(0,4): #Used to publish velocity commands 5 times in order to avoid jerky motion
+                self.velocity_publisher_.publish(self.move_cmd)
         elif(distance_to_move < 1):
             global goal_number
             self.move_cmd.linear.x = 0.0
@@ -363,7 +366,7 @@ def main(args=None):
     
 
     r_mag_cal = 1
-    speed_mag_cal = 0.4
+    speed_mag_cal = 0.1
     mode_control.sync_done = 0
     # num_loops = 2
     # time_one_loop = 2*math.pi*r_mag_cal/speed_mag_cal
@@ -384,18 +387,22 @@ def main(args=None):
             lin_acc_z_cal_arr.append(mode_control.imu_msg.linear_acceleration.z)
             mode_control.move_cmd.linear.x = speed_mag_cal
             mode_control.move_cmd.angular.z = speed_mag_cal/r_mag_cal
+            logger.warning("Publishing Forward speed: %f, Angular speed: %f", mode_control.move_cmd.linear.x, mode_control.move_cmd.angular.z)
             mode_control.velocity_publisher_.publish(mode_control.move_cmd)
+            logger.warning("Publishing: %s", mode_control.velocity_publisher_.publish(mode_control.move_cmd))
             time_elapsed = time.time() - start_time
             logger.warning("Time elapsed: %f ", time_elapsed)
         
-        # Code used just for testing. Need to remove in final implementation
-        if time_elapsed >= 2:
-            mode_control.mode = 'manual'
+        # # Code used just for testing. Need to remove in final implementation
+        # if time_elapsed >= 2:
+        #     mode_control.mode = 'manual'
 
-    logger.warning("Suceessfully recorded magnetometer data. Calculating calibration parameters")
     magx_hard_offset, magy_hard_offset, theta, sigma = mode_control.mag_calibration(mag_x_cal_arr, mag_y_cal_arr, lin_acc_x_cal_arr, lin_acc_y_cal_arr, lin_acc_z_cal_arr)
+    logger.warning("Suceessfully recorded magnetometer data. Calculating calibration parameters")
+    # magx_hard_offset, magy_hard_offset, theta, sigma = 0.002376, 0.002376, -1.042795, 0.797751
+    # logger.warning("Reading hard-coded magnetometer calibration data.")
+    logger.warning("Please switch modes using Joystick to operate robot further")
 
-    # magx_hard_offset, magy_hard_offset, theta, sigma = 0.194037, 0.19403, -1.496121, 1.231137 #Sample parameters for test
 
 
     while 1==1:
@@ -403,12 +410,44 @@ def main(args=None):
         rclpy.spin_once(mode_control)
         if mode_control.sync_done == 1:
             
-            mode_control.mode = 'gps'
+            # mode_control.mode = 'gps'
             if(old_mode != mode_control.mode):
                 logger.warning("Changed mode from: %s to %s", old_mode, mode_control.mode)
             if mode_control.mode == 'manual': #Enter into manual override mode. Complete control in hands of the user
                 # Need to run node `node_teleop_twist_joy` which publishes cmd_vel to robot from JS
                 pass
+                #Hard iron correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x - magx_hard_offset
+                mode_control.mag_data.y = mode_control.mag_data.x - magy_hard_offset
+
+                #Soft iron correction on real-time data
+                rot_soft = ([math.cos(theta), math.sin(theta)] , [-math.sin(theta), math.cos(theta)]) 
+                mode_control.mag_data.x = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+
+                #Scaling factor correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x/sigma
+
+                #Rotating back to compensate for rotation during soft correction
+                rot_soft_back = ([math.cos(-theta), math.sin(-theta)], [-math.sin(-theta), math.cos(-theta)])
+                mode_control.mag_data.x = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+
+                # ---------   1. Estimate the heading (yaw)------------------ 
+                # Reference: https://digilent.com/blog/how-to-convert-magnetometer-data-into-compass-heading/
+
+                heading_mag = -math.atan2(mode_control.mag_data.y,mode_control.mag_data.x); #Result in -pi to pi
+                mode_control.true_heading = heading_mag + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+                #First try to align robot to desired heading and then move in that direction
+                global bearing
+                # mode_control.true_heading = mode_control.mag_north_heading + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+                # Calculation to get true heading within -180 to +180 degrees range
+                if mode_control.true_heading < math.radians(-180):
+                    mode_control.true_heading = math.radians(180 - (abs(math.degrees(mode_control.true_heading)) - 180))
+                elif mode_control.true_heading > math.radians(180):
+                    mode_control.true_heading = -(math.radians(180) - (mode_control.true_heading - math.radians(180)))
+                
+                logger.warning("Heading in manual mode (degrees): %f", math.degrees(mode_control.true_heading))
                 # os.system("ros2 launch husky_control teleop_pub_vel.launch.py &") #No need to run this because both joy nodes are running and they override the speed command from script
             elif mode_control.mode == 'gps': #Enter into force GPS waypoing mode, can hit obstacles, does not call local mode when detects obstacle. Used for testing purpose
                 

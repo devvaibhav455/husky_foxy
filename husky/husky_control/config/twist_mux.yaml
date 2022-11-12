@@ -12,7 +12,7 @@ twist_mux:
       external:
         topic   : cmd_vel
         timeout : 0.5
-        priority: 1
+        priority: 20
     locks:
       e_stop:
         topic   : e_stop
