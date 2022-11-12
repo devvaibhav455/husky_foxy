@@ -172,7 +172,7 @@ class ModeControl(Node):
     def move_forward(self, distance_to_move): 
         '''If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters'''
         if distance_to_move > 1:
-            self.move_cmd.linear.x = 0.1
+            self.move_cmd.linear.x = 0.2
             self.move_cmd.angular.z = 0.0
             for i in range(0,4): #Used to publish velocity commands 5 times in order to avoid jerky motion
                 self.velocity_publisher_.publish(self.move_cmd)
@@ -366,7 +366,7 @@ def main(args=None):
     
 
     r_mag_cal = 1
-    speed_mag_cal = 0.1
+    speed_mag_cal = 0.2
     mode_control.sync_done = 0
     # num_loops = 2
     # time_one_loop = 2*math.pi*r_mag_cal/speed_mag_cal
