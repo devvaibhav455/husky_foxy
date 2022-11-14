@@ -33,6 +33,8 @@
           <initial_orientation_as_reference>false</initial_orientation_as_reference>
           <odometry_frame>odom</odometry_frame>
           <robot_base_frame>base_link</robot_base_frame>
+          <frame_name>imu_link</frame_name> 
+          <!-- frame_name is just for the frame_id in ros msg. The message contents are still wrt sensor's axes only -->
         </plugin>
         <always_on>true</always_on>
         <update_rate>250</update_rate>
