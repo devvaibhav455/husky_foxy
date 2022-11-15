@@ -80,7 +80,8 @@ class ModeControl(Node):
         self.imu_heading_offset = 0 #Will read this in real time when heading calculation is done
 
         self.mode = 'auto'
-        self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data')
+        # self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation
+        self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data')
         self.gps_sub = message_filters.Subscriber(self, NavSatFix, 'gps/data')
         self.joy_sub = message_filters.Subscriber(self, Joy, 'joy_teleop/joy')
         self.mag_sub = message_filters.Subscriber(self, MagneticField, 'mag')

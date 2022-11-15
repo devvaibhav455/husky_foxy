@@ -79,17 +79,22 @@ add_definitions(${PCL_DEFINITIONS})
 
 
 # Create Cpp executable
-add_executable(cpp_executable src/cpp_node.cpp)
-#ament_target_dependencies(cpp_executable rclcpp)
-ament_target_dependencies(cpp_executable ${dependencies})
+add_executable(lidar_cpp_executable src/lidar_cpp_node.cpp)
+add_executable(occupancy_grid_generator src/occupancy_grid_generator.cpp)
+#ament_target_dependencies(lidar_cpp_executable rclcpp)
+ament_target_dependencies(lidar_cpp_executable ${dependencies})
+ament_target_dependencies(occupancy_grid_generator ${dependencies})
+
 
 # Install Cpp executables
 install(TARGETS
-  cpp_executable
+  lidar_cpp_executable
+  occupancy_grid_generator
   DESTINATION lib/${PROJECT_NAME}
 )
 
-target_link_libraries (cpp_executable ${PCL_LIBRARIES})
+target_link_libraries (lidar_cpp_executable ${PCL_LIBRARIES})
+target_link_libraries (occupancy_grid_generator  ${PCL_LIBRARIES})
 
 # Install Python executables
 install(PROGRAMS

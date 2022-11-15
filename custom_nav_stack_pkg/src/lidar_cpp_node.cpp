@@ -68,7 +68,7 @@ visualization_msgs::msg::MarkerArray marker_all; //Contains cuboid for clusters 
 
 // LIMITATION: 1) If object is too close to the LiDAR, it won't come in the pointcloud or might come partial only
 
-class MinimalSubscriber : public rclcpp::Node
+class LidarSubscriber : public rclcpp::Node
 {
 
   struct Config {
@@ -141,12 +141,12 @@ class MinimalSubscriber : public rclcpp::Node
           if (abs(ymax) <= (0.4)*(abs(ymin)+abs(ymax))){*angle_individual_radian_ptr = atan2(ymin, xmin);}else{*angle_individual_radian_ptr = atan2(ymax, xmin);}
           return 1;} // Case 13: Rectangle bottom side crosses the sector
       }
-      // No if-else condition matched (though it should not happen), so return 0 to avoid the warning while compiling: "/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp: In member function ‘int MinimalSubscriber::detect_obstacle(float, float, float, float) const’:/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp:126:5: warning: control reaches end of non-void function [-Wreturn-type]  126 |     }" 
+      // No if-else condition matched (though it should not happen), so return 0 to avoid the warning while compiling: "/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp: In member function ‘int LidarSubscriber::detect_obstacle(float, float, float, float) const’:/home/dev/husky_ws/src/custom_nav_stack_pkg/src/cpp_node.cpp:126:5: warning: control reaches end of non-void function [-Wreturn-type]  126 |     }" 
       return 0;
     }
 
-    MinimalSubscriber()    //Constructor which has the same name as that of class followed by a parentheses. A constructor in C++ is a special method that is automatically called when an object of a class is created. 
-    : Node("minimal_subscriber")
+    LidarSubscriber()    //Constructor which has the same name as that of class followed by a parentheses. A constructor in C++ is a special method that is automatically called when an object of a class is created. 
+    : Node("lidar_subscriber")
     {
       std::cout << "Reached start of Public" << std::endl;
       
@@ -248,7 +248,7 @@ class MinimalSubscriber : public rclcpp::Node
       publisher_marker_array = this->create_publisher<visualization_msgs::msg::MarkerArray>("visualization_marker_array", 10);
       
       subscription_vlp16 = this->create_subscription<sensor_msgs::msg::PointCloud2>
-      ("velodyne_points", rclcpp::SensorDataQoS(), std::bind(&MinimalSubscriber::topic_callback, this, std::placeholders::_1));
+      ("velodyne_points", rclcpp::SensorDataQoS(), std::bind(&LidarSubscriber::topic_callback, this, std::placeholders::_1));
 
       std::cout << "Reached end of Public" << std::endl;      
     }
@@ -485,27 +485,31 @@ class MinimalSubscriber : public rclcpp::Node
           marker_individual.scale.z = max_pt_cluster[2] - min_pt_cluster[2];
 
           // Set the color -- be sure to set alpha to something non-zero!
-          marker_individual.color.r = 0.0f;
-          marker_individual.color.g = 1.0f;
-          marker_individual.color.b = 0.0f;
           marker_individual.color.a = 0.5; //Transparency parameter: 1: full opacity/ zero transparency; 0 : full transparency, zero opacity
 
           marker_individual.lifetime.sec = 0;
           marker_individual.lifetime.nanosec = 0;
-          marker_all.markers.push_back(marker_individual);
+          
 
           // See if current cluster is present in the FOV of the robot and find angle of corner of AABB which is in FOV
           float angle_individual_radian;
           int is_obstacle_detected_in_fov = detect_obstacle(min_pt_cluster[0], min_pt_cluster[1], max_pt_cluster[0], max_pt_cluster[1], &angle_individual_radian);
           if(is_obstacle_detected_in_fov == 1) {
+            marker_individual.color.r = 1.0f;
+            marker_individual.color.g = 0.0f;
+            marker_individual.color.b = 0.0f;
             angle_corner_radian_all[j].push_back(angle_individual_radian);
             std::cout << "Cluster # " << j << " obstacle detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI << " and corner angle: " << angle_corner_radian_all[j][0]*180/M_PI  <<std::endl;
             send(clientSock, &angle_individual_radian, sizeof(angle_individual_radian), 0);
           }else {
+            marker_individual.color.r = 0.0f;
+            marker_individual.color.g = 1.0f;
+            marker_individual.color.b = 0.0f;
             float no_obs_angle_rad = 456.78;
             std::cout << "Cluster # " << j << " obstacle NOT detected in FOV: " << is_obstacle_detected_in_fov << " is at centroid angle: " << centroid_direction_array[j][0]*180/M_PI <<std::endl;
             send(clientSock, &no_obs_angle_rad, sizeof(no_obs_angle_rad), 0);
           }
+          marker_all.markers.push_back(marker_individual);
           j++;
         }
 
@@ -586,7 +590,7 @@ int main(int argc, char * argv[])
   std::cout << "Inside main function now" << std::endl;
   rclcpp::init(argc, argv);
   std::cout << "RCLCPP init complete" << std::endl;
-  rclcpp::spin(std::make_shared<MinimalSubscriber>());
+  rclcpp::spin(std::make_shared<LidarSubscriber>());
   std::cout << "RCLCPP spin line executed" << std::endl;
   rclcpp::shutdown();
   std::cout << "RCLCPP shutdown completed" << std::endl;
