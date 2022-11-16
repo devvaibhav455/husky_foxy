@@ -80,11 +80,11 @@ class ModeControl(Node):
         self.imu_heading_offset = 0 #Will read this in real time when heading calculation is done
 
         self.mode = 'auto'
-        # self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation
-        self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data')
+        # self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation and real-robot
+        self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data') #Real robot only
         self.gps_sub = message_filters.Subscriber(self, NavSatFix, 'gps/data')
         self.joy_sub = message_filters.Subscriber(self, Joy, 'joy_teleop/joy')
-        self.mag_sub = message_filters.Subscriber(self, MagneticField, 'mag')
+        # self.mag_sub = message_filters.Subscriber(self, MagneticField, 'mag')
         
         # self.velocity_publisher_ = self.create_publisher(Twist, 'husky_velocity_controller/cmd_vel_unstamped', 10)
         self.velocity_publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
@@ -144,7 +144,8 @@ class ModeControl(Node):
         (self.roll, self.pitch, self.yaw) = euler_from_quaternion (orientation_list) #Result in radians. -180 < Roll < 180
         global init_heading
         # self.true_heading = -self.roll + init_heading
-        self.true_heading = init_heading - (self.roll - self.imu_heading_offset)
+        self.true_heading = init_heading - (-self.roll - self.imu_heading_offset) #Real robot
+        # self.true_heading = init_heading - (-self.roll - self.imu_heading_offset) #Simulation
         
         # self.mag_north_heading = -self.roll + self.imu_heading_offset #ASSUMPTION 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
         # logger.warning("IMU data extraction (values in degree): Roll: %f, Pitch: %f, Yaw: %f", math.degrees(self.roll), math.degrees(self.pitch), math.degrees(self.yaw))
@@ -183,7 +184,7 @@ class ModeControl(Node):
         if distance_to_move > 1:
             self.move_cmd.linear.x = 0.2
             self.move_cmd.angular.z = 0.0
-            for i in range(0,9): #Used to publish velocity commands 5 times in order to avoid jerky motion
+            for i in range(0,29): #Used to publish velocity commands 5 times in order to avoid jerky motion
                 self.velocity_publisher_.publish(self.move_cmd)
         elif(distance_to_move < 1):
             global goal_number
@@ -454,7 +455,8 @@ def main(args=None):
     Y = (math.cos(statistics.mean(lat_tmp_src_arr)) * math.sin(statistics.mean(lat_tmp_dst_arr))) - (math.sin(statistics.mean(lat_tmp_src_arr)) * math.cos(statistics.mean(lat_tmp_dst_arr)) * math.cos(init_delta_long))
     
     init_heading = math.atan2(X, Y)
-    mode_control.imu_heading_offset = mode_control.roll
+    mode_control.imu_heading_offset = -mode_control.roll #Real robot
+    # mode_control.imu_heading_offset = mode_control.roll #Simulation
 
     logger.warning("Calculated heading (in degrees) is: %f°", math.degrees(init_heading))
 

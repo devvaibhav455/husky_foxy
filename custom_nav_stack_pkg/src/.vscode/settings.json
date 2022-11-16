@@ -82,5 +82,20 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
-    }
+    },
+    "python.analysis.extraPaths": [
+        "/home/dev/husky_ws/install/swri_transform_util/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/install/swri_roscpp/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/install/dwb_msgs/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/install/nav_2d_msgs/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/install/nav2_msgs/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/build/nav2_gazebo_spawner",
+        "/home/dev/husky_ws/install/nav2_gazebo_spawner/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/install/nav2_common/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/install/husky_msgs/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/install/hector_gazebo_plugins/lib/python3.8/site-packages",
+        "/home/dev/husky_ws/build/gps_goal",
+        "/home/dev/husky_ws/install/gps_goal/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ]
 }

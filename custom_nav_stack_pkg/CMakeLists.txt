@@ -45,6 +45,13 @@ find_package(rosidl_default_generators REQUIRED)
 # message( Boost_FOUND in my cmakelist:  ${Boost_FOUND} )
 find_package(PCL REQUIRED)
 
+find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
+if (${Python3_FOUND})
+  include_directories(${Python3_INCLUDE_DIRS})
+else()
+  message(FATAL_ERROR "Python3 not found, please install it.")
+endif()
+
 # https://pointclouds.org/documentation/tutorials/using_pcl_pcl_config.html
 # When PCL is found, several related variables are set:
 
@@ -94,7 +101,7 @@ install(TARGETS
 )
 
 target_link_libraries (lidar_cpp_executable ${PCL_LIBRARIES})
-target_link_libraries (occupancy_grid_generator  ${PCL_LIBRARIES})
+target_link_libraries (occupancy_grid_generator  ${Python3_LIBRARIES})
 
 # Install Python executables
 install(PROGRAMS

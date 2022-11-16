@@ -24,3 +24,7 @@ angle_view_degree = 90
 
 grid_size = 10
 grid_cell_length = 0.5
+test_x1 = 0
+test_y1 = 0
+test_x2 = 4
+test_y2 = -2
