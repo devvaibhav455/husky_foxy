@@ -80,8 +80,8 @@ class ModeControl(Node):
         self.imu_heading_offset = 0 #Will read this in real time when heading calculation is done
 
         self.mode = 'auto'
-        # self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation and real-robot
-        self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data') #Real robot only
+        self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation and real-robot
+        # self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data') #Real robot only
         self.gps_sub = message_filters.Subscriber(self, NavSatFix, 'gps/data')
         self.joy_sub = message_filters.Subscriber(self, Joy, 'joy_teleop/joy')
         # self.mag_sub = message_filters.Subscriber(self, MagneticField, 'mag')
@@ -136,6 +136,7 @@ class ModeControl(Node):
     def listener_callback(self,joy_msg, imu_msg, gps_msg):
     # def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
         self.sync_done = 1
+        rclpy.logging.get_logger('Callback_Function').info('Entered the callback function')
         
         #Extracting data from IMU sensor
         self.imu_msg = imu_msg
@@ -144,8 +145,8 @@ class ModeControl(Node):
         (self.roll, self.pitch, self.yaw) = euler_from_quaternion (orientation_list) #Result in radians. -180 < Roll < 180
         global init_heading
         # self.true_heading = -self.roll + init_heading
-        self.true_heading = init_heading - (-self.roll - self.imu_heading_offset) #Real robot
-        # self.true_heading = init_heading - (-self.roll - self.imu_heading_offset) #Simulation
+        # self.true_heading = init_heading - (-self.roll - self.imu_heading_offset) #Real robot
+        self.true_heading = init_heading - (self.roll - self.imu_heading_offset) #Simulation
         
         # self.mag_north_heading = -self.roll + self.imu_heading_offset #ASSUMPTION 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
         # logger.warning("IMU data extraction (values in degree): Roll: %f, Pitch: %f, Yaw: %f", math.degrees(self.roll), math.degrees(self.pitch), math.degrees(self.yaw))
@@ -164,7 +165,6 @@ class ModeControl(Node):
         Y = (math.cos(self.current_lat) * math.sin(self.dest_lat)) - (math.sin(self.current_lat) * math.cos(self.dest_lat) * math.cos(self.delta_long))
         global bearing #Bearing is the required direction towards which robot should orient
         bearing = math.atan2(X, Y)
-        # rclpy.logging.get_logger('gps_callback').info('Bearing (degree):  %s' % math.degrees(bearing))
         # Setting mode control based on input from JS
         if(joy_msg.buttons[self.button_stop] == 1):
             self.mode = 'e_stop'
@@ -186,6 +186,7 @@ class ModeControl(Node):
             self.move_cmd.angular.z = 0.0
             for i in range(0,29): #Used to publish velocity commands 5 times in order to avoid jerky motion
                 self.velocity_publisher_.publish(self.move_cmd)
+                time.sleep(0.1)
         elif(distance_to_move < 1):
             global goal_number
             self.move_cmd.linear.x = 0.0
@@ -358,6 +359,7 @@ def main(args=None):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     
+    logger.warning('############################## LOGGING STARTED ##############################')
     #On terminal, due to some reason, only warning and above are printed, so setting the level to warning. No need to worry.
     rclpy.init(args=args)
     mode_control = ModeControl()
@@ -420,28 +422,31 @@ def main(args=None):
     logger.warning('Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then will move in straight line for 20 sec')
     time_elapsed = 0
     start_time = time.time()
-    while time_elapsed <= 10 and mode_control.mode == 'auto':
+    logger.warning('Mode just before initial gps location calculation is: %s', mode_control.mode)
+    while time_elapsed <= 10 and mode_control.mode != 'e_stop':
         mode_control.sync_done = 0
         rclpy.spin_once(mode_control)     
         if mode_control.sync_done == 1:
             lat_tmp_src_arr.append(mode_control.gps_msg.latitude)
             lon_tmp_src_arr.append(mode_control.gps_msg.longitude)
             time_elapsed = time.time() - start_time
-    logger.warning("Tmp initial location time elapsed: %f ", time_elapsed)
+            logger.warning("Tmp initial location time elapsed: %f ", time_elapsed)
     
+    logger.warning('Mode just after initial gps location calculation is: %s', mode_control.mode)
     logger.warning("Robot should move forward now for 20 seconds")
     time_elapsed = 0
     start_time = time.time()
-    while time_elapsed <= 20 and mode_control.mode == 'auto':
+    while time_elapsed <= 20 and mode_control.mode != 'e_stop':
         mode_control.move_forward(10)
         time_elapsed = time.time() - start_time        
     
     logger.warning("Straight moving time elapsed: %f ", time_elapsed)
+    logger.warning('Mode just after straight line moving is: %s', mode_control.mode)
     
     logger.warning('Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then do the calculation')
     time_elapsed = 0
     start_time = time.time()
-    while time_elapsed <= 10 and mode_control.mode == 'auto':
+    while time_elapsed <= 10 and mode_control.mode != 'e_stop':
         mode_control.sync_done = 0
         rclpy.spin_once(mode_control)     
         if mode_control.sync_done == 1:
@@ -449,14 +454,15 @@ def main(args=None):
             lon_tmp_dst_arr.append(mode_control.gps_msg.longitude)
             time_elapsed = time.time() - start_time
     logger.warning("Tmp final location time elapsed: %f", time_elapsed)
+    logger.warning('Mode just after final gps location calculation is: %s', mode_control.mode)
     
     init_delta_long = statistics.mean(lon_tmp_dst_arr) - statistics.mean(lon_tmp_src_arr)
     X = math.cos(statistics.mean(lat_tmp_dst_arr)) * math.sin(init_delta_long)
     Y = (math.cos(statistics.mean(lat_tmp_src_arr)) * math.sin(statistics.mean(lat_tmp_dst_arr))) - (math.sin(statistics.mean(lat_tmp_src_arr)) * math.cos(statistics.mean(lat_tmp_dst_arr)) * math.cos(init_delta_long))
     
     init_heading = math.atan2(X, Y)
-    mode_control.imu_heading_offset = -mode_control.roll #Real robot
-    # mode_control.imu_heading_offset = mode_control.roll #Simulation
+    # mode_control.imu_heading_offset = -mode_control.roll #Real robot
+    mode_control.imu_heading_offset = mode_control.roll #Simulation
 
     logger.warning("Calculated heading (in degrees) is: %f°", math.degrees(init_heading))
 

@@ -152,22 +152,67 @@ class LaserScanSubscriber : public rclcpp::Node
         }
 
     private:
-        void laserscan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg_ptr) const
+        void laserscan_callback(const sensor_msgs::msg::LaserScan::SharedPtr laserscan_msg_ptr) const
         {
             std::cout << "############## Callback function starts ##############" << std::endl;
-            RCLCPP_INFO(this->get_logger(), "I heard at -180: '%f'", msg_ptr->ranges[0]);
+            RCLCPP_INFO(this->get_logger(), "I heard at -180: '%f'", laserscan_msg_ptr->ranges[0]);
             // linev6(0,0,2,4);
             // linev6(4,2,0,0);
             // line(4,0,4,2);
-            line(config.test_x1, config.test_y1, config.test_x2, config.test_y2);
-            std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
-            std::cout << "X is: "; 
-            for (auto i: X) { std::cout << i << " " ;} ;
-            std::cout << " ; Y is: "; 
-            for (auto i: Y) { std::cout << i << " " ;} ;
+            
+            nav_msgs::msg::OccupancyGrid occupancy_grid_msg;
+            occupancy_grid_msg.header = laserscan_msg_ptr->header;
+            occupancy_grid_msg.info.map_load_time.sec = 0;
+            occupancy_grid_msg.info.map_load_time.nanosec = 0;
+            occupancy_grid_msg.info.resolution = config.grid_cell_length; // The map resolution [m/cell]
+            occupancy_grid_msg.info.width = config.grid_size; // Map width [cells]
+            occupancy_grid_msg.info.height = config.grid_size; // Map height [cells]
+            occupancy_grid_msg.info.origin.position.x = -(config.grid_size>>1)*config.grid_cell_length;
+            occupancy_grid_msg.info.origin.position.y = (config.grid_size>>1)*config.grid_cell_length;
+            occupancy_grid_msg.info.origin.position.z = 0.0;
+            occupancy_grid_msg.info.origin.orientation.x = 0.7071068;
+            occupancy_grid_msg.info.origin.orientation.y = 0.0;
+            occupancy_grid_msg.info.origin.orientation.z = 0.0;
+            occupancy_grid_msg.info.origin.orientation.w = 0.7071068;
+            float eta = occupancy_grid_msg.info.origin.position.y;
+            float x_dash;
+            float y_dash;
+            std::cout << "No. of ranges in laserscan: " << laserscan_msg_ptr->ranges.size() << std::endl;
+            for(int i = 0; i < laserscan_msg_ptr->ranges.size() ; i++ ){
+                // if (laserscan_msg_ptr->ranges[i] == (laserscan_msg_ptr->range_max - 2)){
+                    //It means that there's nothing obstructing that laser
+                    float angle_vlp = laserscan_msg_ptr->angle_min + i*laserscan_msg_ptr->angle_increment;
+                    float angle_vlp_degree =  angle_vlp*180/M_PI;
+                    float m = tan(angle_vlp);
+                    //Calculations to find the point of intersection of line with slope m passing through VLP sensor with grid's boundary
+                    if ((angle_vlp_degree >= 0 && angle_vlp_degree <= 45) && (angle_vlp_degree >= 315 && angle_vlp_degree <= 360 )){
+                        x_dash = 2*eta;
+                        y_dash = -(m*eta) + eta;                      
+                    }else if (angle_vlp_degree > 45 && angle_vlp_degree <= 135){
+                        x_dash = (eta/m) + eta;
+                        y_dash = 2*eta;                        
+                    }else if (angle_vlp_degree > 135 && angle_vlp_degree <= 225){
+                        x_dash = 0;
+                        y_dash = (eta*m) + eta;
+                    }else if (angle_vlp_degree > 225 && angle_vlp_degree <= 315) {
+                        x_dash = -(eta/m) + eta;
+                        y_dash = 2*eta;
+                    }
+                    line(0, 0, x_dash, y_dash);
+                    std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
+                    std::cout << "X is: "; 
+                    for (auto i: X) { std::cout << i << " " ;} ;
+                    std::cout << " ; Y is: "; 
+                    for (auto i: Y) { std::cout << i << " " ;} ;
+                    plt::plot(X,Y);
+                    plt::show();
+                    sleep(10);
+            }
 
-            plt::plot(X,Y);
-            plt::show();
+
+            
+
+
             std::cout << "\n############## Callback function ends ##############" << std::endl;
         }
         rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr publisher_occ_grid_map;
