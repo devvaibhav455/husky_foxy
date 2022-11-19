@@ -37,7 +37,18 @@ namespace plt = matplotlibcpp;
 //       y: 0.0				                                |||		
 //       z: 0.0				                                |||		
 //       w: 1.0				                                |||		
-// data: '<sequence type: int8, length: 518400>'			|||		
+// data: '<sequence type: int8, length: 518400>'			|||
+// # This represents a 2-D grid map, in which each cell represents the probability of
+// # occupancy.
+
+// Header header 
+
+// #MetaData for the map
+// MapMetaData info
+
+// # The map data, in row-major order, starting with (0,0).  Occupancy
+// # probabilities are in the range [0,100].  Unknown is -1.
+// int8[] data		
 
 
 // clear && colcon build --packages-select custom_nav_stack_pkg --symlink-install && source install/local_setup.bash && ros2 run custom_nav_stack_pkg occupancy_grid_generator
@@ -87,6 +98,7 @@ class LaserScanSubscriber : public rclcpp::Node
 
         // Ref: http://tech-algorithm.com/articles/drawing-line-using-bresenham-algorithm/
         void line(int x,int y,int x2, int y2) const {
+            X.clear(); Y.clear();
             int w = x2 - x ;
             int h = y2 - y ;
             int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0 ;
@@ -155,7 +167,7 @@ class LaserScanSubscriber : public rclcpp::Node
         void laserscan_callback(const sensor_msgs::msg::LaserScan::SharedPtr laserscan_msg_ptr) const
         {
             std::cout << "############## Callback function starts ##############" << std::endl;
-            RCLCPP_INFO(this->get_logger(), "I heard at -180: '%f'", laserscan_msg_ptr->ranges[0]);
+            RCLCPP_INFO(this->get_logger(), "I heard at 0 degree: '%f'", laserscan_msg_ptr->ranges[0]);
             // linev6(0,0,2,4);
             // linev6(4,2,0,0);
             // line(4,0,4,2);
@@ -170,22 +182,27 @@ class LaserScanSubscriber : public rclcpp::Node
             occupancy_grid_msg.info.origin.position.x = -(config.grid_size>>1)*config.grid_cell_length;
             occupancy_grid_msg.info.origin.position.y = (config.grid_size>>1)*config.grid_cell_length;
             occupancy_grid_msg.info.origin.position.z = 0.0;
-            occupancy_grid_msg.info.origin.orientation.x = 0.7071068;
+            occupancy_grid_msg.info.origin.orientation.x = 0.0;
             occupancy_grid_msg.info.origin.orientation.y = 0.0;
-            occupancy_grid_msg.info.origin.orientation.z = 0.0;
+            occupancy_grid_msg.info.origin.orientation.z = -0.7071068;
             occupancy_grid_msg.info.origin.orientation.w = 0.7071068;
-            float eta = occupancy_grid_msg.info.origin.position.y;
+            occupancy_grid_msg.data.reserve(config.grid_size*config.grid_size);
+            std::vector<int8_t> vect1(config.grid_size*config.grid_size);
+            fill(vect1.begin(), vect1.end(), -1);
+            occupancy_grid_msg.data = vect1;
+
+            float eta = (config.grid_size>>1);
             float x_dash;
             float y_dash;
             std::cout << "No. of ranges in laserscan: " << laserscan_msg_ptr->ranges.size() << std::endl;
-            for(int i = 0; i < laserscan_msg_ptr->ranges.size() ; i++ ){
+            for(unsigned int i = 0; i < laserscan_msg_ptr->ranges.size() ; i++ ){
                 // if (laserscan_msg_ptr->ranges[i] == (laserscan_msg_ptr->range_max - 2)){
-                    //It means that there's nothing obstructing that laser
-                    float angle_vlp = laserscan_msg_ptr->angle_min + i*laserscan_msg_ptr->angle_increment;
+                    
+                    float angle_vlp = laserscan_msg_ptr->angle_min + i*(laserscan_msg_ptr->angle_increment);
                     float angle_vlp_degree =  angle_vlp*180/M_PI;
                     float m = tan(angle_vlp);
                     //Calculations to find the point of intersection of line with slope m passing through VLP sensor with grid's boundary
-                    if ((angle_vlp_degree >= 0 && angle_vlp_degree <= 45) && (angle_vlp_degree >= 315 && angle_vlp_degree <= 360 )){
+                    if ((angle_vlp_degree >= 0 && angle_vlp_degree <= 45) || (angle_vlp_degree >= 315 && angle_vlp_degree <= 360 )){
                         x_dash = 2*eta;
                         y_dash = -(m*eta) + eta;                      
                     }else if (angle_vlp_degree > 45 && angle_vlp_degree <= 135){
@@ -198,19 +215,35 @@ class LaserScanSubscriber : public rclcpp::Node
                         x_dash = -(eta/m) + eta;
                         y_dash = 2*eta;
                     }
-                    line(0, 0, x_dash, y_dash);
+                    
+
+                    if (laserscan_msg_ptr->ranges[i] == (laserscan_msg_ptr->range_max - 2)){
+                       //It means that there's nothing obstructing that laser
+                        for(unsigned int j = 0; j < X.size() ; j++ ){
+                            std::cout << X[j]*config.grid_size + Y[j] << std::endl;
+                            std::cout << vect1[0] << std::endl;
+                            std::cout << occupancy_grid_msg.data[0] << std::endl;
+                        // occupancy_grid_msg.data[X[j]*config.grid_size + Y[j]] = 0;
+                        occupancy_grid_msg.data.at(1) = 0;
+                        }
+                    }
+
+
+                    std::cout << "angle_vlp_degree: " << angle_vlp_degree << " slope/m: " << m << " eta: " << eta << " x_dash: " << x_dash << " y_dash: " << y_dash << std::endl;
+                    line(eta, eta, x_dash, y_dash);
                     std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
                     std::cout << "X is: "; 
                     for (auto i: X) { std::cout << i << " " ;} ;
                     std::cout << " ; Y is: "; 
-                    for (auto i: Y) { std::cout << i << " " ;} ;
-                    plt::plot(X,Y);
-                    plt::show();
-                    sleep(10);
+                    for (auto i: Y) { std::cout << i << " " ;} std::cout << std::endl;
+                    // plt::plot(X,Y);
+                    // plt::grid();
+                    // plt::show();
+                    // sleep(10);
             }
 
 
-            
+            publisher_occ_grid_map->publish(occupancy_grid_msg);
 
 
             std::cout << "\n############## Callback function ends ##############" << std::endl;
