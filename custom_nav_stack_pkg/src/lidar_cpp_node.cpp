@@ -405,7 +405,7 @@ class LidarSubscriber : public rclcpp::Node
         ec.setMaxClusterSize (config.cluster_max_size);
         ec.setSearchMethod (tree);
         ec.setInputCloud (cloud_xyz_ptr);
-        // exctract the indices pertaining to each cluster and store in a vector of pcl::PointIndices
+        // extract the indices pertaining to each cluster and store in a vector of pcl::PointIndices
         ec.extract (cluster_indices);
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_all (new pcl::PointCloud<pcl::PointXYZ>); //Point cloud containig all the clusters. Was implemented to visualise all the clusters simultaneously in RVIZ2 instead of sequentially.

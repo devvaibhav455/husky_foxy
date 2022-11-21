@@ -188,8 +188,11 @@ class LaserScanSubscriber : public rclcpp::Node
             occupancy_grid_msg.info.origin.orientation.w = 0.7071068;
             occupancy_grid_msg.data.reserve(config.grid_size*config.grid_size);
             std::vector<int8_t> vect1(config.grid_size*config.grid_size);
-            fill(vect1.begin(), vect1.end(), -1);
+            fill(vect1.begin(), vect1.end(), 100);
             occupancy_grid_msg.data = vect1;
+
+            std::vector<int> index_vect(config.grid_size*config.grid_size);
+            // fill(index_vect.begin(), index_vect.end(), -1);
 
             float eta = (config.grid_size>>1);
             float x_dash;
@@ -202,47 +205,53 @@ class LaserScanSubscriber : public rclcpp::Node
                     float angle_vlp_degree =  angle_vlp*180/M_PI;
                     float m = tan(angle_vlp);
                     //Calculations to find the point of intersection of line with slope m passing through VLP sensor with grid's boundary
-                    if ((angle_vlp_degree >= 0 && angle_vlp_degree <= 45) || (angle_vlp_degree >= 315 && angle_vlp_degree <= 360 )){
+                    if ((angle_vlp_degree >= 0 && angle_vlp_degree <= 45) || (angle_vlp_degree <= 0 && angle_vlp_degree >= -45 )){
                         x_dash = 2*eta;
                         y_dash = -(m*eta) + eta;                      
                     }else if (angle_vlp_degree > 45 && angle_vlp_degree <= 135){
                         x_dash = (eta/m) + eta;
-                        y_dash = 2*eta;                        
-                    }else if (angle_vlp_degree > 135 && angle_vlp_degree <= 225){
+                        y_dash = 0;                        
+                    }else if ((angle_vlp_degree > 135 && angle_vlp_degree <= 180) || (angle_vlp_degree >= -180 && angle_vlp_degree <= -135)){
                         x_dash = 0;
                         y_dash = (eta*m) + eta;
-                    }else if (angle_vlp_degree > 225 && angle_vlp_degree <= 315) {
+                    }else if (angle_vlp_degree > -135 && angle_vlp_degree < -45) {
                         x_dash = -(eta/m) + eta;
                         y_dash = 2*eta;
                     }
                     
+                    line(eta, eta, x_dash, y_dash); // Calculating cells on matrix/ occupancy grid which constitute the line
+                    // std::cout << "angle_vlp_degree: " << angle_vlp_degree << " slope/m: " << m << " eta: " << eta << " x_dash: " << x_dash << " y_dash: " << y_dash << std::endl;
+                    // std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
+                    // std::cout << "X is: "; 
+                    // for (auto i: X) { std::cout << i << " " ;} ;
+                    // std::cout << " ; Y is: "; 
+                    // for (auto i: Y) { std::cout << i << " " ;} std::cout << std::endl;
 
                     if (laserscan_msg_ptr->ranges[i] == (laserscan_msg_ptr->range_max - 2)){
                        //It means that there's nothing obstructing that laser
                         for(unsigned int j = 0; j < X.size() ; j++ ){
-                            std::cout << X[j]*config.grid_size + Y[j] << std::endl;
-                            std::cout << vect1[0] << std::endl;
-                            std::cout << occupancy_grid_msg.data[0] << std::endl;
+                            // std::cout << X[j]*config.grid_size + Y[j] << std::endl;
+                            // std::cout << vect1[0] << std::endl;
+                            // std::cout << occupancy_grid_msg.data[0] << std::endl;
                         // occupancy_grid_msg.data[X[j]*config.grid_size + Y[j]] = 0;
-                        occupancy_grid_msg.data.at(1) = 0;
+                        // std::cout << "Setting (" << X[j] << "," << Y[j] << ") at index: " << X[j]*config.grid_size + Y[j] << " zero" << std::endl;
+                        occupancy_grid_msg.data.at(X[j]*config.grid_size + Y[j]) = 0;
+                        index_vect.push_back(X[j]*config.grid_size + Y[j]);
                         }
+                    }else{
+                        std::cout << "Range is not 18.0" << std::endl;
                     }
 
 
-                    std::cout << "angle_vlp_degree: " << angle_vlp_degree << " slope/m: " << m << " eta: " << eta << " x_dash: " << x_dash << " y_dash: " << y_dash << std::endl;
-                    line(eta, eta, x_dash, y_dash);
-                    std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
-                    std::cout << "X is: "; 
-                    for (auto i: X) { std::cout << i << " " ;} ;
-                    std::cout << " ; Y is: "; 
-                    for (auto i: Y) { std::cout << i << " " ;} std::cout << std::endl;
+                    
                     // plt::plot(X,Y);
                     // plt::grid();
                     // plt::show();
                     // sleep(10);
             }
 
-
+            // std:: cout << "Index zero: " << index_vect[0] << " Size: " << index_vect.size() << std::endl;
+            for (auto i: index_vect) { std::cout << i << " " ;} ;
             publisher_occ_grid_map->publish(occupancy_grid_msg);
 
 
