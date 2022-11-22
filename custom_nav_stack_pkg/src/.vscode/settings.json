@@ -81,7 +81,15 @@
         "cfenv": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "valarray": "cpp",
+        "csetjmp": "cpp",
+        "charconv": "cpp",
+        "codecvt": "cpp",
+        "cuchar": "cpp",
+        "forward_list": "cpp",
+        "unordered_set": "cpp",
+        "scoped_allocator": "cpp"
     },
     "python.analysis.extraPaths": [
         "/home/dev/husky_ws/install/swri_transform_util/lib/python3.8/site-packages",

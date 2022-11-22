@@ -10,6 +10,7 @@
 #include <math.h>
 #include <vector>
 #include "matplotlibcpp.h"
+#include <bits/stdc++.h>
 
 namespace plt = matplotlibcpp;
 
@@ -55,6 +56,7 @@ namespace plt = matplotlibcpp;
 
 std::vector<int> X;
 std::vector<int> Y;
+std::vector<float> dist_vlp;
 
 class LaserScanSubscriber : public rclcpp::Node
 {
@@ -98,7 +100,8 @@ class LaserScanSubscriber : public rclcpp::Node
 
         // Ref: http://tech-algorithm.com/articles/drawing-line-using-bresenham-algorithm/
         void line(int x,int y,int x2, int y2) const {
-            X.clear(); Y.clear();
+            // std::cout << "Source: (" << x << ", " << y << ") ; Destination: (" << x2 << ", " << y2 << ")" << std::endl;
+            X.clear(); Y.clear(); dist_vlp.clear();
             int w = x2 - x ;
             int h = y2 - y ;
             int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0 ;
@@ -117,6 +120,7 @@ class LaserScanSubscriber : public rclcpp::Node
             for (int i=0;i<=longest;i++) {
                 X.push_back(x);
                 Y.push_back(y);
+                dist_vlp.push_back(sqrt(x*x + y*y)*config.grid_cell_length);
                 numerator += shortest ;
                 if (!(numerator<longest)) {
                     numerator -= longest ;
@@ -188,60 +192,95 @@ class LaserScanSubscriber : public rclcpp::Node
             occupancy_grid_msg.info.origin.orientation.w = 0.7071068;
             occupancy_grid_msg.data.reserve(config.grid_size*config.grid_size);
             std::vector<int8_t> vect1(config.grid_size*config.grid_size);
-            fill(vect1.begin(), vect1.end(), 100);
+            fill(vect1.begin(), vect1.end(), -1);
             occupancy_grid_msg.data = vect1;
 
             std::vector<int> index_vect(config.grid_size*config.grid_size);
+            index_vect.clear();
             // fill(index_vect.begin(), index_vect.end(), -1);
+            
 
-            float eta = (config.grid_size>>1);
-            float x_dash;
-            float y_dash;
-            std::cout << "No. of ranges in laserscan: " << laserscan_msg_ptr->ranges.size() << std::endl;
+
+            int eta = (config.grid_size>>1);
+            int x_dash;
+            int y_dash;
+            // std::cout << "No. of ranges in laserscan: " << laserscan_msg_ptr->ranges.size() << "Eta is: " << eta << std::endl;
             for(unsigned int i = 0; i < laserscan_msg_ptr->ranges.size() ; i++ ){
-                // if (laserscan_msg_ptr->ranges[i] == (laserscan_msg_ptr->range_max - 2)){
-                    
                     float angle_vlp = laserscan_msg_ptr->angle_min + i*(laserscan_msg_ptr->angle_increment);
                     float angle_vlp_degree =  angle_vlp*180/M_PI;
                     float m = tan(angle_vlp);
                     //Calculations to find the point of intersection of line with slope m passing through VLP sensor with grid's boundary
                     if ((angle_vlp_degree >= 0 && angle_vlp_degree <= 45) || (angle_vlp_degree <= 0 && angle_vlp_degree >= -45 )){
                         x_dash = 2*eta;
-                        y_dash = -(m*eta) + eta;                      
+                        y_dash = round(-(m*eta) + eta);                      
                     }else if (angle_vlp_degree > 45 && angle_vlp_degree <= 135){
-                        x_dash = (eta/m) + eta;
+                        x_dash = round((eta/m) + eta);
                         y_dash = 0;                        
                     }else if ((angle_vlp_degree > 135 && angle_vlp_degree <= 180) || (angle_vlp_degree >= -180 && angle_vlp_degree <= -135)){
                         x_dash = 0;
-                        y_dash = (eta*m) + eta;
+                        y_dash = round((eta*m) + eta);
                     }else if (angle_vlp_degree > -135 && angle_vlp_degree < -45) {
-                        x_dash = -(eta/m) + eta;
+                        x_dash = round(-(eta/m) + eta);
                         y_dash = 2*eta;
                     }
                     
                     line(eta, eta, x_dash, y_dash); // Calculating cells on matrix/ occupancy grid which constitute the line
-                    // std::cout << "angle_vlp_degree: " << angle_vlp_degree << " slope/m: " << m << " eta: " << eta << " x_dash: " << x_dash << " y_dash: " << y_dash << std::endl;
-                    // std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
-                    // std::cout << "X is: "; 
-                    // for (auto i: X) { std::cout << i << " " ;} ;
-                    // std::cout << " ; Y is: "; 
-                    // for (auto i: Y) { std::cout << i << " " ;} std::cout << std::endl;
+                    
+                    // if(i >= 3147 && i <= 3152){
+                    //     std::cout << "i: " << i << " angle_vlp_degree: " << angle_vlp_degree << " slope/m: " << m << " eta: " << eta << " x_dash: " << x_dash << " y_dash: " << y_dash << std::endl;
+                    //     std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
+                    //     std::cout << "X is: "; 
+                    //     for (auto i: X) { std::cout << i << " " ;} ;
+                    //     std::cout << " ; Y is: "; 
+                    //     for (auto i: Y) { std::cout << i << " " ;} std::cout << std::endl;
+                    // }
+                    
+                    
 
-                    if (laserscan_msg_ptr->ranges[i] == (laserscan_msg_ptr->range_max - 2)){
+                    if (laserscan_msg_ptr->ranges[i] != (laserscan_msg_ptr->range_max - 2)){
+                        // std::cout << "\nRange is not 18.0, infact it is: " << laserscan_msg_ptr->ranges[i] << std::endl;
+                        // std::cout << "Distance array is: ";
+                        // for (auto k: dist_vlp) { std::cout << k << " " ;} ;
+                        if (laserscan_msg_ptr->ranges[i] <= dist_vlp.back()){ //Calculate occupancy grid only if the range is within the required coverage of occupancy grid
+                            auto it = std::find_if(std::begin(dist_vlp), std::end(dist_vlp), [&](float j){return j >= laserscan_msg_ptr->ranges[i]; });
+                            int index_upto_obs = std::distance(dist_vlp.begin(), it); // Ref: https://www.techiedelight.com/find-index-element-vector-cpp/
+                            // std::cout << " | Required Index is: " << index_upto_obs << std::endl;
+                            // Set all cells in the laser direction upto index-1 as free(0); index as occupied(100) and beyond index as unknown(-1)
+                            for (int j=0; j < index_upto_obs; j++){
+                                occupancy_grid_msg.data.at(X[j]*config.grid_size + Y[j]) = 0;
+                                index_vect.push_back(X[j]*config.grid_size + Y[j]);
+                            }
+                            occupancy_grid_msg.data.at(X[index_upto_obs]*config.grid_size + Y[index_upto_obs]) = 100;
+                            index_vect.push_back(X[index_upto_obs]*config.grid_size + Y[index_upto_obs]);
+                            for (unsigned int j=index_upto_obs; j < X.size(); j++){
+                                occupancy_grid_msg.data.at(X[j]*config.grid_size + Y[j]) = -1;
+                                index_vect.push_back(X[j]*config.grid_size + Y[j]);
+                            }
+                        }
+                    }else if (laserscan_msg_ptr->ranges[i] == (laserscan_msg_ptr->range_max - 2)){
                        //It means that there's nothing obstructing that laser
                         for(unsigned int j = 0; j < X.size() ; j++ ){
+                            // std::cout << "Index vector is: ";
+                            // for (auto i: index_vect) { std::cout << i << " " ;} ;
                             // std::cout << X[j]*config.grid_size + Y[j] << std::endl;
                             // std::cout << vect1[0] << std::endl;
                             // std::cout << occupancy_grid_msg.data[0] << std::endl;
                         // occupancy_grid_msg.data[X[j]*config.grid_size + Y[j]] = 0;
                         // std::cout << "Setting (" << X[j] << "," << Y[j] << ") at index: " << X[j]*config.grid_size + Y[j] << " zero" << std::endl;
-                        occupancy_grid_msg.data.at(X[j]*config.grid_size + Y[j]) = 0;
-                        index_vect.push_back(X[j]*config.grid_size + Y[j]);
+                        if( std::find(index_vect.begin(), index_vect.end(), X[j]*config.grid_size + Y[j]) == index_vect.end()){// Means that index is not found in index_vect. So, safe to set it to unoccupied/ free(0).
+                            // std::cout << "Index not found in index_vect, so setting to zero j: " << j << " corresponding index: " << X[j]*config.grid_size + Y[j] << std::endl;
+                            occupancy_grid_msg.data.at(X[j]*config.grid_size + Y[j]) = 0;
                         }
-                    }else{
-                        std::cout << "Range is not 18.0" << std::endl;
+                        }
                     }
-
+                   
+                        
+                        
+                        
+                        
+                    
+                    
+                    
 
                     
                     // plt::plot(X,Y);
@@ -251,7 +290,7 @@ class LaserScanSubscriber : public rclcpp::Node
             }
 
             // std:: cout << "Index zero: " << index_vect[0] << " Size: " << index_vect.size() << std::endl;
-            for (auto i: index_vect) { std::cout << i << " " ;} ;
+            // for (auto i: index_vect) { std::cout << i << " " ;} ;
             publisher_occ_grid_map->publish(occupancy_grid_msg);
 
 
