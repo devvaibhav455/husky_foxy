@@ -47,6 +47,7 @@ class ModeControl(Node):
         self.button_manual_mode = [1 , 3] # Back button
         self.button_auto_mode = [0, 2] #A or green button
         self.button_stop = 6
+        self.button_script_control = 7
 
         path = str(Path(__file__).parent / "./destination_lat_long.txt")
         path = path.replace("install", "src")
@@ -78,8 +79,9 @@ class ModeControl(Node):
         # self.mag_declination = math.radians(-4.23) # 4.23° W at 0 lat/ long. used in simulation
         # self.imu_heading_offset = math.radians(4.235193576741463 - 90) #At robot's initial spawn position, IMU provides ~ 4.23° heading  which is towards West. Need to account for this offset. In practice, it shouldn't matter as heading will be calculated from magnetometer readings which are wrt real directions.
         self.imu_heading_offset = 0 #Will read this in real time when heading calculation is done
-
         self.mode = 'auto'
+        self.anticipated_dist_if_no_slip = 0
+
         self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation and real-robot
         # self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data') #Real robot only
         self.gps_sub = message_filters.Subscriber(self, NavSatFix, 'gps/data')
@@ -136,7 +138,7 @@ class ModeControl(Node):
     def listener_callback(self,joy_msg, imu_msg, gps_msg):
     # def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
         self.sync_done = 1
-        rclpy.logging.get_logger('Callback_Function').info('Entered the callback function')
+        # rclpy.logging.get_logger('Callback_Function').info('Entered the callback function')
         
         #Extracting data from IMU sensor
         self.imu_msg = imu_msg
@@ -168,26 +170,26 @@ class ModeControl(Node):
         # Setting mode control based on input from JS
         if(joy_msg.buttons[self.button_stop] == 1):
             self.mode = 'e_stop'
-        elif(joy_msg.buttons[self.button_gps_mode[0]] == 1 and joy_msg.buttons[self.button_gps_mode[1]] == 1):
+        elif(joy_msg.buttons[self.button_gps_mode[0]] == 1 and joy_msg.buttons[self.button_gps_mode[1]] == 1 and joy_msg.buttons[self.button_script_control] == 1):
             self.mode = 'gps'
-        elif(joy_msg.buttons[self.button_local_mode[0]] == 1 and joy_msg.buttons[self.button_local_mode[1]] == 1):
+        elif(joy_msg.buttons[self.button_local_mode[0]] == 1 and joy_msg.buttons[self.button_local_mode[1]] == 1 and joy_msg.buttons[self.button_script_control] == 1):
             self.mode = 'local'
-        elif(joy_msg.buttons[self.button_auto_mode[0]] == 1 and joy_msg.buttons[self.button_auto_mode[1]] == 1):
+        elif(joy_msg.buttons[self.button_auto_mode[0]] == 1 and joy_msg.buttons[self.button_auto_mode[1]] == 1 and joy_msg.buttons[self.button_script_control] == 1):
             self.mode = 'auto'
-        elif((joy_msg.buttons[self.button_manual_mode[0]] == 1 and joy_msg.buttons[self.button_manual_mode[1]] == 1) or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0):
+        elif(joy_msg.buttons[self.button_script_control] == 1 and ((joy_msg.buttons[self.button_manual_mode[0]] == 1 and joy_msg.buttons[self.button_manual_mode[1]] == 1) or joy_msg.axes[self.analog_axes[0]] != 0 or joy_msg.axes[self.analog_axes[1]] != 0 or joy_msg.axes[self.analog_axes[2]] != 0 or joy_msg.axes[self.analog_axes[3]] != 0)):
             self.mode = 'manual'
         else:
             self.mode = 'auto'
 
-    def move_forward(self, distance_to_move): 
+    def move_forward(self, distance_to_move, speed): 
         '''If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters'''
-        if distance_to_move > 1:
-            self.move_cmd.linear.x = 0.2
+        if distance_to_move > 3:
+            self.move_cmd.linear.x = speed
             self.move_cmd.angular.z = 0.0
             for i in range(0,29): #Used to publish velocity commands 5 times in order to avoid jerky motion
                 self.velocity_publisher_.publish(self.move_cmd)
                 time.sleep(0.1)
-        elif(distance_to_move < 1):
+        elif(distance_to_move <= 3): #Distance threshold for the robot to decide whether a destination is reached or not
             global goal_number
             self.move_cmd.linear.x = 0.0
             self.move_cmd.angular.z = 0.0
@@ -383,11 +385,11 @@ def main(args=None):
     lat_tmp_dst_arr = []
     lon_tmp_dst_arr = []
 
+    speed_linear = 0.2
     r_mag_cal = 1
-    speed_mag_cal = 0.2
     mode_control.sync_done = 0
     # num_loops = 2
-    # time_one_loop = 2*math.pi*r_mag_cal/speed_mag_cal
+    # time_one_loop = 2*math.pi*r_mag_cal/speed_linear
     # print("Time one loop: ", time_one_loop)
     
     # while time_elapsed <= time_one_loop*num_loops:
@@ -402,8 +404,8 @@ def main(args=None):
     #         lin_acc_x_cal_arr.append(mode_control.imu_msg.linear_acceleration.x)
     #         lin_acc_y_cal_arr.append(mode_control.imu_msg.linear_acceleration.y)
     #         lin_acc_z_cal_arr.append(mode_control.imu_msg.linear_acceleration.z)
-    #         mode_control.move_cmd.linear.x = speed_mag_cal
-    #         mode_control.move_cmd.angular.z = speed_mag_cal/r_mag_cal
+    #         mode_control.move_cmd.linear.x = speed_linear
+    #         mode_control.move_cmd.angular.z = speed_linear/r_mag_cal
     #         logger.warning("Publishing Forward speed: %f, Angular speed: %f", mode_control.move_cmd.linear.x, mode_control.move_cmd.angular.z)
     #         mode_control.velocity_publisher_.publish(mode_control.move_cmd)
     #         logger.warning("Publishing: %s", mode_control.velocity_publisher_.publish(mode_control.move_cmd))
@@ -437,7 +439,7 @@ def main(args=None):
     time_elapsed = 0
     start_time = time.time()
     while time_elapsed <= 20 and mode_control.mode != 'e_stop':
-        mode_control.move_forward(10)
+        mode_control.move_forward(10, speed_linear)
         time_elapsed = time.time() - start_time        
     
     logger.warning("Straight moving time elapsed: %f ", time_elapsed)
@@ -469,87 +471,92 @@ def main(args=None):
     logger.warning("Please switch modes using Joystick to operate robot further")
 
 
-
+    
     while 1==1:
         mode_control.sync_done = 0
         rclpy.spin_once(mode_control)
         if mode_control.sync_done == 1:
             
-            # mode_control.mode = 'gps'
+            # mode_control.mode = 'gps' #Used just for quick testing
             if(old_mode != mode_control.mode):
                 logger.warning("Changed mode from: %s to %s", old_mode, mode_control.mode)
+                time_elapsed = 0
+                start_time = time.time()
             if mode_control.mode == 'e_stop':
                 mode_control.move_cmd.linear.x = 0.0
                 mode_control.move_cmd.angular.z = 0.0
                 mode_control.velocity_publisher_.publish(mode_control.move_cmd)
             elif mode_control.mode == 'manual': #Enter into manual override mode. Complete control in hands of the user
-                # Need to run node `node_teleop_twist_joy` which publishes cmd_vel to robot from JS
-                pass
-                #Hard iron correction on real-time data
-                # mode_control.mag_data.x = mode_control.mag_data.x - magx_hard_offset
-                # mode_control.mag_data.y = mode_control.mag_data.x - magy_hard_offset
+                """ Old code left there to stay which was used when we tried the magnetometer approach to calculate heading which proved unsuccessful.
+                Hard iron correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x - magx_hard_offset
+                mode_control.mag_data.y = mode_control.mag_data.x - magy_hard_offset
 
-                #Soft iron correction on real-time data
-                # rot_soft = ([math.cos(theta), math.sin(theta)] , [-math.sin(theta), math.cos(theta)]) 
-                # mode_control.mag_data.x = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
-                # mode_control.mag_data.y = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+                Soft iron correction on real-time data
+                rot_soft = ([math.cos(theta), math.sin(theta)] , [-math.sin(theta), math.cos(theta)]) 
+                mode_control.mag_data.x = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
 
-                #Scaling factor correction on real-time data
-                # mode_control.mag_data.x = mode_control.mag_data.x/sigma
+                Scaling factor correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x/sigma
 
-                #Rotating back to compensate for rotation during soft correction
-                # rot_soft_back = ([math.cos(-theta), math.sin(-theta)], [-math.sin(-theta), math.cos(-theta)])
-                # mode_control.mag_data.x = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
-                # mode_control.mag_data.y = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+                Rotating back to compensate for rotation during soft correction
+                rot_soft_back = ([math.cos(-theta), math.sin(-theta)], [-math.sin(-theta), math.cos(-theta)])
+                mode_control.mag_data.x = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
 
-                # ---------   1. Estimate the heading (yaw)------------------ 
-                # Reference: https://digilent.com/blog/how-to-convert-magnetometer-data-into-compass-heading/
+                ---------   1. Estimate the heading (yaw)------------------ 
+                Reference: https://digilent.com/blog/how-to-convert-magnetometer-data-into-compass-heading/
 
-                # heading_mag = -math.atan2(mode_control.mag_data.y,mode_control.mag_data.x); #Result in -pi to pi
-                # mode_control.true_heading = heading_mag + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
-                #First try to align robot to desired heading and then move in that direction
-                # global bearing
-                # mode_control.true_heading = mode_control.mag_north_heading + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
-                # Calculation to get true heading within -180 to +180 degrees range
-                # if mode_control.true_heading < math.radians(-180):
-                #     mode_control.true_heading = math.radians(180 - (abs(math.degrees(mode_control.true_heading)) - 180))
-                # elif mode_control.true_heading > math.radians(180):
-                #     mode_control.true_heading = -(math.radians(180) - (mode_control.true_heading - math.radians(180)))
-                
-                # logger.warning("Heading in manual mode (degrees): %f", math.degrees(mode_control.true_heading))
-                # os.system("ros2 launch husky_control teleop_pub_vel.launch.py &") #No need to run this because both joy nodes are running and they override the speed command from script
-            elif mode_control.mode == 'gps': #Enter into force GPS waypoing mode, can hit obstacles, does not call local mode when detects obstacle. Used for testing purpose
-                
-                #Using calculated magnetometer calibration parameters to get correct heading from magnetometer.
-                
-                # logger.warning("Real time: Original magx: %f, magy: %f",mode_control.mag_data.x, mode_control.mag_data.y )
-                #Hard iron correction on real-time data
-                # mode_control.mag_data.x = mode_control.mag_data.x - magx_hard_offset
-                # mode_control.mag_data.y = mode_control.mag_data.x - magy_hard_offset
-
-                #Soft iron correction on real-time data
-                # rot_soft = ([math.cos(theta), math.sin(theta)] , [-math.sin(theta), math.cos(theta)]) 
-                # mode_control.mag_data.x = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
-                # mode_control.mag_data.y = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
-
-                #Scaling factor correction on real-time data
-                # mode_control.mag_data.x = mode_control.mag_data.x/sigma
-
-                #Rotating back to compensate for rotation during soft correction
-                # rot_soft_back = ([math.cos(-theta), math.sin(-theta)], [-math.sin(-theta), math.cos(-theta)])
-                # mode_control.mag_data.x = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
-                # mode_control.mag_data.y = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
-
-                # logger.warning("Real time: Corrected magx: %f, magy: %f",mode_control.mag_data.x, mode_control.mag_data.y )
-
-                # ---------   1. Estimate the heading (yaw)------------------ 
-                # Reference: https://digilent.com/blog/how-to-convert-magnetometer-data-into-compass-heading/
-
-                # heading_mag = -math.atan2(mode_control.mag_data.y,mode_control.mag_data.x); #Result in -pi to pi
-                # mode_control.true_heading = heading_mag + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
-                #First try to align robot to desired heading and then move in that direction
+                heading_mag = -math.atan2(mode_control.mag_data.y,mode_control.mag_data.x); #Result in -pi to pi
+                mode_control.true_heading = heading_mag + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+                First try to align robot to desired heading and then move in that direction
                 global bearing
-                # mode_control.true_heading = mode_control.mag_north_heading + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+                mode_control.true_heading = mode_control.mag_north_heading + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+                Calculation to get true heading within -180 to +180 degrees range
+                if mode_control.true_heading < math.radians(-180):
+                    mode_control.true_heading = math.radians(180 - (abs(math.degrees(mode_control.true_heading)) - 180))
+                elif mode_control.true_heading > math.radians(180):
+                    mode_control.true_heading = -(math.radians(180) - (mode_control.true_heading - math.radians(180)))
+                
+                logger.warning("Heading in manual mode (degrees): %f", math.degrees(mode_control.true_heading))
+                os.system("ros2 launch husky_control teleop_pub_vel.launch.py &") #No need to run this because both joy nodes are running and they override the speed command from script
+                """
+                pass
+            elif mode_control.mode == 'gps': #Enter into force GPS waypoing mode, can hit obstacles, does not call local mode when detects obstacle. Used for testing purpose   
+                """Old code left there to stay which was used when we tried the magnetometer approach to calculate heading which proved unsuccessful.
+                Using calculated magnetometer calibration parameters to get correct heading from magnetometer.
+                
+                logger.warning("Real time: Original magx: %f, magy: %f",mode_control.mag_data.x, mode_control.mag_data.y )
+                Hard iron correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x - magx_hard_offset
+                mode_control.mag_data.y = mode_control.mag_data.x - magy_hard_offset
+
+                Soft iron correction on real-time data
+                rot_soft = ([math.cos(theta), math.sin(theta)] , [-math.sin(theta), math.cos(theta)]) 
+                mode_control.mag_data.x = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+
+                Scaling factor correction on real-time data
+                mode_control.mag_data.x = mode_control.mag_data.x/sigma
+
+                Rotating back to compensate for rotation during soft correction
+                rot_soft_back = ([math.cos(-theta), math.sin(-theta)], [-math.sin(-theta), math.cos(-theta)])
+                mode_control.mag_data.x = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[0][0]
+                mode_control.mag_data.y = np.dot(rot_soft_back, [[mode_control.mag_data.x],[mode_control.mag_data.y]])[1][0]
+
+                logger.warning("Real time: Corrected magx: %f, magy: %f",mode_control.mag_data.x, mode_control.mag_data.y )
+
+                ---------   1. Estimate the heading (yaw)------------------ 
+                Reference: https://digilent.com/blog/how-to-convert-magnetometer-data-into-compass-heading/
+
+                heading_mag = -math.atan2(mode_control.mag_data.y,mode_control.mag_data.x); #Result in -pi to pi
+                mode_control.true_heading = heading_mag + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North
+                First try to align robot to desired heading and then move in that direction
+                # mode_control.true_heading = mode_control.mag_north_heading + mode_control.mag_declination #Robot's current heading wrt to True North; If -ve, turn right (cw); + turn left (ccw) to align it with True North"""
+                
+                global bearing
+                
                 # Calculation to get true heading within -180 to +180 degrees range
                 if mode_control.true_heading < math.radians(-180):
                     mode_control.true_heading = math.radians(180 - (abs(math.degrees(mode_control.true_heading)) - 180))
@@ -586,12 +593,32 @@ def main(args=None):
                             mode_control.to_rotate = abs(bearing - mode_control.true_heading)
 
                 if abs(mode_control.to_rotate) > 0.06:
+                    switched_to_rotation = 1
                     logger.warning("Info for goal #: %d, Current heading: %f°, Required heading: %f°, Need to rotate by: %f° in Direction: %s", goal_number, math.degrees(mode_control.true_heading), math.degrees(bearing), math.degrees(mode_control.to_rotate), mode_control.direction)
                     mode_control.rotate(mode_control.to_rotate, mode_control.direction)
-                elif mode_control.to_rotate < 0.06: 
+                elif mode_control.to_rotate < 0.06:     
                     logger.warning("Robot already aligned towards goal no: %d", goal_number)
+                        
+                    switched_to_rotation = 0
+                        
                     mode_control.distance_to_move = mode_control.calc_goal(mode_control.current_lat, mode_control.current_long, mode_control.dest_lat, mode_control.dest_long)
-                    mode_control.move_forward(mode_control.distance_to_move)
+                    mode_control.anticipated_dist_if_no_slip = mode_control.distance_to_move - speed_linear*5 #Anticipate remaining distance after 5 seconds of robot's linear motion
+                    mode_control.move_forward(mode_control.distance_to_move, 0.0)
+                    time_elapsed = time.time() - start_time
+
+                    if (time_elapsed >= 5 and switched_to_rotation == 0 and (mode_control.distance_to_move - mode_control.anticipated_dist_if_no_slip <= 1)): #If robot has moved less than 1 m in 5 sec, slippage is detected
+                        logger.warning("!!! Slippage detected !!! Robot has either not moved or moved forward by <= 1 m within 5 seconds.") 
+                        logger.warning("Going backwards at 1 m/s for 2 seconds")
+                        start_time = time.time()
+                        time_elapsed = 0
+                        while(time_elapsed <= 2):
+                            mode_control.move_forward(mode_control.distance_to_move, -1.0) #Speed should be float
+                            time_elapsed = time.time() - start_time
+                        time_elapsed = 0 
+                        start_time = time.time()
+
+
+                                       
 
 
             elif mode_control.mode == 'local': #Enter into force local navigation mode. Used for testing purpose
