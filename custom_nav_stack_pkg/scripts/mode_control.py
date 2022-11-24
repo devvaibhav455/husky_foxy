@@ -181,10 +181,10 @@ class ModeControl(Node):
         else:
             self.mode = 'auto'
 
-    def move_forward(self, distance_to_move, speed): 
+    def move_forward(self, distance_to_move, speed_linear): 
         '''If distance_to_move='until_obstacle', then robot will move forward indefinitely until an obstacle is detected, otherwise give distance in meters'''
         if distance_to_move > 3:
-            self.move_cmd.linear.x = speed
+            self.move_cmd.linear.x = speed_linear
             self.move_cmd.angular.z = 0.0
             for i in range(0,29): #Used to publish velocity commands 5 times in order to avoid jerky motion
                 self.velocity_publisher_.publish(self.move_cmd)
@@ -335,6 +335,29 @@ class ModeControl(Node):
         self.mag_cal_done = 1
         return magx_hard_offset, magy_hard_offset, theta, sigma #Use these calibration parameters to modify real-time sensor data
 
+    def detect_slip(self, switched_to_rotation, speed_linear):
+        '''If slip is detected, robot will move backwards at 1 m/s, otherwise continue moving straight'''
+        
+        global initial_dist_remaining
+        self.move_forward(self.distance_to_move, speed_linear)
+        global start_time, time_elapsed
+        time_elapsed = time.time() - start_time
+        print("Start time: ", start_time, " ; Time elapsed: ", time_elapsed, " ; Switched to rotation: ", switched_to_rotation, "; Distance to move: ", self.distance_to_move, "; Anticipated: ", self.anticipated_dist_if_no_slip , " ; Diff. in distance actual: ", abs(initial_dist_remaining - self.distance_to_move), " ; Diff anticipated: ", initial_dist_remaining - self.anticipated_dist_if_no_slip)
+        if (time_elapsed >= 5 and switched_to_rotation == 0): # and (self.distance_to_move - self.anticipated_dist_if_no_slip <= 0.4)): #If robot has moved less than 0.4 m in 5 sec, slippage is detected
+            if(abs(initial_dist_remaining - self.distance_to_move) <= initial_dist_remaining - self.anticipated_dist_if_no_slip):
+                logger.warning("!!! Slippage detected !!! Robot has either not moved or moved forward by <= 0.4 m within 5 seconds.") 
+                logger.warning("Going backwards at 1 m/s for 2 seconds")
+                start_time = time.time()
+                time_elapsed = 0
+                while(time_elapsed <= 2):
+                    self.move_forward(self.distance_to_move, -1.0) #Speed should be float
+                    time_elapsed = time.time() - start_time 
+            start_time = time.time()
+            time_elapsed = 0
+            initial_dist_remaining = self.distance_to_move
+            print("Initial distance remaining: ", initial_dist_remaining)
+                # print("Start time: ", start_time, " ; Time elapsed: ", time_elapsed)
+
 
 def main(args=None):
     
@@ -372,7 +395,7 @@ def main(args=None):
     #Perform Magnetometer calibration to calculate initial heading
     #Step1: Drive robot in a circle for 2-3 times. Record the magnetometer parameters. Calculate the calibration parameters, store them and use for further data from mag sensor
 
-    global i, start_time
+    global i, start_time, time_elapsed
     i = 0
     mag_x_cal_arr = []
     mag_y_cal_arr = []
@@ -592,31 +615,27 @@ def main(args=None):
                         else:
                             mode_control.to_rotate = abs(bearing - mode_control.true_heading)
 
-                if abs(mode_control.to_rotate) > 0.06:
-                    switched_to_rotation = 1
-                    logger.warning("Info for goal #: %d, Current heading: %f°, Required heading: %f°, Need to rotate by: %f° in Direction: %s", goal_number, math.degrees(mode_control.true_heading), math.degrees(bearing), math.degrees(mode_control.to_rotate), mode_control.direction)
-                    mode_control.rotate(mode_control.to_rotate, mode_control.direction)
-                elif mode_control.to_rotate < 0.06:     
-                    logger.warning("Robot already aligned towards goal no: %d", goal_number)
+                
+                mode_control.distance_to_move = mode_control.calc_goal(mode_control.current_lat, mode_control.current_long, mode_control.dest_lat, mode_control.dest_long)
+                switched_to_rotation = 0
+                if mode_control.distance_to_move > 3:
+                    if abs(mode_control.to_rotate) > 0.06:
+                        switched_to_rotation = 1
+                        logger.warning("Info for goal #: %d, Current heading: %f°, Required heading: %f°, Need to rotate by: %f° in Direction: %s", goal_number, math.degrees(mode_control.true_heading), math.degrees(bearing), math.degrees(mode_control.to_rotate), mode_control.direction)
+                        mode_control.rotate(mode_control.to_rotate, mode_control.direction)
+                    elif mode_control.to_rotate < 0.06:     
+                        logger.warning("Robot already aligned towards goal no: %d", goal_number)
+                        if switched_to_rotation == 1 or (old_mode != mode_control.mode):
+                            global initial_dist_remaining
+                            initial_dist_remaining = mode_control.distance_to_move
+                            mode_control.anticipated_dist_if_no_slip = initial_dist_remaining - speed_linear*4 #Anticipate remaining distance after 5 seconds of robot's linear motion
+                            print("Initial distance remaining: ", initial_dist_remaining)
                         
-                    switched_to_rotation = 0
-                        
-                    mode_control.distance_to_move = mode_control.calc_goal(mode_control.current_lat, mode_control.current_long, mode_control.dest_lat, mode_control.dest_long)
-                    mode_control.anticipated_dist_if_no_slip = mode_control.distance_to_move - speed_linear*5 #Anticipate remaining distance after 5 seconds of robot's linear motion
-                    mode_control.move_forward(mode_control.distance_to_move, 0.0)
-                    time_elapsed = time.time() - start_time
-
-                    if (time_elapsed >= 5 and switched_to_rotation == 0 and (mode_control.distance_to_move - mode_control.anticipated_dist_if_no_slip <= 1)): #If robot has moved less than 1 m in 5 sec, slippage is detected
-                        logger.warning("!!! Slippage detected !!! Robot has either not moved or moved forward by <= 1 m within 5 seconds.") 
-                        logger.warning("Going backwards at 1 m/s for 2 seconds")
-                        start_time = time.time()
-                        time_elapsed = 0
-                        while(time_elapsed <= 2):
-                            mode_control.move_forward(mode_control.distance_to_move, -1.0) #Speed should be float
-                            time_elapsed = time.time() - start_time
-                        time_elapsed = 0 
-                        start_time = time.time()
-
+                        switched_to_rotation = 0
+                        mode_control.detect_slip(switched_to_rotation, speed_linear)   
+                elif mode_control.distance_to_move <= 3:
+                    #Insert slip detect here
+                    mode_control.detect_slip(switched_to_rotation, speed_linear)
 
                                        
 
