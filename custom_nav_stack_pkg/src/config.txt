@@ -22,8 +22,8 @@ cluster_max_size = 25000
 fwd_obs_tolerance = 5
 angle_view_degree = 90
 
-grid_size = 11
-grid_cell_length = 0.5
+grid_size = 101
+grid_cell_length = 0.05
 test_x1 = 0
 test_y1 = 0
 test_x2 = 4

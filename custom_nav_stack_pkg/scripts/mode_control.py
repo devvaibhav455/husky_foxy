@@ -82,8 +82,8 @@ class ModeControl(Node):
         self.mode = 'auto'
         self.anticipated_dist_if_no_slip = 0
 
-        self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation and real-robot
-        # self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data') #Real robot only
+        # self.imu_sub = message_filters.Subscriber(self, Imu, 'imu/data') #Simulation and real-robot
+        self.imu_sub = message_filters.Subscriber(self, Imu, 'nav/filtered_imu/data') #Real robot only
         self.gps_sub = message_filters.Subscriber(self, NavSatFix, 'gps/data')
         self.joy_sub = message_filters.Subscriber(self, Joy, 'joy_teleop/joy')
         # self.mag_sub = message_filters.Subscriber(self, MagneticField, 'mag')
@@ -93,7 +93,7 @@ class ModeControl(Node):
         # Twist is a datatype for velocity
         self.move_cmd = Twist()        
         
-        # self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub, self.mag_sub], 10, 0.09)
+        # self.ts = message_filters.ApproximateTimeSynchronizer([self.imu_sub, self.gps_sub], 10, 0.09)
         self.ts = message_filters.ApproximateTimeSynchronizer([self.joy_sub, self.imu_sub, self.gps_sub], 10, 0.9)
         self.ts.registerCallback(self.listener_callback)
         # time.sleep(2)
@@ -136,7 +136,7 @@ class ModeControl(Node):
 
 
     def listener_callback(self,joy_msg, imu_msg, gps_msg):
-    # def listener_callback(self, joy_msg, imu_msg, gps_msg, mag_msg):
+    # def listener_callback(self, imu_msg, gps_msg):
         self.sync_done = 1
         # rclpy.logging.get_logger('Callback_Function').info('Entered the callback function')
         
@@ -147,8 +147,8 @@ class ModeControl(Node):
         (self.roll, self.pitch, self.yaw) = euler_from_quaternion (orientation_list) #Result in radians. -180 < Roll < 180
         global init_heading
         # self.true_heading = -self.roll + init_heading
-        # self.true_heading = init_heading - (-self.roll - self.imu_heading_offset) #Real robot
-        self.true_heading = init_heading - (self.roll - self.imu_heading_offset) #Simulation
+        self.true_heading = init_heading - (-self.roll - self.imu_heading_offset) #Real robot
+        # self.true_heading = init_heading - (self.roll - self.imu_heading_offset) #Simulation
         
         # self.mag_north_heading = -self.roll + self.imu_heading_offset #ASSUMPTION 2) IMU heading is considered as magnetometer heading (as couldn't insert magnetometer is gazebo)
         # logger.warning("IMU data extraction (values in degree): Roll: %f, Pitch: %f, Yaw: %f", math.degrees(self.roll), math.degrees(self.pitch), math.degrees(self.yaw))
@@ -157,6 +157,9 @@ class ModeControl(Node):
         #Extracting magnetometer data
         # self.mag_data = mag_msg.magnetic_field
 
+        #Extracting data from Joystick
+        self.joy_msg = joy_msg
+        # self.enable_script = 1 # Used just for quick testing
         
         #Extracting data from GPS sensor
         self.gps_msg = gps_msg
@@ -201,6 +204,11 @@ class ModeControl(Node):
                 logger.warning("GPS navigation complete for all goals :)")
             if goal_number < len(self.lat_array):
                 self.dest_lat, self.dest_long = self.DMS_to_decimal_format(self.lat_array[goal_number], self.long_array[goal_number])
+                global initial_dist_remaining
+                initial_dist_remaining = self.calc_goal(self.current_lat, self.current_long, self.dest_lat, self.dest_long)
+                global start_time
+                start_time = time.time()
+                self.anticipated_dist_if_no_slip = initial_dist_remaining - speed_linear*4 #Anticipate remaining distance after 5 seconds of robot's linear motion
 
     def calc_goal(self, origin_lat, origin_long, goal_lat, goal_long):
         '''Calculate distance and azimuth between GPS points. Returns distance in meter'''
@@ -342,10 +350,11 @@ class ModeControl(Node):
         self.move_forward(self.distance_to_move, speed_linear)
         global start_time, time_elapsed
         time_elapsed = time.time() - start_time
-        print("Start time: ", start_time, " ; Time elapsed: ", time_elapsed, " ; Switched to rotation: ", switched_to_rotation, "; Distance to move: ", self.distance_to_move, "; Anticipated: ", self.anticipated_dist_if_no_slip , " ; Diff. in distance actual: ", abs(initial_dist_remaining - self.distance_to_move), " ; Diff anticipated: ", initial_dist_remaining - self.anticipated_dist_if_no_slip)
+        print("Start time: ", start_time, " ; Time elapsed: ", time_elapsed, " ; Switched to rotation: ", switched_to_rotation, "; Initial distance to move: ", initial_dist_remaining, " ; Current dist to move" , self.distance_to_move,  "; Anticipated: ", self.anticipated_dist_if_no_slip , " ; Dist moved in 5 sec: ", abs(initial_dist_remaining - self.distance_to_move), " ; Diff anticipated: ", initial_dist_remaining - self.anticipated_dist_if_no_slip)
         if (time_elapsed >= 5 and switched_to_rotation == 0): # and (self.distance_to_move - self.anticipated_dist_if_no_slip <= 0.4)): #If robot has moved less than 0.4 m in 5 sec, slippage is detected
-            if(abs(initial_dist_remaining - self.distance_to_move) <= initial_dist_remaining - self.anticipated_dist_if_no_slip):
-                logger.warning("!!! Slippage detected !!! Robot has either not moved or moved forward by <= 0.4 m within 5 seconds.") 
+            # if(abs(initial_dist_remaining - self.distance_to_move) <= initial_dist_remaining - self.anticipated_dist_if_no_slip):
+            if(abs(initial_dist_remaining - self.distance_to_move) <= 0.2):
+                logger.warning("!!! Slippage detected !!! Robot has either not moved or moved forward by <= 0.2 m within 5 seconds.") 
                 logger.warning("Going backwards at 1 m/s for 2 seconds")
                 start_time = time.time()
                 time_elapsed = 0
@@ -355,9 +364,8 @@ class ModeControl(Node):
             start_time = time.time()
             time_elapsed = 0
             initial_dist_remaining = self.distance_to_move
-            print("Initial distance remaining: ", initial_dist_remaining)
-                # print("Start time: ", start_time, " ; Time elapsed: ", time_elapsed)
-
+            # print("Initial distance remaining: ", initial_dist_remaining)
+            self.anticipated_dist_if_no_slip = initial_dist_remaining - speed_linear*4 #Anticipate remaining distance after 5 seconds of robot's linear motion
 
 def main(args=None):
     
@@ -443,57 +451,9 @@ def main(args=None):
     # logger.warning("Suceessfully recorded magnetometer data. Calculating calibration parameters")
     # magx_hard_offset, magy_hard_offset, theta, sigma = 0.002376, 0.002376, -1.042795, 0.797751
     # logger.warning("Reading hard-coded magnetometer calibration data.")
-    
-    logger.warning('Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then will move in straight line for 20 sec')
-    time_elapsed = 0
-    start_time = time.time()
-    logger.warning('Mode just before initial gps location calculation is: %s', mode_control.mode)
-    while time_elapsed <= 10 and mode_control.mode != 'e_stop':
-        mode_control.sync_done = 0
-        rclpy.spin_once(mode_control)     
-        if mode_control.sync_done == 1:
-            lat_tmp_src_arr.append(mode_control.gps_msg.latitude)
-            lon_tmp_src_arr.append(mode_control.gps_msg.longitude)
-            time_elapsed = time.time() - start_time
-            logger.warning("Tmp initial location time elapsed: %f ", time_elapsed)
-    
-    logger.warning('Mode just after initial gps location calculation is: %s', mode_control.mode)
-    logger.warning("Robot should move forward now for 20 seconds")
-    time_elapsed = 0
-    start_time = time.time()
-    while time_elapsed <= 20 and mode_control.mode != 'e_stop':
-        mode_control.move_forward(10, speed_linear)
-        time_elapsed = time.time() - start_time        
-    
-    logger.warning("Straight moving time elapsed: %f ", time_elapsed)
-    logger.warning('Mode just after straight line moving is: %s', mode_control.mode)
-    
-    logger.warning('Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then do the calculation')
-    time_elapsed = 0
-    start_time = time.time()
-    while time_elapsed <= 10 and mode_control.mode != 'e_stop':
-        mode_control.sync_done = 0
-        rclpy.spin_once(mode_control)     
-        if mode_control.sync_done == 1:
-            lat_tmp_dst_arr.append(mode_control.gps_msg.latitude)
-            lon_tmp_dst_arr.append(mode_control.gps_msg.longitude)
-            time_elapsed = time.time() - start_time
-    logger.warning("Tmp final location time elapsed: %f", time_elapsed)
-    logger.warning('Mode just after final gps location calculation is: %s', mode_control.mode)
-    
-    init_delta_long = statistics.mean(lon_tmp_dst_arr) - statistics.mean(lon_tmp_src_arr)
-    X = math.cos(statistics.mean(lat_tmp_dst_arr)) * math.sin(init_delta_long)
-    Y = (math.cos(statistics.mean(lat_tmp_src_arr)) * math.sin(statistics.mean(lat_tmp_dst_arr))) - (math.sin(statistics.mean(lat_tmp_src_arr)) * math.cos(statistics.mean(lat_tmp_dst_arr)) * math.cos(init_delta_long))
-    
-    init_heading = math.atan2(X, Y)
-    # mode_control.imu_heading_offset = -mode_control.roll #Real robot
-    mode_control.imu_heading_offset = mode_control.roll #Simulation
-
-    logger.warning("Calculated heading (in degrees) is: %f°", math.degrees(init_heading))
-
-    logger.warning("Please switch modes using Joystick to operate robot further")
-
-
+     
+    init_heading_calculated = 0
+    logger.warning('Please enable button # %s to run the script.', mode_control.button_script_control)
     
     while 1==1:
         mode_control.sync_done = 0
@@ -501,15 +461,64 @@ def main(args=None):
         if mode_control.sync_done == 1:
             
             # mode_control.mode = 'gps' #Used just for quick testing
-            if(old_mode != mode_control.mode):
-                logger.warning("Changed mode from: %s to %s", old_mode, mode_control.mode)
+            if(init_heading_calculated == 0 and mode_control.joy_msg.buttons[mode_control.button_script_control] == 1):
+                logger.warning('Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then will move in straight line for 20 sec')
                 time_elapsed = 0
                 start_time = time.time()
+                logger.warning('Mode just before initial gps location calculation is: %s', mode_control.mode)
+                while time_elapsed <= 10 and mode_control.mode != 'e_stop':
+                    mode_control.sync_done = 0
+                    rclpy.spin_once(mode_control)     
+                    if mode_control.sync_done == 1:
+                        lat_tmp_src_arr.append(mode_control.gps_msg.latitude)
+                        lon_tmp_src_arr.append(mode_control.gps_msg.longitude)
+                        time_elapsed = time.time() - start_time
+                        logger.warning("Tmp initial location time elapsed: %f ", time_elapsed)
+                
+                logger.warning('Mode just after initial gps location calculation is: %s', mode_control.mode)
+                logger.warning("Robot should move forward now for 20 seconds")
+                time_elapsed = 0
+                start_time = time.time()
+                while time_elapsed <= 20 and mode_control.mode != 'e_stop':
+                    mode_control.move_forward(10, speed_linear)
+                    time_elapsed = time.time() - start_time        
+                
+                logger.warning("Straight moving time elapsed: %f ", time_elapsed)
+                logger.warning('Mode just after straight line moving is: %s', mode_control.mode)
+                
+                logger.warning('Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then do the calculation')
+                time_elapsed = 0
+                start_time = time.time()
+                while time_elapsed <= 10 and mode_control.mode != 'e_stop':
+                    mode_control.sync_done = 0
+                    rclpy.spin_once(mode_control)     
+                    if mode_control.sync_done == 1:
+                        lat_tmp_dst_arr.append(mode_control.gps_msg.latitude)
+                        lon_tmp_dst_arr.append(mode_control.gps_msg.longitude)
+                        time_elapsed = time.time() - start_time
+                logger.warning("Tmp final location time elapsed: %f", time_elapsed)
+                logger.warning('Mode just after final gps location calculation is: %s', mode_control.mode)
+                
+                init_delta_long = statistics.mean(lon_tmp_dst_arr) - statistics.mean(lon_tmp_src_arr)
+                X = math.cos(statistics.mean(lat_tmp_dst_arr)) * math.sin(init_delta_long)
+                Y = (math.cos(statistics.mean(lat_tmp_src_arr)) * math.sin(statistics.mean(lat_tmp_dst_arr))) - (math.sin(statistics.mean(lat_tmp_src_arr)) * math.cos(statistics.mean(lat_tmp_dst_arr)) * math.cos(init_delta_long))
+                
+                init_heading = math.atan2(X, Y)
+                mode_control.imu_heading_offset = -mode_control.roll #Real robot
+                # mode_control.imu_heading_offset = mode_control.roll #Simulation
+                init_heading_calculated = 1
+                logger.warning("Calculated heading (in degrees) is: %f°", math.degrees(init_heading))
+                logger.warning("Please switch modes using Joystick to operate robot further")
+
+            
+            if(old_mode != mode_control.mode):
+                logger.warning("Changed mode from: %s to %s", old_mode, mode_control.mode)
+                switched_to_rotation = 0
             if mode_control.mode == 'e_stop':
                 mode_control.move_cmd.linear.x = 0.0
                 mode_control.move_cmd.angular.z = 0.0
                 mode_control.velocity_publisher_.publish(mode_control.move_cmd)
-            elif mode_control.mode == 'manual': #Enter into manual override mode. Complete control in hands of the user
+            elif mode_control.mode == 'manual' and mode_control.joy_msg.buttons[mode_control.button_script_control] == 1: #Enter into manual override mode. Complete control in hands of the user
                 """ Old code left there to stay which was used when we tried the magnetometer approach to calculate heading which proved unsuccessful.
                 Hard iron correction on real-time data
                 mode_control.mag_data.x = mode_control.mag_data.x - magx_hard_offset
@@ -546,7 +555,7 @@ def main(args=None):
                 os.system("ros2 launch husky_control teleop_pub_vel.launch.py &") #No need to run this because both joy nodes are running and they override the speed command from script
                 """
                 pass
-            elif mode_control.mode == 'gps': #Enter into force GPS waypoing mode, can hit obstacles, does not call local mode when detects obstacle. Used for testing purpose   
+            elif mode_control.mode == 'gps' and mode_control.joy_msg.buttons[mode_control.button_script_control] == 1: #Enter into force GPS waypoing mode, can hit obstacles, does not call local mode when detects obstacle. Used for testing purpose   
                 """Old code left there to stay which was used when we tried the magnetometer approach to calculate heading which proved unsuccessful.
                 Using calculated magnetometer calibration parameters to get correct heading from magnetometer.
                 
@@ -617,7 +626,7 @@ def main(args=None):
 
                 
                 mode_control.distance_to_move = mode_control.calc_goal(mode_control.current_lat, mode_control.current_long, mode_control.dest_lat, mode_control.dest_long)
-                switched_to_rotation = 0
+                
                 if mode_control.distance_to_move > 3:
                     if abs(mode_control.to_rotate) > 0.06:
                         switched_to_rotation = 1
@@ -625,24 +634,27 @@ def main(args=None):
                         mode_control.rotate(mode_control.to_rotate, mode_control.direction)
                     elif mode_control.to_rotate < 0.06:     
                         logger.warning("Robot already aligned towards goal no: %d", goal_number)
+                        # print("Switched to rotation: ", switched_to_rotation, "Second condition: ",old_mode != mode_control.mode )
                         if switched_to_rotation == 1 or (old_mode != mode_control.mode):
                             global initial_dist_remaining
+                            time_elapsed = 0
                             initial_dist_remaining = mode_control.distance_to_move
                             mode_control.anticipated_dist_if_no_slip = initial_dist_remaining - speed_linear*4 #Anticipate remaining distance after 5 seconds of robot's linear motion
-                            print("Initial distance remaining: ", initial_dist_remaining)
+                            # print("Initial distance remaining: ", initial_dist_remaining)
+                            start_time = time.time()
                         
                         switched_to_rotation = 0
                         mode_control.detect_slip(switched_to_rotation, speed_linear)   
                 elif mode_control.distance_to_move <= 3:
-                    #Insert slip detect here
-                    mode_control.detect_slip(switched_to_rotation, speed_linear)
+                    mode_control.move_forward(mode_control.distance_to_move, speed_linear)
+                    switched_to_rotation = 0
 
                                        
 
 
-            elif mode_control.mode == 'local': #Enter into force local navigation mode. Used for testing purpose
+            elif mode_control.mode == 'local' and mode_control.joy_msg.buttons[mode_control.button_script_control] == 1: #Enter into force local navigation mode. Used for testing purpose
                 pass
-            elif mode_control.mode == 'auto': #Enter automatic mode which can auto-switch between gps and local mode
+            elif mode_control.mode == 'auto' and mode_control.joy_msg.buttons[mode_control.button_script_control] == 1: #Enter automatic mode which can auto-switch between gps and local mode
                 pass
 
         old_mode = mode_control.mode

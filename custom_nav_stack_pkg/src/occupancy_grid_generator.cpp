@@ -11,6 +11,7 @@
 #include <vector>
 #include "matplotlibcpp.h"
 #include <bits/stdc++.h>
+#include <rclcpp/qos.hpp>
 
 namespace plt = matplotlibcpp;
 
@@ -102,6 +103,7 @@ class LaserScanSubscriber : public rclcpp::Node
         void line(int x,int y,int x2, int y2) const {
             // std::cout << "Source: (" << x << ", " << y << ") ; Destination: (" << x2 << ", " << y2 << ")" << std::endl;
             X.clear(); Y.clear(); dist_vlp.clear();
+            int eta = x;
             int w = x2 - x ;
             int h = y2 - y ;
             int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0 ;
@@ -120,7 +122,7 @@ class LaserScanSubscriber : public rclcpp::Node
             for (int i=0;i<=longest;i++) {
                 X.push_back(x);
                 Y.push_back(y);
-                dist_vlp.push_back(sqrt(x*x + y*y)*config.grid_cell_length);
+                dist_vlp.push_back(sqrt((x-eta)*(x-eta) + (y-eta)*(y-eta))*config.grid_cell_length);
                 numerator += shortest ;
                 if (!(numerator<longest)) {
                     numerator -= longest ;
@@ -136,42 +138,49 @@ class LaserScanSubscriber : public rclcpp::Node
         LaserScanSubscriber() //Constructor which has the same name as that of class followed by a parentheses. A constructor in C++ is a special method that is automatically called when an object of a class is created.
         : Node("laserscan_subscriber")
         {
-        //Read config from file
-        std::ifstream config_file_path("/home/dev/husky_ws/src/custom_nav_stack_pkg/src/config.txt");
-        std::string line;
-        while (std::getline(config_file_path, line)) {
-            std::istringstream sin(line.substr(line.find("=") + 1));
-            if (line.find("grid_size") == 0)
-                sin >> config.grid_size;
-            else if (line.find("grid_cell_length") == 0)
-                sin >> config.grid_cell_length;
-            else if (line.find("test_x1") == 0)
-                sin >> config.test_x1;
-            else if (line.find("test_x2") == 0)
-                sin >> config.test_x2;
-            else if (line.find("test_y1") == 0)
-                sin >> config.test_y1;
-            else if (line.find("test_y2") == 0)
-                sin >> config.test_y2;
-        }
-        std::cout << config.grid_size << '\n';
-        
-        plt::figure();
-        // std::vector<double> y = {1, 3, 2, 4};
-        // plt::plot(y);
-        // // plt::savefig("minimal.pdf");
-        // plt::show();
-        
-        publisher_occ_grid_map = this->create_publisher<nav_msgs::msg::OccupancyGrid>("custom_map", 10);
-        subscription_laserscan = this->create_subscription<sensor_msgs::msg::LaserScan>
-        ("scan", rclcpp::SensorDataQoS(), std::bind(&LaserScanSubscriber::laserscan_callback, this, std::placeholders::_1));
+            //Read config from file
+            std::ifstream config_file_path("/home/dev/husky_ws/src/custom_nav_stack_pkg/src/config.txt");
+            std::string line;
+            while (std::getline(config_file_path, line)) {
+                std::istringstream sin(line.substr(line.find("=") + 1));
+                if (line.find("grid_size") == 0)
+                    sin >> config.grid_size;
+                else if (line.find("grid_cell_length") == 0)
+                    sin >> config.grid_cell_length;
+                else if (line.find("test_x1") == 0)
+                    sin >> config.test_x1;
+                else if (line.find("test_x2") == 0)
+                    sin >> config.test_x2;
+                else if (line.find("test_y1") == 0)
+                    sin >> config.test_y1;
+                else if (line.find("test_y2") == 0)
+                    sin >> config.test_y2;
+            }
+            std::cout << config.grid_size << '\n';
+            
+            plt::figure();
+            // std::vector<double> y = {1, 3, 2, 4};
+            // plt::plot(y);
+            // // plt::savefig("minimal.pdf");
+            // plt::show();
+            
+            publisher_occ_grid_map = this->create_publisher<nav_msgs::msg::OccupancyGrid>("custom_map", 10);
+            
+            auto my_qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
+            // subscription_laserscan = this->create_subscription<sensor_msgs::msg::LaserScan>
+            // ("scan", rclcpp::SensorDataQoS(), std::bind(&LaserScanSubscriber::laserscan_callback, this, std::placeholders::_1));
+
+
+            subscription_laserscan = this->create_subscription<sensor_msgs::msg::LaserScan>
+            ("scan", my_qos, std::bind(&LaserScanSubscriber::laserscan_callback, this, std::placeholders::_1));
+
         }
 
     private:
         void laserscan_callback(const sensor_msgs::msg::LaserScan::SharedPtr laserscan_msg_ptr) const
         {
-            std::cout << "############## Callback function starts ##############" << std::endl;
-            RCLCPP_INFO(this->get_logger(), "I heard at 0 degree: '%f'", laserscan_msg_ptr->ranges[0]);
+            // std::cout << "############## Callback function starts ##############" << std::endl;
+            // RCLCPP_INFO(this->get_logger(), "I heard at 0 degree: '%f'", laserscan_msg_ptr->ranges[0]);
             // linev6(0,0,2,4);
             // linev6(4,2,0,0);
             // line(4,0,4,2);
@@ -226,7 +235,7 @@ class LaserScanSubscriber : public rclcpp::Node
                     
                     line(eta, eta, x_dash, y_dash); // Calculating cells on matrix/ occupancy grid which constitute the line
                     
-                    // if(i >= 3147 && i <= 3152){
+                    // if(i >= 2799 && i <= 2805){
                     //     std::cout << "i: " << i << " angle_vlp_degree: " << angle_vlp_degree << " slope/m: " << m << " eta: " << eta << " x_dash: " << x_dash << " y_dash: " << y_dash << std::endl;
                     //     std::cout << "X size: " << X.size() << " ; Y size: " << Y.size() << std::endl;
                     //     std::cout << "X is: "; 
@@ -292,9 +301,10 @@ class LaserScanSubscriber : public rclcpp::Node
             // std:: cout << "Index zero: " << index_vect[0] << " Size: " << index_vect.size() << std::endl;
             // for (auto i: index_vect) { std::cout << i << " " ;} ;
             publisher_occ_grid_map->publish(occupancy_grid_msg);
+            sleep(2);
 
 
-            std::cout << "\n############## Callback function ends ##############" << std::endl;
+            // std::cout << "\n############## Callback function ends ##############" << std::endl;
         }
         rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr publisher_occ_grid_map;
         rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_laserscan;
