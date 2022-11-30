@@ -13,6 +13,8 @@
 #include <bits/stdc++.h>
 #include <rclcpp/qos.hpp>
 
+
+
 namespace plt = matplotlibcpp;
 
 //          nav_msgs/msg/OccupancyGrid sample message		|||		            sensor_msgs/msg/LaserScan sample message
@@ -166,7 +168,21 @@ class LaserScanSubscriber : public rclcpp::Node
             
             publisher_occ_grid_map = this->create_publisher<nav_msgs::msg::OccupancyGrid>("custom_map", 10);
             
-            auto my_qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
+
+            static const rmw_qos_profile_t rmw_my_qos_profile_sensor_data =
+            {
+            RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            1,
+            RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            RMW_QOS_POLICY_DURABILITY_VOLATILE,
+            RMW_QOS_DEADLINE_DEFAULT,
+            RMW_QOS_LIFESPAN_DEFAULT,
+            RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,
+            RMW_QOS_LIVELINESS_LEASE_DURATION_DEFAULT,
+            false
+            };
+
+            auto my_qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_my_qos_profile_sensor_data);
             // subscription_laserscan = this->create_subscription<sensor_msgs::msg::LaserScan>
             // ("scan", rclcpp::SensorDataQoS(), std::bind(&LaserScanSubscriber::laserscan_callback, this, std::placeholders::_1));
 

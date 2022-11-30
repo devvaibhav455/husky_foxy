@@ -44,6 +44,7 @@ find_package(rosidl_default_generators REQUIRED)
 # message( CMAKE_MODULE_PATH in mycmake:  ${CMAKE_MODULE_PATH} )
 # message( Boost_FOUND in my cmakelist:  ${Boost_FOUND} )
 find_package(PCL REQUIRED)
+find_package(ompl REQUIRED)
 
 find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
 if (${Python3_FOUND})
@@ -88,15 +89,18 @@ add_definitions(${PCL_DEFINITIONS})
 # Create Cpp executable
 add_executable(lidar_cpp_executable src/lidar_cpp_node.cpp)
 add_executable(occupancy_grid_generator src/occupancy_grid_generator.cpp)
+add_executable(path_planner src/path_planner.cpp)
 #ament_target_dependencies(lidar_cpp_executable rclcpp)
 ament_target_dependencies(lidar_cpp_executable ${dependencies})
 ament_target_dependencies(occupancy_grid_generator ${dependencies})
+ament_target_dependencies(path_planner ${dependencies})
 
 
 # Install Cpp executables
 install(TARGETS
   lidar_cpp_executable
   occupancy_grid_generator
+  path_planner
   DESTINATION lib/${PROJECT_NAME}
 )
 
