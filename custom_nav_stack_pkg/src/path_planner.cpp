@@ -14,6 +14,7 @@ using std::placeholders::_1;
 
 // Ref: https://github.com/dominikbelter/ompl_example_2d , https://github.com/mlsdpk/ompl_2d_rviz_visualizer
 
+rclcpp::Node::
 
 
 class PathPlanner : public rclcpp::Node

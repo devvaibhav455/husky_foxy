@@ -1,7 +1,1042 @@
-2022-11-28 14:52:58 WARNING  ############################## LOGGING STARTED ##############################
-2022-11-28 14:52:58 INFO     Line3: 8.568331406746644e-05 -8.459108823264808e-05
-2022-11-28 14:52:58 INFO     Line6: 8.427178989528105e-05 8.67224450490827e-05
-2022-11-28 14:52:58 INFO     Line9: -8.482634326068172e-05 8.620434763335194e-05
-2022-11-28 14:52:58 INFO     Line12: -8.488815024404338e-05 -8.762365968361716e-05
-2022-11-28 14:52:58 WARNING  Current mode is: auto
-2022-11-28 14:52:58 WARNING  Please enable button # 7 to run the script.
+2022-12-01 12:25:09 WARNING  ############################## LOGGING STARTED ##############################
+2022-12-01 12:25:09 INFO     Line3: 8.568331406746644e-05 -8.459108823264808e-05
+2022-12-01 12:25:09 INFO     Line6: 8.427178989528105e-05 8.67224450490827e-05
+2022-12-01 12:25:09 INFO     Line9: -8.482634326068172e-05 8.620434763335194e-05
+2022-12-01 12:25:09 INFO     Line12: -8.488815024404338e-05 -8.762365968361716e-05
+2022-12-01 12:25:09 WARNING  Current mode is: auto
+2022-12-01 12:25:09 WARNING  Please enable button # 7 to run the script.
+2022-12-01 12:25:13 WARNING  Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then will move in straight line for 20 sec
+2022-12-01 12:25:13 WARNING  Mode just before initial gps location calculation is: auto
+2022-12-01 12:25:13 WARNING  Tmp initial location time elapsed: 0.100246 
+2022-12-01 12:25:13 WARNING  Tmp initial location time elapsed: 0.200823 
+2022-12-01 12:25:13 WARNING  Tmp initial location time elapsed: 0.300042 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 0.400811 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 0.501191 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 0.600546 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 0.700710 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 0.801481 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 0.901911 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 1.001672 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 1.102024 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 1.202036 
+2022-12-01 12:25:14 WARNING  Tmp initial location time elapsed: 1.302583 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 1.402670 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 1.502398 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 1.603989 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 1.703587 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 1.804256 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 1.904018 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 2.004502 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 2.104244 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 2.204841 
+2022-12-01 12:25:15 WARNING  Tmp initial location time elapsed: 2.305816 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 2.405209 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 2.504959 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 2.604516 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 2.704815 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 2.805838 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 2.905855 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 3.005628 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 3.106660 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 3.206774 
+2022-12-01 12:25:16 WARNING  Tmp initial location time elapsed: 3.306501 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 3.407069 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 3.506872 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 3.607571 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 3.707409 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 3.807920 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 3.907546 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 4.007999 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 4.107277 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 4.207358 
+2022-12-01 12:25:17 WARNING  Tmp initial location time elapsed: 4.308497 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 4.408299 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 4.508135 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 4.608435 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 4.709358 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 4.809211 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 4.909736 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 5.010465 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 5.109560 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 5.209449 
+2022-12-01 12:25:18 WARNING  Tmp initial location time elapsed: 5.309811 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 5.410387 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 5.510147 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 5.610849 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 5.710775 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 5.810664 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 5.910768 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 6.010839 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 6.110962 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 6.211846 
+2022-12-01 12:25:19 WARNING  Tmp initial location time elapsed: 6.311509 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 6.412081 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 6.511647 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 6.611956 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 6.712553 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 6.812253 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 6.912963 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 7.013284 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 7.113824 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 7.213305 
+2022-12-01 12:25:20 WARNING  Tmp initial location time elapsed: 7.313187 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 7.414246 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 7.513817 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 7.613531 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 7.713423 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 7.814568 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 7.914499 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 8.014284 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 8.115504 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 8.215255 
+2022-12-01 12:25:21 WARNING  Tmp initial location time elapsed: 8.314973 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 8.415745 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 8.516972 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 8.615929 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 8.715818 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 8.815975 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 8.916120 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 9.016993 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 9.116990 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 9.216244 
+2022-12-01 12:25:22 WARNING  Tmp initial location time elapsed: 9.317114 
+2022-12-01 12:25:23 WARNING  Tmp initial location time elapsed: 9.417066 
+2022-12-01 12:25:23 WARNING  Tmp initial location time elapsed: 9.517332 
+2022-12-01 12:25:23 WARNING  Tmp initial location time elapsed: 9.617795 
+2022-12-01 12:25:23 WARNING  Tmp initial location time elapsed: 9.717829 
+2022-12-01 12:25:23 WARNING  Tmp initial location time elapsed: 9.818344 
+2022-12-01 12:25:23 WARNING  Tmp initial location time elapsed: 9.919840 
+2022-12-01 12:25:23 WARNING  Tmp initial location time elapsed: 10.019177 
+2022-12-01 12:25:23 WARNING  Mode just after initial gps location calculation is: auto
+2022-12-01 12:25:23 WARNING  Robot should move forward now for 20 seconds
+2022-12-01 12:25:44 WARNING  Straight moving time elapsed: 20.356935 
+2022-12-01 12:25:44 WARNING  Mode just after straight line moving is: auto
+2022-12-01 12:25:44 WARNING  Starting to find initial heading using GPS co-ordinates. Waiting for 10 sec here and then do the calculation
+2022-12-01 12:25:54 WARNING  Tmp final location time elapsed: 10.093303
+2022-12-01 12:25:54 WARNING  Mode just after final gps location calculation is: auto
+2022-12-01 12:25:54 WARNING  Calculated heading (in degrees) is: -90.763847°
+2022-12-01 12:25:54 WARNING  Please switch modes using Joystick to operate robot further
+2022-12-01 12:25:59 WARNING  Changed mode from: auto to gps
+2022-12-01 12:25:59 WARNING  The distance from robot to goal #: 0 is: 15.486764 m.
+2022-12-01 12:25:59 WARNING  Info for goal #: 0, Current heading: -90.763850°, Required heading: 50.773358°, Need to rotate by: 141.537208° in Direction: cw
+2022-12-01 12:25:59 WARNING  The distance from robot to goal #: 0 is: 15.486768 m.
+2022-12-01 12:25:59 WARNING  Info for goal #: 0, Current heading: -90.763850°, Required heading: 50.773372°, Need to rotate by: 141.537222° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.493848 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -90.689270°, Required heading: 50.794784°, Need to rotate by: 141.484055° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.508581 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -90.192884°, Required heading: 50.840078°, Need to rotate by: 141.032962° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.530891 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -89.149755°, Required heading: 50.909273°, Need to rotate by: 140.059028° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.559145 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -87.565995°, Required heading: 50.998010°, Need to rotate by: 138.564005° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.590526 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -86.143618°, Required heading: 51.096723°, Need to rotate by: 137.240342° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.628489 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -85.366497°, Required heading: 51.217074°, Need to rotate by: 136.583571° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.674174 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -84.365055°, Required heading: 51.363991°, Need to rotate by: 135.729046° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.731378 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -82.062596°, Required heading: 51.553757°, Need to rotate by: 133.616353° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.796674 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -79.009271°, Required heading: 51.775737°, Need to rotate by: 130.785008° in Direction: cw
+2022-12-01 12:26:00 WARNING  The distance from robot to goal #: 0 is: 15.865966 m.
+2022-12-01 12:26:00 WARNING  Info for goal #: 0, Current heading: -76.048125°, Required heading: 52.017087°, Need to rotate by: 128.065212° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 15.927289 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -73.912617°, Required heading: 52.252265°, Need to rotate by: 126.164881° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 15.993458 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -70.446017°, Required heading: 52.515438°, Need to rotate by: 122.961455° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.060934 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -66.803756°, Required heading: 52.806127°, Need to rotate by: 119.609883° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.121396 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -63.377620°, Required heading: 53.091967°, Need to rotate by: 116.469586° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.168839 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -61.313340°, Required heading: 53.364869°, Need to rotate by: 114.678210° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.211299 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -59.666453°, Required heading: 53.639642°, Need to rotate by: 113.306094° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.257893 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -56.240511°, Required heading: 53.949776°, Need to rotate by: 110.190288° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.305165 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -52.374346°, Required heading: 54.265732°, Need to rotate by: 106.640079° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.348648 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -48.143684°, Required heading: 54.587255°, Need to rotate by: 102.730939° in Direction: cw
+2022-12-01 12:26:01 WARNING  The distance from robot to goal #: 0 is: 16.384722 m.
+2022-12-01 12:26:01 WARNING  Info for goal #: 0, Current heading: -44.120239°, Required heading: 54.919815°, Need to rotate by: 99.040053° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.413561 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -40.590980°, Required heading: 55.259365°, Need to rotate by: 95.850345° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.436697 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -37.147226°, Required heading: 55.603279°, Need to rotate by: 92.750505° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.451928 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -34.371658°, Required heading: 55.930138°, Need to rotate by: 90.301795° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.459624 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -32.514353°, Required heading: 56.237557°, Need to rotate by: 88.751910° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.466772 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -28.980875°, Required heading: 56.580513°, Need to rotate by: 85.561388° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.470964 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -25.531777°, Required heading: 56.947663°, Need to rotate by: 82.479439° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.470233 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -22.237105°, Required heading: 57.290844°, Need to rotate by: 79.527949° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.462539 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -19.788923°, Required heading: 57.611206°, Need to rotate by: 77.400129° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.451159 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -16.970601°, Required heading: 57.941695°, Need to rotate by: 74.912296° in Direction: cw
+2022-12-01 12:26:02 WARNING  The distance from robot to goal #: 0 is: 16.437690 m.
+2022-12-01 12:26:02 WARNING  Info for goal #: 0, Current heading: -13.388901°, Required heading: 58.291939°, Need to rotate by: 71.680839° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.419881 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: -9.728270°, Required heading: 58.639560°, Need to rotate by: 68.367830° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.396811 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: -5.930814°, Required heading: 58.977840°, Need to rotate by: 64.908655° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.366351 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: -1.896772°, Required heading: 59.321338°, Need to rotate by: 61.218111° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.329481 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: 1.412787°, Required heading: 59.653236°, Need to rotate by: 58.240449° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.287636 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: 4.835852°, Required heading: 59.975934°, Need to rotate by: 55.140082° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.242754 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: 7.090121°, Required heading: 60.253333°, Need to rotate by: 53.163211° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.195377 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: 8.564638°, Required heading: 60.510227°, Need to rotate by: 51.945589° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.140441 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: 12.019927°, Required heading: 60.801464°, Need to rotate by: 48.781537° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.082290 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: 15.581379°, Required heading: 61.103853°, Need to rotate by: 45.522475° in Direction: cw
+2022-12-01 12:26:03 WARNING  The distance from robot to goal #: 0 is: 16.021263 m.
+2022-12-01 12:26:03 WARNING  Info for goal #: 0, Current heading: 19.082551°, Required heading: 61.389703°, Need to rotate by: 42.307152° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.955952 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 22.066115°, Required heading: 61.660356°, Need to rotate by: 39.594241° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.885483 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 24.944093°, Required heading: 61.920287°, Need to rotate by: 36.976194° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.811484 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 27.649677°, Required heading: 62.167973°, Need to rotate by: 34.518296° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.735463 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 30.330726°, Required heading: 62.401823°, Need to rotate by: 32.071097° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.657188 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 32.745148°, Required heading: 62.620578°, Need to rotate by: 29.875430° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.573807 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 35.343109°, Required heading: 62.836911°, Need to rotate by: 27.493802° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.488159 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 37.384942°, Required heading: 63.032917°, Need to rotate by: 25.647975° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.401066 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 39.251937°, Required heading: 63.216604°, Need to rotate by: 23.964667° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.318142 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 40.046872°, Required heading: 63.367433°, Need to rotate by: 23.320561° in Direction: cw
+2022-12-01 12:26:04 WARNING  The distance from robot to goal #: 0 is: 15.237072 m.
+2022-12-01 12:26:04 WARNING  Info for goal #: 0, Current heading: 40.268564°, Required heading: 63.500586°, Need to rotate by: 23.232021° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 15.146139 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 41.959105°, Required heading: 63.651088°, Need to rotate by: 21.691983° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 15.050606 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 43.130876°, Required heading: 63.805963°, Need to rotate by: 20.675087° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.959383 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 44.455631°, Required heading: 63.954597°, Need to rotate by: 19.498965° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.875675 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 44.588422°, Required heading: 64.071443°, Need to rotate by: 19.483022° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.790166 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 44.760333°, Required heading: 64.190072°, Need to rotate by: 19.429739° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.696630 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 46.402268°, Required heading: 64.320988°, Need to rotate by: 17.918720° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.600149 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 47.795317°, Required heading: 64.456981°, Need to rotate by: 16.661664° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.505830 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 48.766815°, Required heading: 64.583151°, Need to rotate by: 15.816337° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.418926 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 48.859194°, Required heading: 64.683051°, Need to rotate by: 15.823857° in Direction: cw
+2022-12-01 12:26:05 WARNING  The distance from robot to goal #: 0 is: 14.329543 m.
+2022-12-01 12:26:05 WARNING  Info for goal #: 0, Current heading: 49.051946°, Required heading: 64.785658°, Need to rotate by: 15.733711° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 14.233646 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 50.328245°, Required heading: 64.896857°, Need to rotate by: 14.568612° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 14.137559 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 51.876264°, Required heading: 65.010964°, Need to rotate by: 13.134701° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 14.041294 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 53.664825°, Required heading: 65.126238°, Need to rotate by: 11.461413° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 13.944362 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 55.017560°, Required heading: 65.229673°, Need to rotate by: 10.212113° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 13.846611 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 56.028201°, Required heading: 65.318529°, Need to rotate by: 9.290327° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 13.748447 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 56.893290°, Required heading: 65.399732°, Need to rotate by: 8.506442° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 13.650113 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 57.960278°, Required heading: 65.478477°, Need to rotate by: 7.518200° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 13.553070 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 59.073660°, Required heading: 65.550753°, Need to rotate by: 6.477093° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 13.453922 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 60.160567°, Required heading: 65.615846°, Need to rotate by: 5.455280° in Direction: cw
+2022-12-01 12:26:06 WARNING  The distance from robot to goal #: 0 is: 13.354596 m.
+2022-12-01 12:26:06 WARNING  Info for goal #: 0, Current heading: 60.816552°, Required heading: 65.668131°, Need to rotate by: 4.851578° in Direction: cw
+2022-12-01 12:26:07 WARNING  The distance from robot to goal #: 0 is: 13.255109 m.
+2022-12-01 12:26:07 WARNING  Info for goal #: 0, Current heading: 61.333697°, Required heading: 65.713393°, Need to rotate by: 4.379696° in Direction: cw
+2022-12-01 12:26:07 WARNING  The distance from robot to goal #: 0 is: 13.155718 m.
+2022-12-01 12:26:07 WARNING  Info for goal #: 0, Current heading: 61.921318°, Required heading: 65.757572°, Need to rotate by: 3.836254° in Direction: cw
+2022-12-01 12:26:07 WARNING  The distance from robot to goal #: 0 is: 13.060485 m.
+2022-12-01 12:26:07 WARNING  Info for goal #: 0, Current heading: 62.208341°, Required heading: 65.790312°, Need to rotate by: 3.581971° in Direction: cw
+2022-12-01 12:26:07 WARNING  The distance from robot to goal #: 0 is: 12.961560 m.
+2022-12-01 12:26:07 WARNING  Robot already aligned towards goal no: 0
+2022-12-01 12:26:10 WARNING  The distance from robot to goal #: 0 is: 10.963531 m.
+2022-12-01 12:26:10 WARNING  Robot already aligned towards goal no: 0
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 8.069357 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326784°, Required heading: 67.437831°, Need to rotate by: 4.111047° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.969630 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326784°, Required heading: 67.491242°, Need to rotate by: 4.164458° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.869912 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326785°, Required heading: 67.545995°, Need to rotate by: 4.219211° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.770204 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326785°, Required heading: 67.602160°, Need to rotate by: 4.275375° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.670506 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326785°, Required heading: 67.659786°, Need to rotate by: 4.333000° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.570813 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326786°, Required heading: 67.718930°, Need to rotate by: 4.392144° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.471125 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326786°, Required heading: 67.779659°, Need to rotate by: 4.452872° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.371446 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326787°, Required heading: 67.842022°, Need to rotate by: 4.515236° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.271777 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326787°, Required heading: 67.906096°, Need to rotate by: 4.579309° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.172123 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.326787°, Required heading: 67.971954°, Need to rotate by: 4.645166° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 7.072474 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.327905°, Required heading: 68.039668°, Need to rotate by: 4.711762° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 6.972872 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.335684°, Required heading: 68.109309°, Need to rotate by: 4.773626° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 6.876551 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 63.364931°, Required heading: 68.178768°, Need to rotate by: 4.813838° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 6.778460 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 64.107165°, Required heading: 68.251359°, Need to rotate by: 4.144193° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 6.677139 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 64.527308°, Required heading: 68.323939°, Need to rotate by: 3.796631° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 6.577378 m.
+2022-12-01 12:26:13 WARNING  Info for goal #: 0, Current heading: 64.859380°, Required heading: 68.393040°, Need to rotate by: 3.533660° in Direction: cw
+2022-12-01 12:26:13 WARNING  The distance from robot to goal #: 0 is: 6.477836 m.
+2022-12-01 12:26:13 WARNING  Robot already aligned towards goal no: 0
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 4.388396 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609663°, Required heading: 69.909797°, Need to rotate by: 4.300134° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 4.288699 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609663°, Required heading: 70.013204°, Need to rotate by: 4.403541° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 4.189014 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609664°, Required heading: 70.121536°, Need to rotate by: 4.511872° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 4.089351 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609664°, Required heading: 70.235162°, Need to rotate by: 4.625498° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 3.989702 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609664°, Required heading: 70.354462°, Need to rotate by: 4.744798° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 3.890068 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609664°, Required heading: 70.479884°, Need to rotate by: 4.870219° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 3.790455 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609665°, Required heading: 70.611889°, Need to rotate by: 5.002224° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 3.690861 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609665°, Required heading: 70.751018°, Need to rotate by: 5.141353° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 3.591295 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.609665°, Required heading: 70.897877°, Need to rotate by: 5.288212° in Direction: cw
+2022-12-01 12:26:16 WARNING  The distance from robot to goal #: 0 is: 3.491753 m.
+2022-12-01 12:26:16 WARNING  Info for goal #: 0, Current heading: 65.610952°, Required heading: 71.053110°, Need to rotate by: 5.442158° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 0 is: 3.392255 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 0, Current heading: 65.620785°, Required heading: 71.217422°, Need to rotate by: 5.596637° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 0 is: 3.296021 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 0, Current heading: 65.638311°, Required heading: 71.386590°, Need to rotate by: 5.748279° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 0 is: 3.200222 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 0, Current heading: 66.191681°, Required heading: 71.567704°, Need to rotate by: 5.376023° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 0 is: 3.098477 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 0, Current heading: 66.646179°, Required heading: 71.757174°, Need to rotate by: 5.110995° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 0 is: 2.998128 m.
+2022-12-01 12:26:17 WARNING  Destination #: 0 reached :)
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 1 is: 21.936267 m.
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 1 is: 21.843594 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 1, Current heading: 67.336905°, Required heading: 88.078995°, Need to rotate by: 20.742091° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 1 is: 21.761502 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 1, Current heading: 67.374160°, Required heading: 88.162583°, Need to rotate by: 20.788423° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 1 is: 21.674714 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 1, Current heading: 67.642338°, Required heading: 88.250432°, Need to rotate by: 20.608094° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 1 is: 21.580769 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 1, Current heading: 68.744905°, Required heading: 88.346751°, Need to rotate by: 19.601846° in Direction: cw
+2022-12-01 12:26:17 WARNING  The distance from robot to goal #: 1 is: 21.483384 m.
+2022-12-01 12:26:17 WARNING  Info for goal #: 1, Current heading: 69.726069°, Required heading: 88.440844°, Need to rotate by: 18.714775° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 21.389441 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 70.916771°, Required heading: 88.532482°, Need to rotate by: 17.615711° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 21.301605 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 71.006973°, Required heading: 88.611557°, Need to rotate by: 17.604584° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 21.216608 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 71.260843°, Required heading: 88.685010°, Need to rotate by: 17.424167° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 21.122132 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 72.851018°, Required heading: 88.767744°, Need to rotate by: 15.916726° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 21.024539 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 73.743987°, Required heading: 88.851683°, Need to rotate by: 15.107696° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 20.928016 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 74.549781°, Required heading: 88.931673°, Need to rotate by: 14.381892° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 20.840115 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 74.554727°, Required heading: 88.995387°, Need to rotate by: 14.440660° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 20.751184 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 74.807165°, Required heading: 89.059128°, Need to rotate by: 14.251962° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 20.655638 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 76.127848°, Required heading: 89.128642°, Need to rotate by: 13.000793° in Direction: cw
+2022-12-01 12:26:18 WARNING  The distance from robot to goal #: 1 is: 20.558495 m.
+2022-12-01 12:26:18 WARNING  Info for goal #: 1, Current heading: 77.461337°, Required heading: 89.201394°, Need to rotate by: 11.740057° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 20.459926 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 78.249464°, Required heading: 89.270160°, Need to rotate by: 11.020696° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 20.368840 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 78.279465°, Required heading: 89.322608°, Need to rotate by: 11.043144° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 20.276767 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 78.484042°, Required heading: 89.373594°, Need to rotate by: 10.889552° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 20.179055 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 79.485941°, Required heading: 89.428436°, Need to rotate by: 9.942495° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 20.080016 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 80.698092°, Required heading: 89.486503°, Need to rotate by: 8.788411° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 19.982893 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 82.172214°, Required heading: 89.545307°, Need to rotate by: 7.373093° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 19.884342 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 83.375723°, Required heading: 89.596570°, Need to rotate by: 6.220847° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 19.785290 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 84.115195°, Required heading: 89.637344°, Need to rotate by: 5.522148° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 19.685979 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 84.711341°, Required heading: 89.672415°, Need to rotate by: 4.961075° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 19.586567 m.
+2022-12-01 12:26:19 WARNING  Info for goal #: 1, Current heading: 85.478027°, Required heading: 89.706120°, Need to rotate by: 4.228093° in Direction: cw
+2022-12-01 12:26:19 WARNING  The distance from robot to goal #: 1 is: 19.488058 m.
+2022-12-01 12:26:19 WARNING  Robot already aligned towards goal no: 1
+2022-12-01 12:26:22 WARNING  The distance from robot to goal #: 1 is: 17.490466 m.
+2022-12-01 12:26:22 WARNING  Robot already aligned towards goal no: 1
+2022-12-01 12:26:25 WARNING  Changed mode from: gps to auto
+2022-12-01 12:26:53 WARNING  Changed mode from: auto to gps
+2022-12-01 12:26:53 WARNING  The distance from robot to goal #: 1 is: 12.634095 m.
+2022-12-01 12:26:53 WARNING  Info for goal #: 1, Current heading: 87.221392°, Required heading: 91.052232°, Need to rotate by: 3.830841° in Direction: cw
+2022-12-01 12:26:53 WARNING  The distance from robot to goal #: 1 is: 12.634100 m.
+2022-12-01 12:26:53 WARNING  Info for goal #: 1, Current heading: 87.221391°, Required heading: 91.052231°, Need to rotate by: 3.830840° in Direction: cw
+2022-12-01 12:26:54 WARNING  The distance from robot to goal #: 1 is: 12.625614 m.
+2022-12-01 12:26:54 WARNING  Info for goal #: 1, Current heading: 87.230351°, Required heading: 91.054705°, Need to rotate by: 3.824354° in Direction: cw
+2022-12-01 12:26:54 WARNING  The distance from robot to goal #: 1 is: 12.607258 m.
+2022-12-01 12:26:54 WARNING  Info for goal #: 1, Current heading: 87.338015°, Required heading: 91.059300°, Need to rotate by: 3.721285° in Direction: cw
+2022-12-01 12:26:54 WARNING  The distance from robot to goal #: 1 is: 12.579223 m.
+2022-12-01 12:26:54 WARNING  Robot already aligned towards goal no: 1
+2022-12-01 12:26:57 WARNING  The distance from robot to goal #: 1 is: 10.701489 m.
+2022-12-01 12:26:57 WARNING  Robot already aligned towards goal no: 1
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.807802 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302440°, Required heading: 92.760331°, Need to rotate by: 4.457891° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.708103 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302433°, Required heading: 92.818163°, Need to rotate by: 4.515730° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.608408 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302423°, Required heading: 92.877515°, Need to rotate by: 4.575092° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.508726 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302413°, Required heading: 92.938430°, Need to rotate by: 4.636018° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.409058 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302404°, Required heading: 93.000991°, Need to rotate by: 4.698587° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.309396 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302396°, Required heading: 93.065258°, Need to rotate by: 4.762861° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.209741 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302384°, Required heading: 93.131302°, Need to rotate by: 4.828919° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.109095 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302369°, Required heading: 93.199892°, Need to rotate by: 4.897524° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 7.010454 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302358°, Required heading: 93.269020°, Need to rotate by: 4.966662° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.910835 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.302336°, Required heading: 93.340858°, Need to rotate by: 5.038522° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.811200 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.303774°, Required heading: 93.414793°, Need to rotate by: 5.111020° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.711609 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.354683°, Required heading: 93.490997°, Need to rotate by: 5.136314° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.612483 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 88.926217°, Required heading: 93.573623°, Need to rotate by: 4.647405° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.518110 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 89.163370°, Required heading: 93.646794°, Need to rotate by: 4.483424° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.417928 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 89.946970°, Required heading: 93.722318°, Need to rotate by: 3.775349° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.318028 m.
+2022-12-01 12:27:00 WARNING  Info for goal #: 1, Current heading: 90.355571°, Required heading: 93.794160°, Need to rotate by: 3.438590° in Direction: cw
+2022-12-01 12:27:00 WARNING  The distance from robot to goal #: 1 is: 6.218262 m.
+2022-12-01 12:27:00 WARNING  Robot already aligned towards goal no: 1
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 4.125753 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260873°, Required heading: 95.214081°, Need to rotate by: 3.953208° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 4.025987 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260864°, Required heading: 95.311811°, Need to rotate by: 4.050947° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.926236 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260859°, Required heading: 95.414483°, Need to rotate by: 4.153624° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.826501 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260854°, Required heading: 95.522521°, Need to rotate by: 4.261667° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.726782 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260851°, Required heading: 95.636339°, Need to rotate by: 4.375488° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.627075 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260850°, Required heading: 95.756416°, Need to rotate by: 4.495566° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.527381 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260849°, Required heading: 95.883293°, Need to rotate by: 4.622444° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.427707 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260849°, Required heading: 96.017522°, Need to rotate by: 4.756673° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.328054 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260850°, Required heading: 96.159801°, Need to rotate by: 4.898952° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.228427 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.260869°, Required heading: 96.310862°, Need to rotate by: 5.049993° in Direction: cw
+2022-12-01 12:27:03 WARNING  The distance from robot to goal #: 1 is: 3.128816 m.
+2022-12-01 12:27:03 WARNING  Info for goal #: 1, Current heading: 91.262170°, Required heading: 96.471523°, Need to rotate by: 5.209353° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 1 is: 3.029901 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 1, Current heading: 91.305011°, Required heading: 96.645640°, Need to rotate by: 5.340629° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 1 is: 2.936451 m.
+2022-12-01 12:27:04 WARNING  Destination #: 1 reached :)
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.257394 m.
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.240762 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 91.790097°, Required heading: 171.808203°, Need to rotate by: 80.018106° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.224237 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 92.113387°, Required heading: 172.077331°, Need to rotate by: 79.963944° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.206682 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 92.448873°, Required heading: 172.366021°, Need to rotate by: 79.917148° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.189768 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 93.132186°, Required heading: 172.656784°, Need to rotate by: 79.524598° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.173525 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 93.487089°, Required heading: 172.919127°, Need to rotate by: 79.432038° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.157157 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 93.866677°, Required heading: 173.186985°, Need to rotate by: 79.320308° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.136969 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 96.120732°, Required heading: 173.489125°, Need to rotate by: 77.368393° in Direction: cw
+2022-12-01 12:27:04 WARNING  The distance from robot to goal #: 2 is: 19.114976 m.
+2022-12-01 12:27:04 WARNING  Info for goal #: 2, Current heading: 98.735915°, Required heading: 173.783689°, Need to rotate by: 75.047774° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 19.094023 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 101.124186°, Required heading: 174.061519°, Need to rotate by: 72.937333° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 19.072007 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 101.558526°, Required heading: 174.291942°, Need to rotate by: 72.733416° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 19.048040 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 102.331846°, Required heading: 174.528389°, Need to rotate by: 72.196544° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 19.019404 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 105.980288°, Required heading: 174.812286°, Need to rotate by: 68.831998° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 18.990867 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 109.957044°, Required heading: 175.102566°, Need to rotate by: 65.145522° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 18.961017 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 113.975660°, Required heading: 175.393119°, Need to rotate by: 61.417459° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 18.924667 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 117.668615°, Required heading: 175.676996°, Need to rotate by: 58.008381° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 18.882062 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 121.159331°, Required heading: 175.953099°, Need to rotate by: 54.793768° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 18.834674 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 124.691712°, Required heading: 176.222085°, Need to rotate by: 51.530373° in Direction: cw
+2022-12-01 12:27:05 WARNING  The distance from robot to goal #: 2 is: 18.784518 m.
+2022-12-01 12:27:05 WARNING  Info for goal #: 2, Current heading: 127.621049°, Required heading: 176.461711°, Need to rotate by: 48.840662° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.729702 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 130.479824°, Required heading: 176.699793°, Need to rotate by: 46.219969° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.667115 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 133.810160°, Required heading: 176.947976°, Need to rotate by: 43.137816° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.599786 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 136.663579°, Required heading: 177.182439°, Need to rotate by: 40.518860° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.532772 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 138.989770°, Required heading: 177.389760°, Need to rotate by: 38.399990° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.466683 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 139.579218°, Required heading: 177.559619°, Need to rotate by: 37.980401° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.395979 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 140.733595°, Required heading: 177.736871°, Need to rotate by: 37.003277° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.317727 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 143.652567°, Required heading: 177.935796°, Need to rotate by: 34.283229° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.240838 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 146.495952°, Required heading: 178.135088°, Need to rotate by: 31.639136° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.160909 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 149.394589°, Required heading: 178.326926°, Need to rotate by: 28.932337° in Direction: cw
+2022-12-01 12:27:06 WARNING  The distance from robot to goal #: 2 is: 18.077310 m.
+2022-12-01 12:27:06 WARNING  Info for goal #: 2, Current heading: 151.782829°, Required heading: 178.501882°, Need to rotate by: 26.719053° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.991101 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 153.773239°, Required heading: 178.663937°, Need to rotate by: 24.890699° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.903261 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 155.694652°, Required heading: 178.817722°, Need to rotate by: 23.123070° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.816315 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 157.435254°, Required heading: 178.956893°, Need to rotate by: 21.521638° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.727561 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 159.187065°, Required heading: 179.089253°, Need to rotate by: 19.902188° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.633328 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 160.940979°, Required heading: 179.217824°, Need to rotate by: 18.276846° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.539781 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 162.198096°, Required heading: 179.334316°, Need to rotate by: 17.136220° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.445889 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 163.477307°, Required heading: 179.443474°, Need to rotate by: 15.966167° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.358389 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 163.747228°, Required heading: 179.528460°, Need to rotate by: 15.781232° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.269313 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 163.878586°, Required heading: 179.612494°, Need to rotate by: 15.733908° in Direction: cw
+2022-12-01 12:27:07 WARNING  The distance from robot to goal #: 2 is: 17.170926 m.
+2022-12-01 12:27:07 WARNING  Info for goal #: 2, Current heading: 165.196919°, Required heading: 179.701437°, Need to rotate by: 14.504518° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 17.072264 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 165.922799°, Required heading: 179.780163°, Need to rotate by: 13.857364° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.976453 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 166.867794°, Required heading: 179.856338°, Need to rotate by: 12.988544° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.888414 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 166.991045°, Required heading: 179.924044°, Need to rotate by: 12.932999° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.797048 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 167.082352°, Required heading: 179.996048°, Need to rotate by: 12.913696° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.699131 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 168.296983°, Required heading: -179.923162°, Need to rotate by: 11.779854° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.597411 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 168.957155°, Required heading: -179.856742°, Need to rotate by: 11.186103° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.501283 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 169.923492°, Required heading: -179.802909°, Need to rotate by: 10.273599° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.416288 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 170.057723°, Required heading: -179.750243°, Need to rotate by: 10.192034° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.330302 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 170.196252°, Required heading: -179.694913°, Need to rotate by: 10.108835° in Direction: cw
+2022-12-01 12:27:08 WARNING  The distance from robot to goal #: 2 is: 16.233255 m.
+2022-12-01 12:27:08 WARNING  Info for goal #: 2, Current heading: 172.403067°, Required heading: -179.629947°, Need to rotate by: 7.966986° in Direction: cw
+2022-12-01 12:27:09 WARNING  The distance from robot to goal #: 2 is: 16.133672 m.
+2022-12-01 12:27:09 WARNING  Info for goal #: 2, Current heading: 175.727035°, Required heading: -179.560629°, Need to rotate by: 4.712336° in Direction: cw
+2022-12-01 12:27:09 WARNING  The distance from robot to goal #: 2 is: 16.033871 m.
+2022-12-01 12:27:09 WARNING  Robot already aligned towards goal no: 2
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 14.006492 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778626°, Required heading: 178.790367°, Need to rotate by: 17.431007° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.911125 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778625°, Required heading: 178.667711°, Need to rotate by: 17.553664° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.815824 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778623°, Required heading: 178.543361°, Need to rotate by: 17.678016° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.720586 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778620°, Required heading: 178.417282°, Need to rotate by: 17.804099° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.625421 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778616°, Required heading: 178.289440°, Need to rotate by: 17.931944° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.530322 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778610°, Required heading: 178.159798°, Need to rotate by: 18.061592° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.435295 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778602°, Required heading: 178.028323°, Need to rotate by: 18.193075° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.340343 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778589°, Required heading: 177.894980°, Need to rotate by: 18.326431° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.245462 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778587°, Required heading: 177.759722°, Need to rotate by: 18.461691° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.150659 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.778526°, Required heading: 177.622511°, Need to rotate by: 18.598963° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 13.056030 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.780111°, Required heading: 177.483445°, Need to rotate by: 18.736445° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 12.964024 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -163.821793°, Required heading: 177.345540°, Need to rotate by: 18.832667° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 12.872004 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -164.026560°, Required heading: 177.208852°, Need to rotate by: 18.764588° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 12.773991 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -164.867511°, Required heading: 177.066491°, Need to rotate by: 18.065998° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 12.669131 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -164.892938°, Required heading: 176.913574°, Need to rotate by: 18.193488° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 12.573810 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -166.010365°, Required heading: 176.769500°, Need to rotate by: 17.220135° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 12.485176 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -167.813014°, Required heading: 176.624525°, Need to rotate by: 15.562461° in Direction: ccw
+2022-12-01 12:27:12 WARNING  The distance from robot to goal #: 2 is: 12.394757 m.
+2022-12-01 12:27:12 WARNING  Info for goal #: 2, Current heading: -169.749109°, Required heading: 176.483396°, Need to rotate by: 13.767496° in Direction: ccw
+2022-12-01 12:27:13 WARNING  The distance from robot to goal #: 2 is: 12.298913 m.
+2022-12-01 12:27:13 WARNING  Info for goal #: 2, Current heading: -173.205143°, Required heading: 176.339271°, Need to rotate by: 10.455587° in Direction: ccw
+2022-12-01 12:27:13 WARNING  The distance from robot to goal #: 2 is: 12.195866 m.
+2022-12-01 12:27:13 WARNING  Info for goal #: 2, Current heading: -175.888869°, Required heading: 176.207124°, Need to rotate by: 7.904007° in Direction: ccw
+2022-12-01 12:27:13 WARNING  The distance from robot to goal #: 2 is: 12.088055 m.
+2022-12-01 12:27:13 WARNING  Info for goal #: 2, Current heading: -178.318857°, Required heading: 176.096084°, Need to rotate by: 5.585059° in Direction: ccw
+2022-12-01 12:27:13 WARNING  The distance from robot to goal #: 2 is: 11.987547 m.
+2022-12-01 12:27:13 WARNING  Robot already aligned towards goal no: 2
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 10.035798 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899899°, Required heading: 177.951973°, Need to rotate by: 16.052074° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.939723 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899895°, Required heading: 178.110104°, Need to rotate by: 16.210209° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.843729 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899892°, Required heading: 178.271307°, Need to rotate by: 16.371415° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.747813 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899890°, Required heading: 178.435690°, Need to rotate by: 16.535800° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.651981 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899890°, Required heading: 178.603340°, Need to rotate by: 16.703450° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.556237 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899890°, Required heading: 178.774347°, Need to rotate by: 16.874457° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.460576 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899890°, Required heading: 178.948822°, Need to rotate by: 17.048932° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.365010 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899891°, Required heading: 179.126847°, Need to rotate by: 17.226956° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.269535 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899892°, Required heading: 179.308546°, Need to rotate by: 17.408654° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.174156 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899893°, Required heading: 179.494027°, Need to rotate by: 17.594135° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 9.078880 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.899908°, Required heading: 179.683398°, Need to rotate by: 17.783490° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 8.983831 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.901822°, Required heading: 179.876526°, Need to rotate by: 17.974704° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 8.892355 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 161.901087°, Required heading: -179.933534°, Need to rotate by: 18.165379° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 8.799473 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 162.138116°, Required heading: -179.730911°, Need to rotate by: 18.130973° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 8.703306 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 163.091198°, Required heading: -179.517736°, Need to rotate by: 17.391066° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 8.604683 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 163.784713°, Required heading: -179.332934°, Need to rotate by: 16.882353° in Direction: cw
+2022-12-01 12:27:16 WARNING  The distance from robot to goal #: 2 is: 8.509591 m.
+2022-12-01 12:27:16 WARNING  Info for goal #: 2, Current heading: 165.289342°, Required heading: -179.157829°, Need to rotate by: 15.552829° in Direction: cw
+2022-12-01 12:27:17 WARNING  The distance from robot to goal #: 2 is: 8.427053 m.
+2022-12-01 12:27:17 WARNING  Info for goal #: 2, Current heading: 165.516597°, Required heading: -179.008001°, Need to rotate by: 15.475402° in Direction: cw
+2022-12-01 12:27:17 WARNING  The distance from robot to goal #: 2 is: 8.345674 m.
+2022-12-01 12:27:17 WARNING  Info for goal #: 2, Current heading: 165.722799°, Required heading: -178.849446°, Need to rotate by: 15.427754° in Direction: cw
+2022-12-01 12:27:17 WARNING  The distance from robot to goal #: 2 is: 8.252256 m.
+2022-12-01 12:27:17 WARNING  Info for goal #: 2, Current heading: 168.327333°, Required heading: -178.655236°, Need to rotate by: 13.017431° in Direction: cw
+2022-12-01 12:27:17 WARNING  The distance from robot to goal #: 2 is: 8.152634 m.
+2022-12-01 12:27:17 WARNING  Info for goal #: 2, Current heading: 171.839257°, Required heading: -178.443530°, Need to rotate by: 9.717212° in Direction: cw
+2022-12-01 12:27:17 WARNING  The distance from robot to goal #: 2 is: 8.058488 m.
+2022-12-01 12:27:17 WARNING  Info for goal #: 2, Current heading: 174.980165°, Required heading: -178.277030°, Need to rotate by: 6.742805° in Direction: cw
+2022-12-01 12:27:17 WARNING  The distance from robot to goal #: 2 is: 7.967479 m.
+2022-12-01 12:27:17 WARNING  Info for goal #: 2, Current heading: 177.463794°, Required heading: -178.138091°, Need to rotate by: 4.398116° in Direction: cw
+2022-12-01 12:27:17 WARNING  The distance from robot to goal #: 2 is: 7.869790 m.
+2022-12-01 12:27:17 WARNING  Robot already aligned towards goal no: 2
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.844480 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475681°, Required heading: 178.239941°, Need to rotate by: 18.284378° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.749624 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475680°, Required heading: 177.929074°, Need to rotate by: 18.595247° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.654948 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475678°, Required heading: 177.607790°, Need to rotate by: 18.916532° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.560455 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475676°, Required heading: 177.275563°, Need to rotate by: 19.248760° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.466156 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475675°, Required heading: 176.931853°, Need to rotate by: 19.592471° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.372069 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475673°, Required heading: 176.576111°, Need to rotate by: 19.948216° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.278195 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475672°, Required heading: 176.207683°, Need to rotate by: 20.316645° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.184555 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475670°, Required heading: 175.825932°, Need to rotate by: 20.698398° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 5.091153 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475669°, Required heading: 175.430143°, Need to rotate by: 21.094189° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 4.998004 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.475767°, Required heading: 175.019555°, Need to rotate by: 21.504678° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 4.904306 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.544168°, Required heading: 174.594511°, Need to rotate by: 21.861321° in Direction: ccw
+2022-12-01 12:27:20 WARNING  The distance from robot to goal #: 2 is: 4.809878 m.
+2022-12-01 12:27:20 WARNING  Info for goal #: 2, Current heading: -163.638924°, Required heading: 174.149669°, Need to rotate by: 22.211407° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.714465 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -163.741106°, Required heading: 173.683156°, Need to rotate by: 22.575738° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.622330 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -164.376592°, Required heading: 173.212800°, Need to rotate by: 22.410607° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.533980 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -165.404283°, Required heading: 172.724006°, Need to rotate by: 21.871711° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.447936 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -166.535340°, Required heading: 172.241617°, Need to rotate by: 21.223043° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.354327 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -168.675790°, Required heading: 171.728105°, Need to rotate by: 19.596105° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.244942 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -169.224793°, Required heading: 171.192094°, Need to rotate by: 19.583114° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.148986 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -171.223723°, Required heading: 170.683772°, Need to rotate by: 18.092506° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 4.061289 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -174.291993°, Required heading: 170.132687°, Need to rotate by: 15.575320° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 3.969369 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: -177.745832°, Required heading: 169.583892°, Need to rotate by: 12.670277° in Direction: ccw
+2022-12-01 12:27:21 WARNING  The distance from robot to goal #: 2 is: 3.874238 m.
+2022-12-01 12:27:21 WARNING  Info for goal #: 2, Current heading: 178.508343°, Required heading: 169.083905°, Need to rotate by: 9.424438° in Direction: ccw
+2022-12-01 12:27:22 WARNING  The distance from robot to goal #: 2 is: 3.777463 m.
+2022-12-01 12:27:22 WARNING  Info for goal #: 2, Current heading: 174.757010°, Required heading: 168.641302°, Need to rotate by: 6.115708° in Direction: ccw
+2022-12-01 12:27:22 WARNING  The distance from robot to goal #: 2 is: 3.680411 m.
+2022-12-01 12:27:22 WARNING  Robot already aligned towards goal no: 2
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 2 is: 1.606865 m.
+2022-12-01 12:27:25 WARNING  Destination #: 2 reached :)
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.295398 m.
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.321654 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130977°, Required heading: -94.527297°, Need to rotate by: 105.341726° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.348390 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130978°, Required heading: -94.239856°, Need to rotate by: 105.629165° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.375606 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130980°, Required heading: -93.953203°, Need to rotate by: 105.915817° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.403300 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130982°, Required heading: -93.667351°, Need to rotate by: 106.201667° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.431468 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130984°, Required heading: -93.382336°, Need to rotate by: 106.486681° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.460110 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130985°, Required heading: -93.098139°, Need to rotate by: 106.770875° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.489221 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130987°, Required heading: -92.814795°, Need to rotate by: 107.054218° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.518803 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130989°, Required heading: -92.532292°, Need to rotate by: 107.336719° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.548852 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.130901°, Required heading: -92.250637°, Need to rotate by: 107.618462° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.579472 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.134145°, Required heading: -91.968765°, Need to rotate by: 107.897091° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.610062 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.155984°, Required heading: -91.691343°, Need to rotate by: 108.152673° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.639495 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.156284°, Required heading: -91.429410°, Need to rotate by: 108.414306° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.670434 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 160.463559°, Required heading: -91.167033°, Need to rotate by: 108.369408° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.705831 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 162.181402°, Required heading: -90.891548°, Need to rotate by: 106.927050° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.735833 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 163.326856°, Required heading: -90.600817°, Need to rotate by: 106.072327° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.757019 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 165.001206°, Required heading: -90.321877°, Need to rotate by: 104.676917° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.777193 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 165.234510°, Required heading: -90.083465°, Need to rotate by: 104.682025° in Direction: cw
+2022-12-01 12:27:25 WARNING  The distance from robot to goal #: 3 is: 19.799423 m.
+2022-12-01 12:27:25 WARNING  Info for goal #: 3, Current heading: 165.784239°, Required heading: -89.847417°, Need to rotate by: 104.368345° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.827403 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: 168.976675°, Required heading: -89.572981°, Need to rotate by: 101.450344° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.858577 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: 172.871868°, Required heading: -89.293563°, Need to rotate by: 97.834569° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.887170 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: 177.085064°, Required heading: -89.011551°, Need to rotate by: 93.903385° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.907546 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: -179.085396°, Required heading: -88.723464°, Need to rotate by: 90.361932° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.920727 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: -175.570169°, Required heading: -88.432990°, Need to rotate by: 87.137179° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.928115 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: -172.117034°, Required heading: -88.141526°, Need to rotate by: 83.975508° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.927447 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: -169.505755°, Required heading: -87.871757°, Need to rotate by: 81.633998° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.922109 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: -167.425913°, Required heading: -87.612970°, Need to rotate by: 79.812942° in Direction: cw
+2022-12-01 12:27:26 WARNING  The distance from robot to goal #: 3 is: 19.916757 m.
+2022-12-01 12:27:26 WARNING  Info for goal #: 3, Current heading: -163.715316°, Required heading: -87.322448°, Need to rotate by: 76.392868° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.900315 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -160.506793°, Required heading: -87.029299°, Need to rotate by: 73.477493° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.874950 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -157.612360°, Required heading: -86.759928°, Need to rotate by: 70.852432° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.849785 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -156.761954°, Required heading: -86.530044°, Need to rotate by: 70.231910° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.823313 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -155.474309°, Required heading: -86.290482°, Need to rotate by: 69.183827° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.794040 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -151.970758°, Required heading: -86.011522°, Need to rotate by: 65.959236° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.765541 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -148.159059°, Required heading: -85.729841°, Need to rotate by: 62.429218° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.732217 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -144.162303°, Required heading: -85.452815°, Need to rotate by: 58.709488° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.690239 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -140.549052°, Required heading: -85.180560°, Need to rotate by: 55.368492° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.643207 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -137.105894°, Required heading: -84.917536°, Need to rotate by: 52.188358° in Direction: cw
+2022-12-01 12:27:27 WARNING  The distance from robot to goal #: 3 is: 19.591665 m.
+2022-12-01 12:27:27 WARNING  Info for goal #: 3, Current heading: -133.612096°, Required heading: -84.664840°, Need to rotate by: 48.947256° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.538203 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -131.854014°, Required heading: -84.455233°, Need to rotate by: 47.398781° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.482712 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -130.380038°, Required heading: -84.253448°, Need to rotate by: 46.126590° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.421234 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -127.061341°, Required heading: -84.019527°, Need to rotate by: 43.041814° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.354333 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -123.882471°, Required heading: -83.791995°, Need to rotate by: 40.090476° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.284579 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -121.513242°, Required heading: -83.596100°, Need to rotate by: 37.917141° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.216523 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -120.367904°, Required heading: -83.421272°, Need to rotate by: 36.946632° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.143091 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -118.459951°, Required heading: -83.234797°, Need to rotate by: 35.225154° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 19.066562 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -115.854408°, Required heading: -83.037614°, Need to rotate by: 32.816794° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 18.988215 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -113.161996°, Required heading: -82.848723°, Need to rotate by: 30.313273° in Direction: cw
+2022-12-01 12:27:28 WARNING  The distance from robot to goal #: 3 is: 18.907263 m.
+2022-12-01 12:27:28 WARNING  Info for goal #: 3, Current heading: -110.320431°, Required heading: -82.669918°, Need to rotate by: 27.650513° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.821900 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -107.932814°, Required heading: -82.504334°, Need to rotate by: 25.428480° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.734512 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -106.088378°, Required heading: -82.352870°, Need to rotate by: 23.735508° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.645620 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -104.389218°, Required heading: -82.210669°, Need to rotate by: 22.178548° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.560268 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -103.645554°, Required heading: -82.092288°, Need to rotate by: 21.553266° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.476999 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -103.121947°, Required heading: -81.985596°, Need to rotate by: 21.136350° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.384333 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -101.577576°, Required heading: -81.867051°, Need to rotate by: 19.710525° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.286724 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -100.349148°, Required heading: -81.776782°, Need to rotate by: 18.572366° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.190907 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -99.240062°, Required heading: -81.693682°, Need to rotate by: 17.546380° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.104325 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -99.143552°, Required heading: -81.609999°, Need to rotate by: 17.533554° in Direction: cw
+2022-12-01 12:27:29 WARNING  The distance from robot to goal #: 3 is: 18.017407 m.
+2022-12-01 12:27:29 WARNING  Info for goal #: 3, Current heading: -98.897373°, Required heading: -81.519843°, Need to rotate by: 17.377530° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.923555 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -97.325983°, Required heading: -81.410480°, Need to rotate by: 15.915503° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.825520 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -96.248914°, Required heading: -81.322728°, Need to rotate by: 14.926186° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.728282 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -95.142952°, Required heading: -81.258648°, Need to rotate by: 13.884304° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.639635 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -95.054743°, Required heading: -81.189160°, Need to rotate by: 13.865583° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.549202 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -94.842582°, Required heading: -81.113915°, Need to rotate by: 13.728667° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.453189 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -93.563452°, Required heading: -81.023238°, Need to rotate by: 12.540214° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.356186 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -92.112935°, Required heading: -80.934329°, Need to rotate by: 11.178606° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.259166 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -91.163804°, Required heading: -80.870869°, Need to rotate by: 10.292935° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.167752 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -91.101017°, Required heading: -80.816738°, Need to rotate by: 10.284278° in Direction: cw
+2022-12-01 12:27:30 WARNING  The distance from robot to goal #: 3 is: 17.073826 m.
+2022-12-01 12:27:30 WARNING  Info for goal #: 3, Current heading: -90.823285°, Required heading: -80.758295°, Need to rotate by: 10.064990° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.975864 m.
+2022-12-01 12:27:31 WARNING  Info for goal #: 3, Current heading: -89.807683°, Required heading: -80.689291°, Need to rotate by: 9.118393° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.877750 m.
+2022-12-01 12:27:31 WARNING  Info for goal #: 3, Current heading: -88.566945°, Required heading: -80.620183°, Need to rotate by: 7.946762° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.779406 m.
+2022-12-01 12:27:31 WARNING  Info for goal #: 3, Current heading: -87.155322°, Required heading: -80.555534°, Need to rotate by: 6.599788° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.680578 m.
+2022-12-01 12:27:31 WARNING  Info for goal #: 3, Current heading: -86.146192°, Required heading: -80.503533°, Need to rotate by: 5.642658° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.581310 m.
+2022-12-01 12:27:31 WARNING  Info for goal #: 3, Current heading: -85.449792°, Required heading: -80.460970°, Need to rotate by: 4.988822° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.481852 m.
+2022-12-01 12:27:31 WARNING  Info for goal #: 3, Current heading: -84.860138°, Required heading: -80.423306°, Need to rotate by: 4.436832° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.382333 m.
+2022-12-01 12:27:31 WARNING  Info for goal #: 3, Current heading: -84.068134°, Required heading: -80.386320°, Need to rotate by: 3.681814° in Direction: cw
+2022-12-01 12:27:31 WARNING  The distance from robot to goal #: 3 is: 16.283732 m.
+2022-12-01 12:27:31 WARNING  Robot already aligned towards goal no: 3
+2022-12-01 12:27:34 WARNING  The distance from robot to goal #: 3 is: 14.284704 m.
+2022-12-01 12:27:34 WARNING  Robot already aligned towards goal no: 3
+2022-12-01 12:27:37 WARNING  The distance from robot to goal #: 3 is: 11.287057 m.
+2022-12-01 12:27:37 WARNING  Robot already aligned towards goal no: 3
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 8.390940 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183371°, Required heading: -78.649691°, Need to rotate by: 3.533680° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 8.290127 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183372°, Required heading: -78.607394°, Need to rotate by: 3.575978° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 8.191313 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183371°, Required heading: -78.564923°, Need to rotate by: 3.618448° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 8.091502 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183370°, Required heading: -78.520967°, Need to rotate by: 3.662403° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.991695 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183369°, Required heading: -78.475920°, Need to rotate by: 3.707448° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.891899 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183366°, Required heading: -78.429731°, Need to rotate by: 3.753635° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.792110 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183364°, Required heading: -78.382360°, Need to rotate by: 3.801003° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.692323 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183355°, Required heading: -78.333759°, Need to rotate by: 3.849595° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.592538 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183340°, Required heading: -78.283879°, Need to rotate by: 3.899461° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.492757 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.183045°, Required heading: -78.232672°, Need to rotate by: 3.950373° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.392648 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -82.032070°, Required heading: -78.184244°, Need to rotate by: 3.847826° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.292698 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -81.942549°, Required heading: -78.134949°, Need to rotate by: 3.807600° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.192830 m.
+2022-12-01 12:27:40 WARNING  Info for goal #: 3, Current heading: -81.619365°, Required heading: -78.077588°, Need to rotate by: 3.541777° in Direction: cw
+2022-12-01 12:27:40 WARNING  The distance from robot to goal #: 3 is: 7.093112 m.
+2022-12-01 12:27:40 WARNING  Robot already aligned towards goal no: 3
+2022-12-01 12:27:43 WARNING  The distance from robot to goal #: 3 is: 5.098377 m.
+2022-12-01 12:27:43 WARNING  Robot already aligned towards goal no: 3
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 2.206412 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 2.206412 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 2.107088 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 2.107088 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 2.007829 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 2.007829 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.907652 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.907652 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.809547 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.809547 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.710560 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.710560 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.611702 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.611702 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.512991 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.512991 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.414458 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.414458 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.316145 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.316145 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.218109 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.218109 m.
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.128994 m.
+2022-12-01 12:27:46 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:46 WARNING  The distance from robot to goal #: 3 is: 1.128994 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 1.050205 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 1.050205 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.981400 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.981400 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.922424 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.922424 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.873030 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.873030 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.832628 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.832628 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.802444 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.802444 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.782005 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.782005 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.771007 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.771007 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.769316 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.769316 m.
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.769336 m.
+2022-12-01 12:27:47 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:47 WARNING  The distance from robot to goal #: 3 is: 0.769336 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769342 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:48 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:48 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769341 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:49 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:49 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769340 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769339 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769339 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769339 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769339 m.
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769339 m.
+2022-12-01 12:27:50 WARNING  GPS navigation complete for all goals :)
+2022-12-01 12:27:50 WARNING  The distance from robot to goal #: 3 is: 0.769339 m.
+2022-12-01 12:27:50 WARNING  Changed mode from: gps to auto

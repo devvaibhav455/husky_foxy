@@ -119,7 +119,7 @@ class ModeControl(Node):
         # rclpy.logging.get_logger('DMS_to_decimal_format').info('Given GPS goal: lat %s, long %s.' % (lat, long))
         return lat, long
 
-    def rotate(self,target_angle_rad,direction):
+    def rotate(self,target_angle_rad,direction, speed_linear):
         '''Publishes twist command to rotate robot in CW or CCW direction. '''
         global bearing
         if(direction == 'CCW' or direction == 'ccw'):
@@ -131,7 +131,8 @@ class ModeControl(Node):
     
         self.move_cmd.angular.z = multiplier * (self.kp * (abs(bearing - self.true_heading) + 0.3))
         # self.move_cmd.angular.z = multiplier * (self.kp * (abs(target_angle_rad) + 0.3))
-        self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 4)
+        # self.move_cmd.linear.x = abs(self.move_cmd.angular.z / 4)
+        self.move_cmd.linear.x = speed_linear
         self.velocity_publisher_.publish(self.move_cmd)
 
 
@@ -350,11 +351,11 @@ class ModeControl(Node):
         self.move_forward(self.distance_to_move, speed_linear)
         global start_time, time_elapsed
         time_elapsed = time.time() - start_time
-        print("Start time: ", start_time, " ; Time elapsed: ", time_elapsed, " ; Switched to rotation: ", switched_to_rotation, "; Initial distance to move: ", initial_dist_remaining, " ; Current dist to move" , self.distance_to_move,  "; Anticipated: ", self.anticipated_dist_if_no_slip , " ; Dist moved in 5 sec: ", abs(initial_dist_remaining - self.distance_to_move), " ; Diff anticipated: ", initial_dist_remaining - self.anticipated_dist_if_no_slip)
-        if (time_elapsed >= 5 and switched_to_rotation == 0): # and (self.distance_to_move - self.anticipated_dist_if_no_slip <= 0.4)): #If robot has moved less than 0.4 m in 5 sec, slippage is detected
+        print("Start time: ", start_time, " ; Time elapsed: ", time_elapsed, " ; Switched to rotation: ", switched_to_rotation, "; Initial distance to move: ", initial_dist_remaining, " ; Current dist to move" , self.distance_to_move,  "; Anticipated: ", self.anticipated_dist_if_no_slip , " ; Dist moved in 10 sec: ", abs(initial_dist_remaining - self.distance_to_move), " ; Diff anticipated: ", initial_dist_remaining - self.anticipated_dist_if_no_slip)
+        if (time_elapsed >= 10 and switched_to_rotation == 0): # and (self.distance_to_move - self.anticipated_dist_if_no_slip <= 0.4)): #If robot has moved less than 0.4 m in 5 sec, slippage is detected
             # if(abs(initial_dist_remaining - self.distance_to_move) <= initial_dist_remaining - self.anticipated_dist_if_no_slip):
-            if(abs(initial_dist_remaining - self.distance_to_move) <= 0.2):
-                logger.warning("!!! Slippage detected !!! Robot has either not moved or moved forward by <= 0.2 m within 5 seconds.") 
+            if(abs(initial_dist_remaining - self.distance_to_move) <= 0.1):
+                logger.warning("!!! Slippage detected !!! Robot has either not moved or moved forward by <= 0.1 m within 10 seconds.") 
                 logger.warning("Going backwards at 1 m/s for 2 seconds")
                 start_time = time.time()
                 time_elapsed = 0
@@ -416,7 +417,7 @@ def main(args=None):
     lat_tmp_dst_arr = []
     lon_tmp_dst_arr = []
 
-    speed_linear = 0.2
+    speed_linear = 1.0
     r_mag_cal = 1
     mode_control.sync_done = 0
     # num_loops = 2
@@ -631,7 +632,7 @@ def main(args=None):
                     if abs(mode_control.to_rotate) > 0.06:
                         switched_to_rotation = 1
                         logger.warning("Info for goal #: %d, Current heading: %f°, Required heading: %f°, Need to rotate by: %f° in Direction: %s", goal_number, math.degrees(mode_control.true_heading), math.degrees(bearing), math.degrees(mode_control.to_rotate), mode_control.direction)
-                        mode_control.rotate(mode_control.to_rotate, mode_control.direction)
+                        mode_control.rotate(mode_control.to_rotate, mode_control.direction, speed_linear)
                     elif mode_control.to_rotate < 0.06:     
                         logger.warning("Robot already aligned towards goal no: %d", goal_number)
                         # print("Switched to rotation: ", switched_to_rotation, "Second condition: ",old_mode != mode_control.mode )
