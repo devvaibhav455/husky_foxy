@@ -42,25 +42,17 @@ class Planner2D
 {
 public:
 
-    /*!
-   * Constructor.
-   * @param nodeHandle the ROS node handle.
-   */
-    Planner2D(rclcpp::NodeHandle& _nodeHandle);
-
-    /*!
-   * Destructor.
-   */
-    virtual ~Planner2D();
+    Planner2D();
+    
 
     /*!
    * plan path
    */
-    nav_msgs::Path planPath(const nav_msgs::OccupancyGrid& globalMap);
+    nav_msgs::msg::Path planPath(const nav_msgs::msg::OccupancyGrid& globalMap);
 
 private:
     /// node handle
-    ros::NodeHandle& nodeHandle;
+    // ros::NodeHandle& nodeHandle;
 
     /// problem dim
     int dim;
@@ -87,7 +79,7 @@ private:
     void configure(void);
 
     /// extract path
-    nav_msgs::Path extractPath(ompl::base::ProblemDefinition* pdef);
+    nav_msgs::msg::Path extractPath(ompl::base::ProblemDefinition* pdef);
 };
 
 } /* namespace */

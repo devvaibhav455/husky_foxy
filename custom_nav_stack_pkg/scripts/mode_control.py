@@ -455,7 +455,7 @@ def main(args=None):
      
     init_heading_calculated = 0
     logger.warning('Please enable button # %s to run the script.', mode_control.button_script_control)
-    
+    rclpy.spin
     while 1==1:
         mode_control.sync_done = 0
         rclpy.spin_once(mode_control)

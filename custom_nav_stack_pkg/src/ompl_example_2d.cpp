@@ -19,7 +19,6 @@
 #include <thread>
 
 using namespace std;
-using namespace ros;
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
@@ -27,21 +26,16 @@ namespace og = ompl::geometric;
 namespace ompl_example_2d {
 
 /// occupancy map used for planning
-nav_msgs::OccupancyGrid occupancyMap;
+nav_msgs::msg::OccupancyGrid occupancyMap;
 
-Planner2D::Planner2D(ros::NodeHandle& _nodeHandle)
-    : nodeHandle(_nodeHandle)
-{
-    ROS_INFO("Controlling UR node started.");
+Planner2D::Planner2D(){
+    std::cout << "Entered constructor in .cpp file. Testing" << std::endl;
     configure();
-}
-
-Planner2D::~Planner2D()
-{
 }
 
 /// check if the current state is valid
 bool isStateValid(const ob::State *state){
+    std::cout << "Entered isStateValid function" << std::endl;
     // get x coord of the robot
     const auto *coordX =
             state->as<ob::CompoundState>()->as<ob::RealVectorStateSpace::StateType>(0);
@@ -70,8 +64,9 @@ bool isStateValid(const ob::State *state){
 }
 
 /// extract path
-nav_msgs::Path Planner2D::extractPath(ob::ProblemDefinition* pdef){
-    nav_msgs::Path plannedPath;
+nav_msgs::msg::Path Planner2D::extractPath(ob::ProblemDefinition* pdef){
+    std::cout << "Entered extractPath function" << std::endl;
+    nav_msgs::msg::Path plannedPath;
     plannedPath.header.frame_id = "/map";
     // get the obtained path
     ob::PathPtr path = pdef->getSolutionPath();
@@ -90,7 +85,7 @@ nav_msgs::Path Planner2D::extractPath(ob::ProblemDefinition* pdef){
         const auto *coordY =
                 state->as<ob::CompoundState>()->as<ob::RealVectorStateSpace::StateType>(1);
         // fill in the ROS PoseStamped structure...
-        geometry_msgs::PoseStamped poseMsg;
+        geometry_msgs::msg::PoseStamped poseMsg;
         poseMsg.pose.position.x = coordX->values[0];
         poseMsg.pose.position.y = coordY->values[0];
         poseMsg.pose.position.z = 0.01;
@@ -99,7 +94,7 @@ nav_msgs::Path Planner2D::extractPath(ob::ProblemDefinition* pdef){
         poseMsg.pose.orientation.y = 0.0;
         poseMsg.pose.orientation.z = 0.0;
         poseMsg.header.frame_id = "/map";
-        poseMsg.header.stamp = ros::Time::now();
+        poseMsg.header.stamp = occupancyMap.header.stamp;
         // ... and add the pose to the path
         plannedPath.poses.push_back(poseMsg);
     }
@@ -109,7 +104,9 @@ nav_msgs::Path Planner2D::extractPath(ob::ProblemDefinition* pdef){
 /*!
  * plan path
  */
-nav_msgs::Path Planner2D::planPath(const nav_msgs::OccupancyGrid& globalMap){
+
+nav_msgs::msg::Path Planner2D::planPath(const nav_msgs::msg::OccupancyGrid& globalMap){
+    std::cout << "Entered planPath function" << std::endl;
     occupancyMap = globalMap;
 
     // search space information
@@ -133,7 +130,7 @@ nav_msgs::Path Planner2D::planPath(const nav_msgs::OccupancyGrid& globalMap){
     // solve motion planning problem
     ob::PlannerStatus solved = planner->ob::Planner::solve(1.0);
 
-    nav_msgs::Path plannedPath;
+    nav_msgs::msg::Path plannedPath;
     if (solved) {// if cussess
         // get the planned path
         plannedPath=extractPath(pdef.get());
@@ -143,6 +140,7 @@ nav_msgs::Path Planner2D::planPath(const nav_msgs::OccupancyGrid& globalMap){
 
 /// configure planner
 void Planner2D::configure(void){
+    std::cout << "Entered configure function" << std::endl;
     dim = 2;//2D problem
     maxStepLength = 0.1;// max step length
 

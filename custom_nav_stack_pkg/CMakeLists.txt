@@ -55,24 +55,29 @@ endif()
 
 # https://pointclouds.org/documentation/tutorials/using_pcl_pcl_config.html
 # When PCL is found, several related variables are set:
-
 #     PCL_FOUND: set to 1 if PCL is found, otherwise unset
-
 #     PCL_INCLUDE_DIRS: set to the paths to PCL installed headers and the dependency headers
-
 #     PCL_LIBRARIES: set to the file names of the built and installed PCL libraries
-
 #     PCL_LIBRARY_DIRS: set to the paths to where PCL libraries and 3rd party dependencies reside
-
 #     PCL_VERSION: the version of the found PCL
-
 #     PCL_COMPONENTS: lists all available components
-
 #     PCL_DEFINITIONS: lists the needed preprocessor definitions and compiler flags
 
+# https://ompl.kavrakilab.org/buildSystem.html
+# CMake in your own project, you can simply use this command in your CMakeLists.txt: find_package(ompl). This will define the following variables:
+
+#     OMPL_FOUND - TRUE
+#     OMPL_INCLUDE_DIRS - The OMPL include directory
+#     OMPL_LIBRARIES - The OMPL library
+#     OMPLAPP_LIBRARIES - The OMPL.app libraries (if installed)
+#     OMPL_VERSION - The OMPL version in the form <major>.<minor>.<patchlevel>
+#     OMPL_MAJOR_VERSION - Major version
+#     OMPL_MINOR_VERSION - Minor version
+#     OMPL_PATCH_VERSION - Patch version
 
 
-set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "lifecycle_msgs" "visualization_msgs" "PCL" )#"libpcl-dev"
+
+set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "lifecycle_msgs" "visualization_msgs" "PCL" "ompl" )#"libpcl-dev"
 
 
 # uncomment the following section in order to fill in
@@ -80,8 +85,27 @@ set(dependencies "rclcpp" "sensor_msgs" "geometry_msgs" "nav_msgs" "nav2_msgs" "
 # find_package(<dependency> REQUIRED)
 
 # Include Cpp "include" directory
-include_directories(include ${colcon_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+include_directories(./include ${colcon_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 # /usr/include/pcl-1.10 /usr/include/eigen3 
+
+# Declare a cpp library
+file(GLOB ompl_example_2d_sources
+    src/ompl_example_2d.cpp
+)
+
+# file(GLOB ompl_example_2d_headers
+#     include/ompl_example_2d/*.hpp
+# )
+
+add_library(${PROJECT_NAME} ${ompl_example_2d_sources}) #${ompl_example_2d_headers}
+target_link_libraries(${PROJECT_NAME} ${rclcpp_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+  ${rclcpp_INCLUDE_DIRS}
+)
+
+
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
@@ -89,11 +113,13 @@ add_definitions(${PCL_DEFINITIONS})
 # Create Cpp executable
 add_executable(lidar_cpp_executable src/lidar_cpp_node.cpp)
 add_executable(occupancy_grid_generator src/occupancy_grid_generator.cpp)
-add_executable(path_planner src/path_planner.cpp)
+add_executable(path_planner src/path_planner.cpp ${ompl_example_2d_sources}) #${ompl_example_2d_headers}
+# add_executable(path_planner src/path_planner.cpp  src/ompl_example_2d.cpp include/ompl_example_2d/ompl_example_2d.hpp)
 #ament_target_dependencies(lidar_cpp_executable rclcpp)
 ament_target_dependencies(lidar_cpp_executable ${dependencies})
 ament_target_dependencies(occupancy_grid_generator ${dependencies})
 ament_target_dependencies(path_planner ${dependencies})
+ament_export_dependencies(rclcpp)
 
 
 # Install Cpp executables
@@ -106,6 +132,7 @@ install(TARGETS
 
 target_link_libraries (lidar_cpp_executable ${PCL_LIBRARIES})
 target_link_libraries (occupancy_grid_generator  ${Python3_LIBRARIES})
+target_link_libraries (path_planner  ${Python3_LIBRARIES} ${OMPL_LIBRARIES} )
 
 # Install Python executables
 install(PROGRAMS
