@@ -44,7 +44,16 @@ find_package(rosidl_default_generators REQUIRED)
 # message( CMAKE_MODULE_PATH in mycmake:  ${CMAKE_MODULE_PATH} )
 # message( Boost_FOUND in my cmakelist:  ${Boost_FOUND} )
 find_package(PCL REQUIRED)
+
 find_package(ompl REQUIRED)
+# /opt/ros/foxy/share/ompl/cmake/omplConfig.cmake, version: 1.5.0
+#     /usr/local/share/ompl/cmake/omplConfig.cmake, version: 1.5.2
+#     /usr/share/ompl/cmake/omplConfig.cmake, version: 1.4.2
+
+if (${OMPL_FOUND})
+  message(OMPL found!: ${OMPL_VERSION} at: ${OMPL_INCLUDE_DIRS})
+endif()
+
 
 find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
 if (${Python3_FOUND})

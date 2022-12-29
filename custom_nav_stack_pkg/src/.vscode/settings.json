@@ -89,7 +89,8 @@
         "cuchar": "cpp",
         "forward_list": "cpp",
         "unordered_set": "cpp",
-        "scoped_allocator": "cpp"
+        "scoped_allocator": "cpp",
+        "nonlinearoptimization": "cpp"
     },
     "python.analysis.extraPaths": [
         "/home/dev/husky_ws/install/swri_transform_util/lib/python3.8/site-packages",

@@ -18,6 +18,9 @@
 #include <limits>
 #include <thread>
 
+#include <ompl/geometric/SimpleSetup.h>
+#include <ompl/base/ProblemDefinition.h>
+
 using namespace std;
 
 namespace ob = ompl::base;
@@ -30,12 +33,13 @@ nav_msgs::msg::OccupancyGrid occupancyMap;
 
 Planner2D::Planner2D(){
     std::cout << "Entered constructor in .cpp file. Testing" << std::endl;
-    configure();
+    // configure();
 }
 
 /// check if the current state is valid
 bool isStateValid(const ob::State *state){
     std::cout << "Entered isStateValid function" << std::endl;
+    
     // get x coord of the robot
     const auto *coordX =
             state->as<ob::CompoundState>()->as<ob::RealVectorStateSpace::StateType>(0);
@@ -107,76 +111,106 @@ nav_msgs::msg::Path Planner2D::extractPath(ob::ProblemDefinition* pdef){
 
 nav_msgs::msg::Path Planner2D::planPath(const nav_msgs::msg::OccupancyGrid& globalMap){
     std::cout << "Entered planPath function" << std::endl;
-    occupancyMap = globalMap;
+    // construct the state space we are planning in
+    auto space(std::make_shared<ob::SE3StateSpace>());
 
-    // search space information
-    auto si(std::make_shared<ompl::base::SpaceInformation>(space));
-    // define state checking callback
-    si->setStateValidityChecker(isStateValid);
-    // set State Validity Checking Resolution (avoid going through the walls)
-    si->setStateValidityCheckingResolution(0.001);
+    ob::RealVectorBounds bounds(3);
+    bounds.setLow(-1);
+    bounds.setHigh(1);
+ 
+    space->setBounds(bounds);
 
-    // problem definition
-    auto pdef(std::make_shared<ob::ProblemDefinition>(si));
-    pdef->setStartAndGoalStates(*start.get(), *goal.get());
-
-    // create planner
-    auto planner(std::make_shared<og::RRTConnect>(si));
-    // configure the planner
-    planner->setRange(maxStepLength);// max step length
-    planner->setProblemDefinition(pdef);
-    planner->setup();
-
-    // solve motion planning problem
-    ob::PlannerStatus solved = planner->ob::Planner::solve(1.0);
-
-    nav_msgs::msg::Path plannedPath;
-    if (solved) {// if cussess
-        // get the planned path
-        plannedPath=extractPath(pdef.get());
+    
+ 
+    og::SimpleSetup ss(space);
+    ss.setStateValidityChecker([](const ob::State *state) { return isStateValid(state); });
+    ob::ScopedState<> start(space);
+    start.random();
+    ob::ScopedState<> goal(space);
+    goal.random();
+    ss.setStartAndGoalStates(start, goal);
+    ob::PlannerStatus solved = ss.solve(1.0);
+    if (solved){
+        std::cout << "Found solution:" << std::endl;
+        // print the path to screen
+        ss.simplifySolution();
+        ss.getSolutionPath().print(std::cout);
     }
-    return plannedPath;
+
 }
+
+// nav_msgs::msg::Path Planner2D::planPath(const nav_msgs::msg::OccupancyGrid& globalMap){
+//     std::cout << "Entered planPath function" << std::endl;
+//     occupancyMap = globalMap;
+
+//     // search space information
+//     auto si(std::make_shared<ompl::base::SpaceInformation>(space));
+//     // define state checking callback
+//     si->setStateValidityChecker(isStateValid);
+//     // set State Validity Checking Resolution (avoid going through the walls)
+//     si->setStateValidityCheckingResolution(0.001);
+
+//     // problem definition
+//     auto pdef(std::make_shared<ob::ProblemDefinition>(si));
+//     pdef->setStartAndGoalStates(*start.get(), *goal.get());
+
+//     // create planner
+//     auto planner(std::make_shared<og::RRTConnect>(si));
+//     // configure the planner
+//     planner->setRange(maxStepLength);// max step length
+//     planner->setProblemDefinition(pdef);
+//     planner->setup();
+
+//     // solve motion planning problem
+//     ob::PlannerStatus solved = planner->ob::Planner::solve(1.0);
+
+//     nav_msgs::msg::Path plannedPath;
+//     if (solved) {// if cussess
+//         // get the planned path
+//         plannedPath=extractPath(pdef.get());
+//     }
+//     return plannedPath;
+// }
 
 /// configure planner
-void Planner2D::configure(void){
-    std::cout << "Entered configure function" << std::endl;
-    dim = 2;//2D problem
-    maxStepLength = 0.1;// max step length
+// void Planner2D::configure(void){
+//     std::cout << "Entered configure function" << std::endl;
+//     dim = 2;//2D problem
+//     maxStepLength = 0.1;// max step length
 
-    // create bounds for the x axis
-    coordXBound.reset(new ob::RealVectorBounds(dim-1));
-    coordXBound->setLow(-1.0);
-    coordXBound->setHigh(13.0);
+//     // create bounds for the x axis
+//     coordXBound.reset(new ob::RealVectorBounds(dim-1));
+//     coordXBound->setLow(-1.0);
+//     coordXBound->setHigh(13.0);
 
-    // create bounds for the y axis
-    coordYBound.reset(new ob::RealVectorBounds(dim-1));
-    coordYBound->setLow(-5.0);
-    coordYBound->setHigh(5.0);
+//     // create bounds for the y axis
+//     coordYBound.reset(new ob::RealVectorBounds(dim-1));
+//     coordYBound->setLow(-5.0);
+//     coordYBound->setHigh(5.0);
 
-    // construct the state space we are planning in
-    auto coordX(std::make_shared<ob::RealVectorStateSpace>(dim-1));
-    auto coordY(std::make_shared<ob::RealVectorStateSpace>(dim-1));
-    space = coordX +coordY;
+//     // construct the state space we are planning in
+//     auto coordX(std::make_shared<ob::RealVectorStateSpace>(dim-1));
+//     auto coordY(std::make_shared<ob::RealVectorStateSpace>(dim-1));
+//     space = coordX +coordY;
 
-    // create bounds for the x axis
-    coordX->setBounds(*coordXBound.get());
+//     // create bounds for the x axis
+//     coordX->setBounds(*coordXBound.get());
 
-    // create bounds for the y axis
-    coordY->setBounds(*coordYBound.get());
+//     // create bounds for the y axis
+//     coordY->setBounds(*coordYBound.get());
 
-    // define the start position
-    start.reset(new ob::ScopedState<>(space));
-    (*start.get())[0]=0.0;
-    (*start.get())[1]=-2.5;
-//    start.get()->random();
+//     // define the start position
+//     start.reset(new ob::ScopedState<>(space));
+//     (*start.get())[0]=0.0;
+//     (*start.get())[1]=-2.5;
+// //    start.get()->random();
 
-    // define the goal position
-    goal.reset(new ob::ScopedState<>(space));
-    (*goal.get())[0]=12.0;
-    (*goal.get())[1]=-4.0;
-//    goal.get()->random();
-}
+//     // define the goal position
+//     goal.reset(new ob::ScopedState<>(space));
+//     (*goal.get())[0]=12.0;
+//     (*goal.get())[1]=-4.0;
+// //    goal.get()->random();
+// }
 
 } /* namespace */
 

@@ -87,7 +87,8 @@
                 "/home/dev/husky_ws/src/pointcloud_to_laserscan/include/**",
                 "/home/dev/husky_ws/src/velodyne_simulator/velodyne_gazebo_plugins/include/**",
                 "/usr/include/**",
-                "/usr/include/eigen3"
+                "/usr/include/eigen3",
+                "/opt/ros/foxy/include/ompl-1.5"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",
